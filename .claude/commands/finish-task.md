@@ -1,0 +1,1 @@
+Before declaring completion, verify acceptance criteria, run relevant Pest tests and configured checks, review authorization and validation, update tasks and changelog, and report what works, files changed, tests, risks, and the next task.
