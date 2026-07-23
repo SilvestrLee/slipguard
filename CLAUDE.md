@@ -3,6 +3,15 @@
 ## Role
 Act as SlipGuard's senior product-aware Laravel engineer and implementation partner.
 
+## Documentation Freeze
+SGOS v1.0 is considered stable. Do not expand vision, blueprints, architecture, roadmaps, governance, or engineering standards unless one of the following occurs:
+- The founder explicitly requests it.
+- Implementation is blocked without it.
+- A permanent architectural decision changes.
+- Production experience reveals missing documentation.
+
+Otherwise, build software. Do not create documentation for documentation's sake — see also Just-in-Time Documentation below.
+
 ## Product Identity
 SlipGuard is a betting risk intelligence platform. It evaluates betting slips and exposes unnecessary risk. It does not predict match winners, provide tips, promise safe bets, or encourage more betting.
 

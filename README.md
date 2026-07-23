@@ -1,58 +1,90 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SlipGuard
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## What This Is
 
-## About Laravel
+SlipGuard is a betting risk intelligence platform. It evaluates betting slips and exposes unnecessary structural risk. It does not predict match winners, provide tips, promise safe bets, or encourage more betting.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+SlipGuard is:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- A betting risk intelligence platform.
+- A slip analysis tool.
+- A decision-support system.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+SlipGuard is not a bookmaker, tipster, prediction engine, or guaranteed-win system. See `docs/00-governance/VISION_AND_PRINCIPLES.md` for the full statement.
 
-## Learning Laravel
+## Technology Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- Laravel 13, PHP 8.3+.
+- Customer-facing UI: Blade and Livewire.
+- Internal operations: Filament.
+- Testing: Pest.
+- Frontend build: Vite + Tailwind CSS.
+- Database: SQLite locally (see `.env`); do not change database technology without an ADR.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Repository Structure
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```
+app/            Application code (Models, Console, Providers, Services, ...)
+config/         Laravel configuration
+database/       Migrations, factories, seeders
+docs/           SGOS — the authoritative knowledge base (see below)
+public/         Web root and built assets
+resources/      Views, CSS, JS source
+routes/         Route definitions
+tests/          Pest test suite
+CLAUDE.md       Instructions for AI coding agents working in this repo
+PROJECT.md      Current project status at a glance
+TASKS.md        Active milestone task list
+CHANGELOG.md    Running log of what has shipped
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## SGOS — SlipGuard Operating System
 
-## Contributing
+`docs/` holds SGOS, the durable repository context: governance, product definition, architecture, the risk-engine contract, UX rules, engineering standards, quality strategy, delivery roadmap, and architecture decision records (`docs/adr/`). See `docs/00-governance/SGOS_VERSION.md` for the current version and versioning policy, and `docs/README.md` for the entry point.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Documentation philosophy: **just-in-time**. Only populate a document when it supports the current milestone or preserves a decision that must remain stable across milestones. Do not read `docs/_legacy-bootstrap/` for current direction — it is a superseded draft, preserved only as history (see its own README).
 
-## Code of Conduct
+This repository, not chat history, is the source of truth. If you are picking this project up cold — human or AI — start with `CLAUDE.md`, then `PROJECT.md`, then `docs/README.md`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Current Milestone
 
-## Security Vulnerabilities
+**E-02 — Customer Foundation.** See `TASKS.md` for the active task list and `docs/08-operations/DELIVERY_ROADMAP.md` for the full roadmap:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+E-01 Engineering Initialization (complete) → **E-02 Customer Foundation** → E-03 Manual Slip Capture → E-04 Deterministic Risk Analysis (blocked on Data Science formula approval) → E-05 Risk Report → E-06 History and Journal → E-07 Public Trust Website → E-08 MVP Hardening → Release 1.0.
 
-## License
+## Running Locally
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate
+npm install
+npm run dev
+```
+
+In a second terminal:
+
+```bash
+php artisan serve
+```
+
+Run tests with:
+
+```bash
+php artisan test
+```
+
+## Branch Strategy
+
+- `main` — released/stable.
+- `develop` — active development; branch from and merge back into this for day-to-day work.
+
+## Where to Begin
+
+Check `TASKS.md`'s "Ready" list for the current task. As of this writing, the next implementation work (customer authentication) depends on `docs/adr/ADR-005-AUTHENTICATION-STRATEGY.md` being approved by the founder — it currently carries a recommendation, not a decision. Don't start building against it until its status reads `Accepted`.
+
+## Working With Claude Code
+
+`CLAUDE.md` defines the product identity, locked decisions, and working rules for AI-assisted development in this repository — read it before making changes. Project-specific slash commands live in `.claude/commands/` (`start-task`, `finish-task`, `audit-context`).
