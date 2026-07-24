@@ -41,3 +41,6 @@ Before risk implementation, Data Science must approve formulas, weights, thresho
 
 ## Normalization Status
 Football sport and market normalization (taxonomy version 1.0) is implemented — see `docs/03-data-science/FOOTBALL_MARKET_TAXONOMY_V1.md` and `App\Domain\Risk\Taxonomy\FootballMarketTaxonomyV1`. This is engine-preparation only: it classifies free-text input into stable codes and does not calculate risk. Formulas, weights, and thresholds remain unapproved and blocked as above.
+
+## Rule-Set Design Status
+A complete proposed rule set (formulas, thresholds, caps, bands, data-quality scoring, a three-tier analysis-availability gate, reason codes, invariants, and 20 worked test vectors) has been designed and reviewed — see `docs/03-data-science/RISK_RULE_SET_2026_1.md`, status `READY FOR PRODUCT APPROVAL`. It is **still not accepted**; the Blocker above remains in force until Product Office and Data Science record explicit sign-off in `docs/00-governance/DECISION_LOG.md`. A prerequisite cross-sport normalization defect found during this review has already been fixed in code (commit `7d13c27`), independent of that sign-off.

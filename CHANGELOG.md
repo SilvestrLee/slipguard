@@ -172,3 +172,57 @@ Pest: **167/167 passing** (up from 159).
 - No `.claude/rules/` path-enforcement system was created — this is not a verified Claude Code feature, and fabricating one would create false confidence rather than real governance. "UI UX Pro Max" and a "21st.dev" MCP server were confirmed absent from this environment (no `.mcp.json`, no such plugin installed) and were correctly unneeded this sprint since no material UI design work occurred.
 
 Pest: **167/167 passing** (unchanged — no application code changed in this correction).
+
+## Sprint E-06A — Deterministic Risk Factor Mathematics (Design Only)
+
+**Status:** Design proposed — `READY WITH OPEN DECISIONS`, not accepted. No implementation occurred; this sprint produced exactly one authoritative document plus the required documentation-index updates.
+
+### Added
+- `docs/03-data-science/RISK_RULE_SET_2026_1.md` — the complete proposed mathematical specification for Engine v1: exact formulas, thresholds, and maximum contributions for all six factors (Leg Count, Combined Odds, Individual Odds Elevation + Outlier, Risk Concentration, Market Complexity, Relationship [disabled]); two group interaction caps with proportional-scaling adjustment; an achievable-ceiling rescale (78 → 100); risk bands; independent data-quality scoring and bands; a resolved Limited Analysis policy; an updated, authoritative reason-code catalogue; 12 mathematical invariants; and 18 fully computed test vectors.
+- Pointer from `docs/03-data-science/RISK_ENGINE.md` to the new rule-set document.
+- A `Proposed` row in `docs/00-governance/DECISION_LOG.md` for Rule Set 2026.1.
+
+### Key Design Decisions
+- **Rejected every logarithm-based candidate formula** (leg-count and combined-odds log-normalization, log-odds-share concentration) after confirming by direct reflection against the installed `brick/math` library that `BigDecimal` has no `ln`/`log`/`exp` method at all — using one would require binary floating point, which the decimal precision policy and ADR-002 both forbid. Replaced with piecewise-linear interpolation (combined odds, individual-odds sub-factors) and a Herfindahl-style concentration index built on linear `(odds − 1)` shares instead of log-odds shares.
+- **Corrected the sprint brief's own decimal-precision assumption**: odds input is 2 decimal places (`betting_slip_legs.decimal_odds DECIMAL(6,2)`), not the 4 the brief's "recommended starting direction" proposed — verified against the actual migration, not assumed.
+- **Found `brick/math` is already installed** (transitively, via `laravel/framework`) — not a new dependency requiring justification, only a possible direct-requirement formalization.
+- **Identified a real prerequisite for E-06B**: `NormalizeBettingSlip` (Sprint E-05A) normalizes every leg's market against the football taxonomy regardless of that leg's sport-normalization result. Market Complexity (RF-005) must gate on `sport.status === Complete` before trusting a leg's complexity — not yet implemented anywhere, a requirement on the future scoring layer.
+- Resolved the Limited Analysis Policy to a single data-quality gate (score ≥ 40 produces a full score with its quality band disclosed; below 40 produces no score and the slip stays `Ready`) rather than the three separate, potentially-conflicting gates the brief posed as options.
+- All 18 test vectors computed via a `BigDecimal` reference script for this document, not hand arithmetic — verified zero floating-point involvement end to end.
+
+### Not Done (by design — scope)
+- No scoring classes, rule-set PHP classes, `brick/math` `composer.json` change, database migration, `SlipAnalysis`/`LegAnalysis`, analysis request IDs, input fingerprints, calculation persistence, weakest-leg selection, customer reports, Filament work, AI, or UI changes of any kind.
+
+### Open (blocking E-06B — see the rule-set document's §22)
+Seven explicit decisions: the factor tables themselves, the two group cap values, the Limited Analysis data-quality floor, two recommended-but-missing boundary vectors, the RF-005 sport-gating requirement, the `MARKET_UNRECOGNIZED` reason-code catalogue addition, and the timing of making `brick/math` a direct dependency.
+
+Pest: **167/167 passing** (unchanged — no application code changed this sprint).
+
+## Fix — Cross-Sport Normalization Isolation (commit `7d13c27`)
+
+### Fixed
+- `App\Domain\Risk\Normalization\NormalizeBettingSlip` no longer runs football-market normalization against a leg unless that leg's sport was recognized as football (`sport->sportCode === NormalizeSport::FOOTBALL_CODE`). Previously every leg was normalized through `FootballMarketTaxonomyV1` regardless of sport, risking a Tennis/Basketball/Cricket leg being misclassified through a coincidentally overlapping market phrase (e.g. "Match Result").
+- `App\Domain\Risk\Normalization\NormalizedMarket::notClassifiedForSport()` — new factory method returning `market_code: null`, `complexity: unknown`, and `status` mirroring the leg's own sport status (`unsupported`/`unrecognized`), with raw market/selection text always preserved.
+
+### Added
+- 6 regression tests in `tests/Feature/Risk/NormalizeBettingSlipTest.php`: a football no-regression case, three unsupported-sport cases deliberately using overlapping football-alias phrasing (Tennis+Match Winner, Basketball+Match Result, Cricket+Total Goals) to prove no leakage, one unrecognized-sport case, and one determinism case.
+
+Pest: **173/173 passing** (up from 167).
+
+## Sprint E-06A Review — Prerequisite Correction and Rule-Set Resolution
+
+**Status:** `docs/03-data-science/RISK_RULE_SET_2026_1.md` upgraded from `READY WITH OPEN DECISIONS` to `READY FOR PRODUCT APPROVAL`.
+
+### Changed
+- All seven previously-open decisions (§22 of the prior draft) individually resolved with question/choice/alternatives/consequences/recommendation for each, not summarized as a count — see the rule-set document's new §22.1–22.7.
+- **Redesigned the analysis-availability gate into three tiers**: a sport hard-gate (any non-football leg → unavailable, per Product Office's explicit recommendation), a 25% market-unrecognized-proportion gate, and a partial-normalization deduction score — replacing the single data-quality threshold from the prior draft, after finding a pure score-based gate could disagree with a proportion-based reading of the same slip.
+- **Proved the 78-point achievable ceiling is exactly reachable**, not merely theoretical: a new vector (20 legs, one concentrated outlier, every market complex) saturates both group caps and Market Complexity simultaneously, scoring exactly 100.
+- **Proved a single-leg slip's true ceiling is 54 (High)** and **a two-leg slip can reach 77 (Very High)** under deliberately extreme construction — both previously derived, now backed by real computed vectors.
+- **Data quality's scope narrowed**: sport-level problems are no longer a soft deduction blended into the data-quality score — they're the Tier 1 hard gate. Data quality (§16) now measures only how well an all-football slip's markets normalized.
+- Reason-code catalogue finalized: added `RELATIONSHIP_FACTOR_NOT_EVALUATED` (always emitted, replacing two previously-dormant codes), `SPORT_UNSUPPORTED`, `ANALYSIS_LIMITED`, `ANALYSIS_UNAVAILABLE`.
+- Risk bands (0–24/25–49/50–74/75–100) validated against a full 20-vector distribution (8 Low, 5 Moderate, 4 High, 3 Very High) rather than retained by default.
+
+### Not Done (by design — scope)
+No production scoring classes, no database migration, no persistence, no weakest-leg implementation, no UI, no AI, no external sports data. The only code touched in this review was the normalization-boundary fix above, committed separately from the still-unapproved design document per the review's own commit gate.
+
+Pest: **173/173 passing** (unchanged from the fix above — no additional code changed in the document review itself).

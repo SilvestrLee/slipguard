@@ -1,11 +1,13 @@
 # SlipGuard Tasks
 
 ## Active Milestone
-E-05A — Football Taxonomy & Deterministic Normalization
+E-06A — Deterministic Risk Factor Mathematics (design only)
 
 **Naming note (E-03B):** a prior sprint was directed as "E-04" but contained no mathematics or risk scoring — tracked as E-03B instead, since canonical E-04 (Deterministic Risk Analysis) is a different, still-blocked thing.
 
-**Naming note (E-05A):** this sprint is directed as "E-05A," but its content (taxonomy/normalization) is engine-preparation work that logically precedes E-04's mathematics, not a sub-part of canonical E-05 (Risk Report, the presentation layer). Tracked verbatim as E-05A per instruction, flagging that the number doesn't reflect actual sequencing — it lands chronologically before E-04's math, not after E-05's report UI.
+**Naming note (E-05A):** a prior sprint was directed as "E-05A," but its content (taxonomy/normalization) was engine-preparation work that logically precedes E-04's mathematics, not a sub-part of canonical E-05 (Risk Report, the presentation layer). Tracked as directed, flagging that the number didn't reflect actual sequencing.
+
+**Naming note (E-06A):** this sprint is directed as "E-06A" and is, appropriately, exactly E-04's mathematics design — the naming finally lines up with the canonical roadmap's intent (E-04 Deterministic Risk Analysis), just under a different label. No collision to flag this time.
 
 ## Completed
 ### E-02 (Sprint E-02A — Customer Identity Foundation) — Closed, Product Office approved
@@ -70,8 +72,23 @@ Pest: 91/91 passing.
 
 Pest: 167/167 passing.
 
+### E-06A — Deterministic Risk Factor Mathematics (design only)
+- [x] `docs/03-data-science/RISK_RULE_SET_2026_1.md` — the single authoritative rule-set design document, status **READY FOR PRODUCT APPROVAL**: five active factors + one explicitly inactive (relationship), two group interaction caps, a 78-point achievable ceiling **proven exactly reachable** (TV-019 scores exactly 100), risk bands validated against a 20-vector distribution, a three-tier analysis-availability gate (sport hard-gate → market-unrecognized proportion gate → data-quality deduction score), a finalized reason-code catalogue, 13 mathematical invariants, and 20 computed test vectors.
+- [x] Fixed the cross-sport normalization defect this sprint identified — see the separate `7d13c27` commit below — rather than leaving it as a documented requirement on E-06B.
+- [x] Rejected every logarithm-based candidate formula (leg count, combined odds, concentration) after confirming directly against the installed `brick/math` library that `BigDecimal` has no `ln`/`log` method — replaced with piecewise-linear interpolation and a linear-share Herfindahl index, both fully fixed-precision.
+- [x] Corrected the sprint's own "4 decimal place odds" assumption against the actual schema (`decimal_odds` is `DECIMAL(6,2)`, 2 d.p.).
+- [x] Resolved all seven previously-open decisions individually (rule-set doc §22.1–22.7): factor tables, group cap values, the analysis-availability gate structure, two proof vectors (single-leg ceiling 54/High, two-leg Very High 77), the RF-005 sport-gate requirement (now implemented, not just required), the reason-code catalogue, and `brick/math`'s dependency timing (deferred to E-06B, zero-risk).
+- [x] Redesigned the Limited Analysis policy into three tiers (sport hard-gate, 25% market-unrecognized proportion gate, partial-normalization deduction score) after finding the original single-score design could disagree with a proportion-based reading of the same slip.
+- [x] All 20 test vectors (17 retained + 3 new: ceiling proof, single-leg ceiling, two-leg Very High) computed via the same `BigDecimal`-based reference script.
+- [x] No production scoring code, no migration, no dependency addition, no persistence, no weakest-leg logic — design and one bug fix only, per scope.
+
+### Cross-Sport Normalization Fix (commit `7d13c27`)
+- [x] `NormalizeBettingSlip` now gates market normalization on `sport->sportCode === NormalizeSport::FOOTBALL_CODE`; non-football legs get `NormalizedMarket::notClassifiedForSport()` instead of a (possibly false-positive) football classification.
+- [x] 6 new regression tests: football no-regression, three overlapping-phrase unsupported-sport cases, one unrecognized-sport case, one determinism case. 173/173 passing at commit time.
+
 ## Blocked
 - E-04 is blocked until Data Science approves formulas, thresholds, and test vectors.
+- E-06B (implementation) awaits Product Office's formal sign-off recorded in `docs/00-governance/DECISION_LOG.md` — the design document itself no longer has unresolved questions to block on.
 
 ## Later
 - [ ] E-04 Deterministic Risk Analysis.
