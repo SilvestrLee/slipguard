@@ -21,4 +21,25 @@ final readonly class NormalizedMarket
         public string $rawSelectionInput,
         public string $taxonomyVersion,
     ) {}
+
+    /**
+     * A leg whose sport was not recognized as football never gets a market
+     * opinion at all — no taxonomy applies, so none is guessed. $sportStatus
+     * must be Unsupported or Unrecognized (mirrored directly onto the market
+     * result, since "the market is unclassifiable" and "the sport is
+     * unclassifiable" are the same fact here).
+     */
+    public static function notClassifiedForSport(string $rawMarket, string $rawSelection, NormalizationStatus $sportStatus, string $taxonomyVersion): self
+    {
+        return new self(
+            marketCode: null,
+            marketFamily: null,
+            complexity: MarketComplexity::Unknown,
+            status: $sportStatus,
+            selectionFacts: [],
+            rawMarketInput: $rawMarket,
+            rawSelectionInput: $rawSelection,
+            taxonomyVersion: $taxonomyVersion,
+        );
+    }
 }

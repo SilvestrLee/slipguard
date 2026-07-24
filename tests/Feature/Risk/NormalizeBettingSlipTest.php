@@ -82,6 +82,81 @@ test('an unrecognized market on an otherwise valid leg still normalizes without 
     expect($normalized->legs[0]->market->marketCode)->toBeNull();
 });
 
+// --- Cross-sport normalization isolation ---
+
+test('a football leg still normalizes exactly as before (no regression)', function () {
+    $slip = BettingSlip::factory()->ready()->create();
+    $slip->legs()->create([
+        'sport' => 'Football', 'competition' => null,
+        'event_name' => 'Arsenal vs Chelsea', 'market_name' => 'Match Result',
+        'selection_name' => 'Arsenal to win', 'decimal_odds' => '1.90', 'display_order' => 0,
+    ]);
+
+    $normalized = normalizer()->execute($slip);
+
+    expect($normalized->legs[0]->sport->sportCode)->toBe('football');
+    expect($normalized->legs[0]->market->marketCode)->toBe('football.match_result.1x2');
+    expect($normalized->legs[0]->market->status)->toBe(NormalizationStatus::Complete);
+});
+
+test('an unsupported sport never reaches the football taxonomy, even with an overlapping market phrase', function (string $sport, string $market, string $selection) {
+    $slip = BettingSlip::factory()->ready()->create();
+    $slip->legs()->create([
+        'sport' => $sport, 'competition' => null,
+        'event_name' => 'Some Event', 'market_name' => $market,
+        'selection_name' => $selection, 'decimal_odds' => '1.90', 'display_order' => 0,
+    ]);
+
+    $normalized = normalizer()->execute($slip);
+    $leg = $normalized->legs[0];
+
+    expect($leg->sport->sportCode)->toBeNull();
+    expect($leg->sport->status)->toBe(NormalizationStatus::Unsupported);
+    expect($leg->market->marketCode)->toBeNull();
+    expect($leg->market->marketFamily)->toBeNull();
+    expect($leg->market->complexity->value)->toBe('unknown');
+    expect($leg->market->status)->toBe(NormalizationStatus::Unsupported);
+    expect($leg->market->rawMarketInput)->toBe($market);
+    expect($leg->market->rawSelectionInput)->toBe($selection);
+})->with([
+    'Tennis + Match Winner' => ['Tennis', 'Match Winner', 'Player A'],
+    'Basketball + Match Result' => ['Basketball', 'Match Result', 'Home'],
+    'Cricket + Total Goals' => ['Cricket', 'Total Goals', 'Over 2.5'],
+]);
+
+test('an unrecognized sport never reaches the football taxonomy either', function () {
+    $slip = BettingSlip::factory()->ready()->create();
+    $slip->legs()->create([
+        'sport' => 'Waterball', 'competition' => null,
+        'event_name' => 'Some Event', 'market_name' => 'Match Result',
+        'selection_name' => 'Home', 'decimal_odds' => '1.90', 'display_order' => 0,
+    ]);
+
+    $normalized = normalizer()->execute($slip);
+    $leg = $normalized->legs[0];
+
+    expect($leg->sport->sportCode)->toBeNull();
+    expect($leg->sport->status)->toBe(NormalizationStatus::Unrecognized);
+    expect($leg->market->marketCode)->toBeNull();
+    expect($leg->market->complexity->value)->toBe('unknown');
+    expect($leg->market->status)->toBe(NormalizationStatus::Unrecognized);
+});
+
+test('cross-sport normalization is deterministic across repeated calls', function () {
+    $slip = BettingSlip::factory()->ready()->create();
+    $slip->legs()->create([
+        'sport' => 'Tennis', 'competition' => null,
+        'event_name' => 'Some Event', 'market_name' => 'Match Winner',
+        'selection_name' => 'Player A', 'decimal_odds' => '1.90', 'display_order' => 0,
+    ]);
+
+    $first = normalizer()->execute($slip->fresh());
+    $second = normalizer()->execute($slip->fresh());
+
+    expect($first->legs[0]->market->status)->toBe($second->legs[0]->market->status);
+    expect($first->legs[0]->market->marketCode)->toBe($second->legs[0]->market->marketCode);
+});
+
 test('normalization supports the maximum configured number of legs', function () {
     $slip = BettingSlip::factory()->ready()->create();
 

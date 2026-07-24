@@ -27,11 +27,23 @@ class NormalizeBettingSlip
         }
 
         $legs = $bettingSlip->legs->map(function ($leg) {
+            $sport = $this->normalizeSport->normalize($leg->sport);
+
+            // Market normalization only ever runs for a recognized football
+            // leg. A leg whose sport is unsupported or unrecognized never
+            // reaches FootballMarketTaxonomyV1 — applying that taxonomy to a
+            // non-football (or unidentified) leg would produce a market
+            // classification that isn't semantically meaningful, even if the
+            // free text coincidentally matches a football alias.
+            $market = $sport->sportCode === NormalizeSport::FOOTBALL_CODE
+                ? $this->normalizeMarket->normalize($leg->market_name, $leg->selection_name)
+                : NormalizedMarket::notClassifiedForSport($leg->market_name, $leg->selection_name, $sport->status, FootballMarketTaxonomyV1::VERSION);
+
             return new NormalizedBettingSlipLeg(
                 bettingSlipLegId: $leg->id,
                 displayOrder: $leg->display_order,
-                sport: $this->normalizeSport->normalize($leg->sport),
-                market: $this->normalizeMarket->normalize($leg->market_name, $leg->selection_name),
+                sport: $sport,
+                market: $market,
             );
         })->all();
 
