@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Domain\BettingSlip\BettingSlipStatus;
 use App\Models\BettingSlip;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,7 +24,22 @@ class BettingSlipFactory extends Factory
         return [
             'user_id' => User::factory(),
             'name' => fake()->optional()->words(3, true),
-            'status' => BettingSlip::STATUS_DRAFT,
+            'status' => BettingSlipStatus::Draft,
         ];
+    }
+
+    public function ready(): static
+    {
+        return $this->state(fn () => ['status' => BettingSlipStatus::Ready]);
+    }
+
+    public function analysed(): static
+    {
+        return $this->state(fn () => ['status' => BettingSlipStatus::Analysed]);
+    }
+
+    public function archived(): static
+    {
+        return $this->state(fn () => ['status' => BettingSlipStatus::Archived]);
     }
 }

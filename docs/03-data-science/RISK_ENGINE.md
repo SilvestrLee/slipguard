@@ -38,3 +38,6 @@ AI may explain approved findings. It may not calculate, change bands, select the
 
 ## Blocker
 Before risk implementation, Data Science must approve formulas, weights, thresholds, normalization, market taxonomy, worked examples, edge cases, and test vectors.
+
+## Normalization Status
+Football sport and market normalization (taxonomy version 1.0) is implemented — see `docs/03-data-science/FOOTBALL_MARKET_TAXONOMY_V1.md` and `App\Domain\Risk\Taxonomy\FootballMarketTaxonomyV1`. This is engine-preparation only: it classifies free-text input into stable codes and does not calculate risk. Formulas, weights, and thresholds remain unapproved and blocked as above.

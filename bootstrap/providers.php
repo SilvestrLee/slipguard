@@ -1,7 +1,11 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\Filament\OperationsPanelProvider;
+use App\Providers\VoltServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\Filament\OperationsPanelProvider::class,
-    App\Providers\VoltServiceProvider::class,
+    AppServiceProvider::class,
+    OperationsPanelProvider::class,
+    VoltServiceProvider::class,
 ];
