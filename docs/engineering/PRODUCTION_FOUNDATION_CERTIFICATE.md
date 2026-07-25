@@ -11,8 +11,9 @@ Engineering Certification
 | Certification Version | 1.0 |
 | Certification Date | 2026-07-25 |
 | Repository Branch | `develop` |
-| Baseline Commit (last committed state at time of certification) | `91e4d3c` — "docs(risk): define deterministic rule set 2026.1" |
-| Repository Status | **Dirty, by design** — see the Repository Baseline note in §15. 12 modified files and 83 untracked files represent several already-delivered, not-yet-committed sprints (E-06B Risk Engine, E-06C Analysis Persistence, ADR-007, U-01/U-01A UX Constitution, and this validation sprint itself). This certificate records their *content* as validated, not a clean git state — commit status and content validity are independent facts, and this document does not overstate the former. |
+| Certifying Commit | `18d1c4c` — "docs(engineering): certify Production-Ready Foundation and close platform engineering" |
+| Pre-Certification Baseline Commit | `91e4d3c` — "docs(risk): define deterministic rule set 2026.1" |
+| Repository Status | **Clean as of the certifying commit.** At the time this document was drafted, the repository was dirty relative to `91e4d3c` (12 modified, 83 untracked files spanning several already-delivered sprints — E-06B Risk Engine, E-06C Analysis Persistence, ADR-007, U-01/U-01A UX Constitution — plus this validation sprint and the certification itself). All of it was reviewed, staged, and committed together as `18d1c4c` in one milestone commit. See the Repository Baseline note in §14. |
 
 ---
 
@@ -177,9 +178,10 @@ The deterministic engine should be treated as stable infrastructure. Changes to 
 | Field | Value |
 |---|---|
 | Repository Branch | `develop` |
-| Baseline Commit (pre-certification) | `91e4d3c` |
+| Certifying Commit | `18d1c4c` |
+| Pre-Certification Baseline Commit | `91e4d3c` |
 | Certification Date | 2026-07-25 |
 | Engineering Validation Report Version | 1.0 (`engineering-validation-report.md`) |
 | Production Readiness Assessment Version | 1.0 (`production-readiness.md`) |
 
-**Note on baseline accuracy:** at the moment of writing, `91e4d3c` is the last *committed* state, but the repository's actual validated content (everything this certificate and the preceding eleven reports assess) extends well beyond it — see the Repository Status field at the top of this document. The commit that includes this certificate becomes the true baseline commit for future comparison; its hash is necessarily unknown at the time this file is written and should be cross-referenced via `git log` once created, rather than guessed here.
+**This is the permanent historical baseline.** `18d1c4c` (branch `develop`) is the commit against which every future sprint should be compared. It bundles all content validated by this certification — the deterministic Risk Engine (E-06B), the Analysis Persistence boundary and ADR-007 (E-06C), the UX Constitution (U-01/U-01A), the twelve-stage validation sprint, and this certificate itself — reviewed and staged together as one milestone commit rather than split retroactively across the sprints that produced them.
