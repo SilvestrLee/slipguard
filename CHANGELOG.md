@@ -410,6 +410,26 @@ No change to the Risk Engine, Rule Set, persistence layer, ADR-007, or any gover
 ### Product Office Review (2026-07-25)
 Approved without changes requested. The proposed design-token values were formally accepted as canonical — not provisional — and `docs/05-ux/DESIGN_TOKENS.md`'s provenance note updated accordingly; future UI work must reuse them rather than introducing new values. Product Office also explicitly reconfirmed, for the record, that the following remain reserved for a future, separately-approved milestone and must not be inferred or implemented ahead of that approval: Discipline Trend, Customer Betting Behaviour Analytics, Historical Improvement Metrics, Average Risk Band, Customer Scorecards, Recommendations, Coaching Features (`docs/00-governance/DECISION_LOG.md`). Next authorized sprint: U-02.5, Deterministic Analysis Report Experience — presentation/explainability only, no mathematical or architectural changes authorized.
 
+## Governance Programme G-02 — Office Operating System
+
+**Status:** Delivered. Documentation only — no PHP, Blade, Livewire, Tailwind, migrations, database, tests, Risk Engine, Rule Set, persistence, or UX implementation was changed.
+
+### Added
+- `docs/00-governance/office-operating-system/` — the permanent cross-office governance framework: `OFFICE_OPERATING_SYSTEM.md` (master philosophy: office lifecycle, how work enters/leaves an office, ownership and authority-inheritance principles, definitions of autonomy/escalation/completion), `AUTHORITY_MODEL.md` (the five ownership types, decision precedence tied to `CLAUDE.md`'s existing Source-of-Truth Order, conflict resolution, and a full RACI Responsibility Matrix across all six offices and thirteen decision types), `DECISION_ESCALATION_MODEL.md` (generalises Engineering's pre-existing stop/document/escalate discipline to every office, with worked examples per office), `HANDOVER_STANDARD.md` (the single ten-section format every future office-to-office handover follows), `OFFICE_TEMPLATE.md` / `PLAYBOOK_TEMPLATE.md` / `WORKFLOW_TEMPLATE.md` (the structure every office constitution, working method, and per-assignment lifecycle inherits), and `README.md` (reading order plus a full provenance table showing every mechanism already existed in this repository's history — RF-003A, ADR-007, the E-06C Validation sprint, U-02 — before G-02 formalised it).
+- `docs/offices/` — standing constitutions for all six offices: `PRODUCT_OFFICE.md`, `ARCHITECTURE_OFFICE.md`, `ENGINEERING_OFFICE.md`, `UX_STUDIO.md`, `DATA_SCIENCE_LAB.md`, `COMPLIANCE_OFFICE.md`. Each fills every section `OFFICE_TEMPLATE.md` requires, grounded in this repository's actual history rather than generic governance boilerplate (e.g. Architecture Office cites ADR-001–007 and the AV-1 finding; Data Science Lab cites the RF-003A correction and Rule Set 2026.1's actual current "Proposed" status; UX Studio states its strategic/execution authority split plainly, citing the U-02 design-token escalation as its worked example).
+- **Compliance Office formally established** as a standing office for the first time — `docs/09-compliance/PRODUCT_GUARDRAILS.md` previously existed with no explicit owner field; it is now jointly owned with Product Office, a formalisation of existing content, not a new requirement.
+
+### Changed
+- `CLAUDE.md`'s Source-of-Truth Order now points to `docs/00-governance/office-operating-system/` and `docs/offices/` under "Governance."
+- `PROJECT.md` gained an "Office Operating System" pointer section alongside the existing Engineering Constitution and UX Foundation Documents pointers.
+- `docs/00-governance/ENGINEERING_CONSTITUTION.md`: added a scope note clarifying its §1 (Authority Matrix) and §2 (Behaviour Change Policy) are retained unchanged as Engineering's own specific instance of the new general `AUTHORITY_MODEL.md` and `DECISION_ESCALATION_MODEL.md` — nothing in that document was reopened or altered.
+
+### Validation
+Every cross-reference across the 14 new documents was checked against the actual filesystem; one broken self-referential phrasing was found (a Working-Principles sentence in `ARCHITECTURE_OFFICE.md` that accidentally cited a non-existent path while making a comparison) and corrected. No duplicated governance (each office cross-references the shared framework rather than restating it), no orphan documents (both new directories are linked from `CLAUDE.md` and `PROJECT.md`), no existing Locked decision reopened.
+
+### Not Done (by design — scope)
+No application code, Risk Engine, UI, persistence, database, migration, or test was modified. No new governance was invented beyond what's grounded in this repository's own prior decisions and behaviour — see each document's citations.
+
 ## U-03.1 — Approved Source Review and Analysis Output Inventory
 
 **Status:** Delivered, returned to Product Office. UX Studio, inventory only — no design, no wireframes, no frontend components, no implementation code, no Engineering instruction, no Risk Engine reinterpretation.
