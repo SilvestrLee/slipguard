@@ -4,7 +4,9 @@
 **Effective:** 2026-07-25
 **Applies To:** All engineering work in this repository, from this point forward
 **Ratified By:** Product Office + Architecture Office (Governance Consolidation Sprint G-01)
-**Related Documents:** `CLAUDE.md`, `docs/00-governance/VISION_AND_PRINCIPLES.md`, `docs/00-governance/WORKING_PRINCIPLES.md`, `docs/00-governance/DECISION_LOG.md`, `docs/adr/ADR-007-ANALYSIS-PERSISTENCE-BOUNDARY.md`, `docs/engineering/PRODUCTION_FOUNDATION_CERTIFICATE.md`, `docs/00-governance/GOVERNANCE_CONSOLIDATION_G01.md` (the audit trail behind this document)
+**Related Documents:** `CLAUDE.md`, `docs/00-governance/VISION_AND_PRINCIPLES.md`, `docs/00-governance/WORKING_PRINCIPLES.md`, `docs/00-governance/DECISION_LOG.md`, `docs/adr/ADR-007-ANALYSIS-PERSISTENCE-BOUNDARY.md`, `docs/engineering/PRODUCTION_FOUNDATION_CERTIFICATE.md`, `docs/00-governance/GOVERNANCE_CONSOLIDATION_G01.md` (the audit trail behind this document), `docs/00-governance/office-operating-system/` (the Governance Programme G-02 framework this document now instantiates for Engineering specifically — see the note at the end of §1 and §2), `docs/offices/ENGINEERING_OFFICE.md`
+
+**Superseded scope note (G-02, 2026-07-25):** §1 and §2 below are retained verbatim as Engineering's own specific authority boundary and escalation discipline — they remain accurate and in force. The *general*, cross-office versions of these same models now live in `docs/00-governance/office-operating-system/AUTHORITY_MODEL.md` and `DECISION_ESCALATION_MODEL.md`; where this document and those differ only in scope (Engineering-only vs. all offices), the general documents are authoritative for anything beyond Engineering. Nothing in §1–§9 below has been changed or reopened by G-02.
 
 ## Purpose
 

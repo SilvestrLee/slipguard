@@ -79,7 +79,7 @@ Do not create or expand documents unless they directly support the current miles
 1. Current founder instruction.
 2. `CLAUDE.md`.
 3. `PROJECT.md`.
-4. Governance — including `docs/00-governance/ENGINEERING_CONSTITUTION.md` for authority boundaries and behaviour-change policy.
+4. Governance — including `docs/00-governance/office-operating-system/` (the Office Operating System: cross-office authority, handovers, and escalation) and `docs/offices/` (each office's constitution); `docs/00-governance/ENGINEERING_CONSTITUTION.md` remains Engineering's own specific authority boundary and behaviour-change policy within that framework.
 5. Product Blueprint.
 6. Architecture and domain specifications.
 7. Roadmap and active task.
