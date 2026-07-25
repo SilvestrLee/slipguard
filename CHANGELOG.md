@@ -410,6 +410,45 @@ No change to the Risk Engine, Rule Set, persistence layer, ADR-007, or any gover
 ### Product Office Review (2026-07-25)
 Approved without changes requested. The proposed design-token values were formally accepted as canonical — not provisional — and `docs/05-ux/DESIGN_TOKENS.md`'s provenance note updated accordingly; future UI work must reuse them rather than introducing new values. Product Office also explicitly reconfirmed, for the record, that the following remain reserved for a future, separately-approved milestone and must not be inferred or implemented ahead of that approval: Discipline Trend, Customer Betting Behaviour Analytics, Historical Improvement Metrics, Average Risk Band, Customer Scorecards, Recommendations, Coaching Features (`docs/00-governance/DECISION_LOG.md`). Next authorized sprint: U-02.5, Deterministic Analysis Report Experience — presentation/explainability only, no mathematical or architectural changes authorized.
 
+## U-03.1 — Approved Source Review and Analysis Output Inventory
+
+**Status:** Delivered, returned to Product Office. UX Studio, inventory only — no design, no wireframes, no frontend components, no implementation code, no Engineering instruction, no Risk Engine reinterpretation.
+
+### Added
+- `docs/05-ux/U-03/U-03.1-SOURCE-REVIEW-AND-OUTPUT-INVENTORY.md` — the source-of-truth evidence register for the U-03 Analysis Experience milestone. Full Risk Engine output contract (every factor, DTO, enum, and threshold cross-checked between `docs/03-data-science/RISK_RULE_SET_2026_1.md` and the actual `app/Domain/Risk/` implementation — zero conflicts found), the betting-slip and analysis-availability lifecycles (two distinct, non-interchangeable status concepts), a Risk Band Register and Risk Factor Register, dedicated contracts for Weakest-Selection, Confidence, Data-Quality, Explainability, Recommendation, and Rule-Set-Information, existing customer entry points and reusable components, a Customer Vocabulary Register, a State Coverage Matrix, a Conflict Register (3 minor conflicts), an Open Questions/Escalation Register (8 questions, each routed to a specific owning office), and a Constraints Register.
+
+### Key Findings
+- **Weakest-selection ranking has zero implementation anywhere** — an approved `docs/00-governance/PRODUCT_GLOSSARY.md` concept with no corresponding code (confirmed by repository-wide grep and `RISK_RULE_SET_2026_1.md` §G's own explicit scope confirmation). `docs/05-ux/EXPLAINABILITY_SYSTEM.md` already pre-approves "top contributing factor" as the interim substitute, so this does not block U-03.2.
+- **Recommendations have zero implementation and are explicitly reserved** pending separate Product Office approval (`docs/00-governance/DECISION_LOG.md`, 2026-07-25) — confirmed by grep, not just by absence of a document reference.
+- **No customer-facing route exists that displays a completed analysis** — `history` and `journal` are both `coming-soon` placeholders; there is no report/analysis-detail route in `routes/web.php` at all.
+- Rule Set 2026.1 remains status "Proposed," not "Accepted" — recorded accurately in the register rather than assumed resolved.
+- Three minor conflicts recorded (not resolved, per scope): "Leg" vs. "selection" terminology inconsistency, two coexisting button-component implementations (pre-token Blade components vs. U-02's inline token-based markup), and "Accumulator Tax" being an approved glossary term with no corresponding computed field.
+
+### Readiness Classification
+**READY WITH NON-BLOCKING QUESTIONS.** U-03.2 (Customer Analysis Journey and Experience Storyboard) may proceed for the fully-specified Full/Limited/Unavailable outcome structure. Weakest-selection and recommendation presentation are explicitly excluded from U-03.2's scope until separately approved.
+
+### Not Done (by design — scope)
+No wireframes, no frontend components, no implementation code, no test changes, no Risk Engine changes, no Engineering instruction issued. U-03 is not marked complete — only U-03.1. This document is returned to Product Office; U-03.2 does not begin automatically.
+
+## U-03.2 — Customer Analysis Journey and Experience Storyboard
+
+**Status:** Delivered, returned to Product Office for review. UX Studio, specification only — no implementation code, no application changes.
+
+### Added
+- `docs/05-ux/U-03/U-03.2-CUSTOMER-ANALYSIS-JOURNEY-AND-STORYBOARD.md` — the full customer-facing specification for the Analysis Experience, built directly on `U-03.1`'s evidence and eight binding Product Office decisions (PD-01–PD-08). Covers the complete journey from submission transition through Full/Limited/Unavailable report states to exit, with a 13-component inventory, complete proposed customer copy (Risk Band explanations, Data Quality explanations, Limited/Unavailable copy, trust and methodology statements, Accumulator Tax framing — all checked against a binding Copy Guardrails list), full responsive and accessibility specifications, a governance traceability matrix, and a 7-item Open Issues Register.
+- A mid-review Product Office addendum ("APPROVED UX INSPIRATION") requested a dedicated Mobile Navigation and Drawer Experience section, incorporated as new §42–§46: mobile header, full-height right-side navigation drawer, a 3-group navigation hierarchy using SlipGuard's own existing labels (not the addendum's generic placeholders), active-state and motion treatment, a 15-component inventory, a 5-state matrix, and explicit tablet/desktop fallback to the existing horizontal nav. The addendum's own boundary was enforced throughout: interaction quality was adapted, the source's brand, colours, labels, and content were not.
+
+### Key Product Office Decisions Applied
+Rule Set 2026.1 governs despite its Proposed status (PD-01); Limited Analysis is a distinct, non-alarming, fully-authorized state (PD-02); "Main Contributing Factor" is the sole approved term for the highest-contributing factor, never "weakest selection" (PD-03); Data Quality shows band only, never the numeric score (PD-04); factors are ordered by persisted adjusted contribution with no recalculation (PD-05); Accumulator Tax is explanatory language only (PD-06); the submission transition is truthful, brief, and indeterminate, with an explicit list of prohibited fake-progress copy (PD-07); "Selection" is the customer-facing term, "Leg" stays internal-only (PD-08).
+
+### Findings Worth Flagging
+- **A real lifecycle inconsistency**, not previously surfaced in `U-03.1`: a Limited Analysis (like a Full one) also transitions its slip to `Analysed`, meaning "Edit this slip" — proposed as a Limited-Analysis recovery action by the directive itself — is not actually reachable under today's `BettingSlipStatus::allowedTransitions()` rules. Only an Unavailable outcome (which keeps the slip `Ready`) genuinely supports editing. Logged as Open Issue OI-03, escalated rather than silently resolved either way.
+- The mobile navigation drawer is a genuinely new interaction pattern relative to what's implemented today (a below-header collapsing panel, not a full-height overlay) — flagged (OI-06) for a follow-up pass formally extending `docs/05-ux/COMPONENT_PRINCIPLES.md`/`MOTION_SYSTEM.md`, per the Gap Rule, rather than treating this milestone document alone as sufficient permanent governance.
+- Data Quality's "Insufficient" band was deliberately left without customer copy — per `U-03.1`'s own findings, that band always resolves to an Unavailable outcome (which shows no Data Quality section at all) under Rule Set 2026.1's actual arithmetic, so drafting copy for it would misrepresent the system.
+
+### Not Done (by design — scope)
+No wireframes as code, no frontend components, no implementation, no test or route/migration/model changes, no Risk Engine changes, no Engineering instructions issued. U-03 remains not marked complete — only U-03.2. Returned to Product Office; the next milestone does not begin automatically.
+
 ## TOOL-UX-001 — Tooling Verification and Invocation Policy
 
 **Status:** Delivered. Documentation, repository hygiene, and tool verification only — no application code, tests, routes, migrations, models, or UX implementation changed.
