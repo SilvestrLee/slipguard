@@ -1,5 +1,13 @@
 <?php
 
+use App\Domain\Risk\Normalization\NormalizedBettingSlip;
+use App\Domain\Risk\Normalization\NormalizedBettingSlipLeg;
+use App\Domain\Risk\Normalization\NormalizedMarket;
+use App\Domain\Risk\Normalization\NormalizedSport;
+use App\Domain\Risk\Taxonomy\FootballMarketTaxonomyV1;
+use App\Domain\Risk\Taxonomy\MarketComplexity;
+use App\Domain\Risk\Taxonomy\MarketFamily;
+use App\Domain\Risk\Taxonomy\NormalizationStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -47,4 +55,58 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * Risk Engine test helpers — build NormalizedBettingSlip fixtures directly,
+ * without going through the database or the football alias matcher. Used
+ * by tests/Unit/Risk/Engine and tests/Unit/Risk/Factors, which exercise
+ * the engine's own mathematics (Rule Set 2026.1), not normalization
+ * (already covered separately in tests/Unit/Risk and tests/Feature/Risk).
+ */
+function footballLeg(int $id, int $order, string $odds, string $complexity = 'simple', NormalizationStatus $marketStatus = NormalizationStatus::Complete): NormalizedBettingSlipLeg
+{
+    $sport = new NormalizedSport('football', NormalizationStatus::Complete, 'Football');
+
+    $market = new NormalizedMarket(
+        marketCode: $complexity === 'unknown' ? null : 'football.match_result.1x2',
+        marketFamily: $complexity === 'unknown' ? null : MarketFamily::MatchResult,
+        complexity: MarketComplexity::from($complexity),
+        status: $marketStatus,
+        selectionFacts: [],
+        rawMarketInput: 'Match Result',
+        rawSelectionInput: 'Home',
+        taxonomyVersion: FootballMarketTaxonomyV1::VERSION,
+    );
+
+    return new NormalizedBettingSlipLeg($id, $order, $sport, $market, $odds);
+}
+
+function unsupportedSportLeg(int $id, int $order, string $odds): NormalizedBettingSlipLeg
+{
+    $sport = new NormalizedSport(null, NormalizationStatus::Unsupported, 'Tennis');
+    $market = NormalizedMarket::notClassifiedForSport('Match Winner', 'Player A', NormalizationStatus::Unsupported, FootballMarketTaxonomyV1::VERSION);
+
+    return new NormalizedBettingSlipLeg($id, $order, $sport, $market, $odds);
+}
+
+/**
+ * @param  array<int, NormalizedBettingSlipLeg>  $legs
+ */
+function normalizedSlip(array $legs, int $bettingSlipId = 1): NormalizedBettingSlip
+{
+    return new NormalizedBettingSlip($bettingSlipId, FootballMarketTaxonomyV1::VERSION, $legs);
+}
+
+/**
+ * @param  array<int, array{0: string, 1: string}>  $oddsAndComplexity  [[odds, complexity], ...]
+ */
+function slipOf(array $oddsAndComplexity): NormalizedBettingSlip
+{
+    $legs = [];
+    foreach ($oddsAndComplexity as $index => [$odds, $complexity]) {
+        $legs[] = footballLeg($index + 1, $index, $odds, $complexity);
+    }
+
+    return normalizedSlip($legs);
 }

@@ -12,7 +12,7 @@
 
 | Axis | Value |
 |---|---|
-| Engine version | Not yet implemented |
+| Engine version | `1.0` (implemented, `CalculateStructuralRisk::ENGINE_VERSION` — Sprint E-06C, ADR-007) |
 | Rule-set version | `2026.1` (proposed) |
 | Market taxonomy version | `1.0` (already implemented, `FootballMarketTaxonomyV1`) |
 | Input schema version | Proposed `1.0` |
@@ -227,14 +227,16 @@ final_score = round_half_up(clamp(rescaled, 0, 100))
 
 Answering the review's specific questions directly, with the vector that proves each answer:
 
-- **Does an ordinary 3-leg accumulator land in Moderate?** No — TV-004 (balanced, simple/simple/moderate) lands at 18, Low. A 3-leg slip needs elevated odds or complex markets to reach Moderate (TV-009: 3 complex-ish legs, 36, Moderate).
-- **Does a balanced 5-leg slip land in Moderate or High?** Moderate (TV-006, 30).
+- **Does an ordinary 3-leg accumulator land in Moderate?** No — TV-004 (balanced, all simple markets) lands at 16, Low. A 3-leg slip needs elevated odds or complex markets to reach Moderate (TV-009: 3 complex markets, 40, Moderate).
+- **Does a balanced 5-leg slip land in Moderate or High?** Moderate (TV-006, 28).
 - **Does a 10-leg accumulator reliably reach High?** No — TV-007 (10 legs, all odds 1.20) lands at 37, Moderate. Leg count alone, even near its own sub-ceiling, is insufficient without odds or concentration also contributing.
 - **Should Very High be rare?** 15% of vectors reach it, and every one required a deliberately extreme construction (TV-018/019: 20 legs with a concentrated outlier leg; TV-021: a 2-leg slip with an extreme 1.05/50.00 split) — not an ordinary accumulator. No balanced or moderately-aggressive vector reaches it.
 - **Can a single high-odds complex market reach High?** Yes — TV-020 (single leg, odds 50.00, complex market) reaches exactly 54, High. It cannot reach Very High: a single leg structurally cannot trigger RF-001 (0 by definition) or RF-004 (0 by definition, §9), capping a single leg's reachable ceiling at Group A's uncapped RF-002 (20) + Group B's uncapped RF-003 (20) + RF-005 (10) = 50 raw ÷ 78 × 100 ≈ 64 — inside High, below Very High's 75 floor.
-- **Should a two-leg slip ever reach Very High?** Yes, but only under deliberately extreme construction — TV-021 (odds 1.05 and 50.00, both complex) reaches 77, Very High. An ordinary two-leg slip (TV-003, odds 1.50/1.60) reaches only 12, Low. Two legs is enough leg-count-wise to unlock RF-004's concentration mechanism (unlike a single leg), which is what makes 021's extreme spread reachable.
+- **Should a two-leg slip ever reach Very High?** Yes, but only under deliberately extreme construction — TV-021 (odds 1.05 and 50.00, both complex) reaches 77, Very High. An ordinary two-leg slip (TV-003, odds 1.50/1.60) reaches only 9, Low. Two legs is enough leg-count-wise to unlock RF-004's concentration mechanism (unlike a single leg), which is what makes 021's extreme spread reachable.
 
 No boundary distortion found from mapping bands off the rounded integer rather than the unrounded value (TV-014/TV-014b, §20, differ by 0.01 in combined odds and produce identical scores).
+
+**RF-003A correction (2026-07-24):** TV-003, TV-004/TV-015, TV-006, and TV-009's RF-003/score figures above and in §20 were originally computed by a reference script carrying a float-to-BigDecimal-int truncation defect that silently collapsed RF-003's `1.5` relative-outlier anchor into `1.0` (identical in kind to a defect independently found in the RF-005 implementation). This corrupted exactly the vectors whose max-to-median ratio falls between 1.0 and 2.0 (a "balanced accumulator" ratio range); vectors with equal-odds legs or a genuine dominant outlier were unaffected because their ratios fall outside that range. §8's RF-003 formula itself was never ambiguous and requires no change — only the four affected precomputed vectors below were corrected, using the same properly-implemented formula. See `docs/00-governance/DECISION_LOG.md`, RF-003A.
 
 ## 15. Implementation Feasibility Review
 
@@ -362,24 +364,24 @@ Unchanged from the prior draft, plus one addition:
 
 ## 20. Canonical Test Vectors
 
-All 20 structural vectors (17 from the prior draft + 3 added in this review) computed with the same `BigDecimal` reference script, re-run after the normalization fix (the fix does not change any of these vectors' inputs or outputs — none of them use a non-football sport).
+All 20 structural vectors (17 from the prior draft + 3 added in this review) computed with the same `BigDecimal` reference script, re-run after the normalization fix (the fix does not change any of these vectors' inputs or outputs — none of them use a non-football sport). TV-003, TV-004/TV-015, TV-006, and TV-009 were subsequently corrected under RF-003A (2026-07-24) — the original reference script had a float-truncation defect affecting RF-003's relative-outlier anchor; see the note after §14 and `DECISION_LOG.md`. All legs in TV-004 and TV-006 are `simple`-complexity markets (RF-005 = 0 for both); TV-009's three legs are all `complex`-complexity markets (RF-005 = 10).
 
 | Vector | Legs | Combined Odds | RF-001 | RF-002 | RF-003 | RF-004 | RF-005 | Group A | Group B | Score | Band |
 |---|---:|---:|---:|---:|---:|---:|---:|---|---|---:|---|
 | TV-001 Conservative Single | 1 | 1.4000 | 0 | 1.2000 | 0.8000 | 0 | 0 | 1.2000 | 0.8000 | **3** | Low |
 | TV-002 Aggressive Single | 1 | 9.0000 | 0 | 12.6667 | 10.2857 | 0 | 10 | 12.6667 | 10.2857 | **42** | Moderate |
-| TV-003 Balanced Two-Leg | 2 | 2.4000 | 2 | 3.8000 | 3.2645 | 0.1240 | 0 | 5.8000 | 3.3885 | **12** | Low |
-| TV-004 Balanced Three-Leg | 3 | 3.3600 | 5 | 5.7200 | 3.3333 | 0.2000 | 0 | 10.7200 | 3.5333 | **18** | Low |
+| TV-003 Balanced Two-Leg | 2 | 2.4000 | 2 | 3.8000 | 1.3290 | 0.1240 | 0 | 5.8000 | 1.4530 | **9** | Low |
+| TV-004 Balanced Three-Leg | 3 | 3.3600 | 5 | 5.7200 | 1.4667 | 0.2000 | 0 | 10.7200 | 1.6667 | **16** | Low |
 | TV-005 High-Odds Outlier | 4 | 8.7750 | 8 | 12.3667 | 13.7794 | 8.7772 | 0 | 20.3667 | 22.5566 | **55** | High |
-| TV-006 Balanced Five-Leg | 5 | 6.3717 | 11 | 9.3717 | 3.2379 | 0.0926 | 0 | 20.3717 | 3.3305 | **30** | Moderate |
+| TV-006 Balanced Five-Leg | 5 | 6.3717 | 11 | 9.3717 | 1.3759 | 0.0926 | 0 | 20.3717 | 1.4685 | **28** | Moderate |
 | TV-007 Large Low-Odds Accumulator | 10 | 6.1917 | 19 | 9.1917 | 0.4000 | 0 | 0 | 28.1917 | 0.4000 | **37** | Moderate |
 | TV-008 Extreme Accumulator | 20 | 375899.7346 | 25 | 20 | 1.8000 | 0 | 0 | **40 (capped)** | 1.8000 | **54** | High |
-| TV-009 Complex-Market Slip | 3 | 9.2400 | 5 | 12.9867 | 4.6952 | 0.0413 | 10 | 17.9867 | 4.7365 | **36** | Moderate |
+| TV-009 Complex-Market Slip | 3 | 9.2400 | 5 | 12.9867 | 2.7905 | 0.0413 | 10 | 17.9867 | 2.8318 | **40** | Moderate |
 | TV-010 Concentrated Risk | 4 | 4.9588 | 8 | 7.9588 | 11.8337 | 10.2895 | 0 | 15.9588 | 22.1232 | **49** | Moderate |
 | TV-013 Unsupported Sport | 1 | 1.8000 | 0 | 2.4000 | 1.6000 | 0 | 0 (excluded) | 2.4000 | 1.6000 | **5** | Low |
 | TV-014 Boundary (3.99) | 1 | 3.9900 | 0 | 6.9800 | 6.4850 | 0 | 0 | 6.9800 | 6.4850 | **17** | Low |
 | TV-014b Boundary (4.00) | 1 | 4.0000 | 0 | 7.0000 | 6.5000 | 0 | 0 | 7.0000 | 6.5000 | **17** | Low |
-| TV-015 Reordered (= TV-004) | 3 | 3.3600 | 5 | 5.7200 | 3.3333 | 0.2000 | 0 | 10.7200 | 3.5333 | **18** | Low |
+| TV-015 Reordered (= TV-004) | 3 | 3.3600 | 5 | 5.7200 | 1.4667 | 0.2000 | 0 | 10.7200 | 1.6667 | **16** | Low |
 | TV-016 Group-Cap Activation | 20 | 3325.2567 | 25 | 20 | 1.0000 | 0 | 0 | **40 (capped)** | 1.0000 | **53** | High |
 | TV-017 Equal-Odds Tie | 4 | 5.0625 | 8 | 8.0625 | 1.0000 | 0 | 0 | 16.0625 | 1.0000 | **22** | Low |
 | TV-018 Maximum 20-Leg (mixed) | 20 | 122.3182 | 25 | 20 | 20 | 12.2665 | 0 | **40 (capped)** | **28 (capped)** | **87** | Very High |

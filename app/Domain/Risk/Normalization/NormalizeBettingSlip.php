@@ -44,6 +44,7 @@ class NormalizeBettingSlip
                 displayOrder: $leg->display_order,
                 sport: $sport,
                 market: $market,
+                decimalOdds: (string) $leg->decimal_odds,
             );
         })->all();
 

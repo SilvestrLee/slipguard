@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class BettingSlip extends Model
 {
@@ -34,6 +35,11 @@ class BettingSlip extends Model
     public function legs(): HasMany
     {
         return $this->hasMany(BettingSlipLeg::class)->orderBy('display_order');
+    }
+
+    public function analysis(): HasOne
+    {
+        return $this->hasOne(SlipAnalysis::class);
     }
 
     public function isEditable(): bool

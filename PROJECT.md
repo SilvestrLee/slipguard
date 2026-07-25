@@ -22,3 +22,6 @@ OCR, bookmaker parsing, outcome prediction, safe accumulator generation, social 
 
 ## SGOS Rule
 Only core documents are populated now. Deferred areas remain lightweight until implementation requires them.
+
+## UX Foundation Documents
+`docs/05-ux/` defines SlipGuard's permanent design language — required reading before any frontend implementation: `DESIGN_LANGUAGE.md`, `VISUAL_INSPIRATION.md`, `MOTION_SYSTEM.md`, `COMPONENT_PRINCIPLES.md`, `HOMEPAGE_STORYBOARD.md`, `DESIGN_TOKENS.md`, `EXPLAINABILITY_SYSTEM.md`, `EMPTY_STATES.md`, `TRUST_SIGNALS.md`, `ACCESSIBILITY.md`, `ICONOGRAPHY.md`, `IMAGE_GUIDELINES.md`, `RESPONSIVE_RULES.md`, and `UX_RULES.md`. Every document carries a version/status/owner header and cross-references its related documents. See `CLAUDE.md`'s Required Reading and Frontend Work Rule (including its Gap Rule: extend the documentation and get Product Office approval before inventing UX in code).

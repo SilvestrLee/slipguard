@@ -8,5 +8,6 @@
 | ADR-004 | Customer and operations UI separation | Accepted |
 | ADR-005 | Authentication strategy (Laravel Breeze, Livewire stack) | Accepted |
 | ADR-006 | Betting slip content versioning — none; lifecycle status is sufficient | Accepted |
+| ADR-007 | Analysis persistence boundary — engine stays a pure calculator, persistence wraps it, presentation never invokes the engine or mutates a persisted analysis | Accepted |
 
 Create ADRs only for durable architecture, security, cost, or maintainability decisions.

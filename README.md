@@ -48,6 +48,8 @@ This repository, not chat history, is the source of truth. If you are picking th
 
 ## Current Milestone
 
+**Production Foundation: Certified (2026-07-25).** The deterministic engine, persistence boundary, and architectural layering have completed engineering validation (`docs/engineering/PRODUCTION_FOUNDATION_CERTIFICATE.md`, recommendation `READY WITH OBSERVATIONS`). Platform Engineering is closed; active work is now Customer Experience Engineering — see `TASKS.md`.
+
 **E-02 — Customer Foundation.** See `TASKS.md` for the active task list and `docs/08-operations/DELIVERY_ROADMAP.md` for the full roadmap:
 
 E-01 Engineering Initialization (complete) → **E-02 Customer Foundation** → E-03 Manual Slip Capture → E-04 Deterministic Risk Analysis (blocked on Data Science formula approval) → E-05 Risk Report → E-06 History and Journal → E-07 Public Trust Website → E-08 MVP Hardening → Release 1.0.

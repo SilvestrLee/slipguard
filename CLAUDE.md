@@ -55,6 +55,13 @@ Before coding, read:
 - Update `TASKS.md` and `CHANGELOG.md` after implementation.
 - Record meaningful errors in the incident log.
 
+## Frontend Work Rule
+Before implementing Blade, Livewire, Filament, Tailwind, CSS, icons, illustrations, animations, typography, spacing, interactions, or responsive behaviour — review the applicable `docs/05-ux/` UX Constitution documents: `DESIGN_LANGUAGE.md`, `VISUAL_INSPIRATION.md`, `MOTION_SYSTEM.md`, `COMPONENT_PRINCIPLES.md`, `DESIGN_TOKENS.md`, `HOMEPAGE_STORYBOARD.md`, `EXPLAINABILITY_SYSTEM.md`, `EMPTY_STATES.md`, `TRUST_SIGNALS.md`, `ACCESSIBILITY.md`, `ICONOGRAPHY.md`, `IMAGE_GUIDELINES.md`, `RESPONSIVE_RULES.md`, and `UX_RULES.md`. Implementation follows documentation; documentation does not follow implementation. If an implementation choice conflicts with these documents, the documents take precedence.
+
+No implementation may introduce a new component pattern, interaction pattern, animation style, spacing system, typography scale, colour system, icon metaphor, or illustration style unless it is first documented in `docs/05-ux/`.
+
+**Gap Rule:** if implementation encounters a UX situation the documentation doesn't cover, stop. Extend the relevant UX Constitution document, obtain Product Office approval, then resume. Never invent a UX decision inside code.
+
 ## Just-in-Time Documentation
 Do not create or expand documents unless they directly support the current milestone or preserve a stable cross-project decision.
 

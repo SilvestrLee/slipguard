@@ -1,13 +1,20 @@
 # SlipGuard Tasks
 
+## Production Foundation
+**Status:** Certified 2026-07-25 — `READY WITH OBSERVATIONS`. See `docs/engineering/PRODUCTION_FOUNDATION_CERTIFICATE.md` for the full engineering certification (governance versions, validation summary, test/performance/architecture/security/documentation summaries, outstanding debt, and the Platform Engineering → Customer Experience Engineering transition). Platform Engineering is now closed; all further work proceeds under Customer Experience Engineering (see below).
+
+Note recorded by the certificate, not resolved by it: Risk Rule Set 2026.1 still awaits formal Product Office / Data Science sign-off (`docs/00-governance/DECISION_LOG.md`) — the engineering foundation implementing it is certified independently of that pending product decision.
+
 ## Active Milestone
-E-06A — Deterministic Risk Factor Mathematics (design only)
+E-06C — Analysis Persistence (delivered, pending Product Office / Data Science review). E-06C Validation (engineering validation sprint) and the Production Foundation certification are now also delivered — see above. Next: Customer Experience Engineering (U-02).
 
 **Naming note (E-03B):** a prior sprint was directed as "E-04" but contained no mathematics or risk scoring — tracked as E-03B instead, since canonical E-04 (Deterministic Risk Analysis) is a different, still-blocked thing.
 
 **Naming note (E-05A):** a prior sprint was directed as "E-05A," but its content (taxonomy/normalization) was engine-preparation work that logically precedes E-04's mathematics, not a sub-part of canonical E-05 (Risk Report, the presentation layer). Tracked as directed, flagging that the number didn't reflect actual sequencing.
 
 **Naming note (E-06A):** this sprint is directed as "E-06A" and is, appropriately, exactly E-04's mathematics design — the naming finally lines up with the canonical roadmap's intent (E-04 Deterministic Risk Analysis), just under a different label. No collision to flag this time.
+
+**Naming note (E-06C, superseded same day):** this sprint's own code initially labelled itself "E-06C," colliding with the then-current roadmap's E-06C (weakest-leg/highest-risk-leg ranking) — so it was briefly renamed E-06D pending clarification. Product Office then ruled explicitly: persistence is a genuine prerequisite for U-02 (Dashboard, History, Risk Report retrieval, Journal linkage, and rule-set/version traceability all require it), so it is inserted into the sequence as **E-06C — Analysis Persistence**, and weakest-leg/highest-risk-leg ranking is renumbered **E-06D**. See `docs/00-governance/DECISION_LOG.md` (2026-07-25). Sequence: E-06B (engine) → E-06C (persistence) → E-06D (weakest-leg) → U-02.
 
 ## Completed
 ### E-02 (Sprint E-02A — Customer Identity Foundation) — Closed, Product Office approved
@@ -86,13 +93,67 @@ Pest: 167/167 passing.
 - [x] `NormalizeBettingSlip` now gates market normalization on `sport->sportCode === NormalizeSport::FOOTBALL_CODE`; non-football legs get `NormalizedMarket::notClassifiedForSport()` instead of a (possibly false-positive) football classification.
 - [x] 6 new regression tests: football no-regression, three overlapping-phrase unsupported-sport cases, one unrecognized-sport case, one determinism case. 173/173 passing at commit time.
 
-## Blocked
-- E-04 is blocked until Data Science approves formulas, thresholds, and test vectors.
-- E-06B (implementation) awaits Product Office's formal sign-off recorded in `docs/00-governance/DECISION_LOG.md` — the design document itself no longer has unresolved questions to block on.
+### E-06B — Deterministic Risk Engine Implementation
+- [x] `App\Domain\Risk\Engine\CalculateStructuralRisk` — pure entry point, exact §7 calculation order, no persistence/mutation/external calls.
+- [x] `RuleSet2026_1` and all six `RiskFactor` implementations (RF-001–RF-005 active, RF-006 explicitly inactive at contribution 0).
+- [x] `CalculateDataQuality` and `DetermineAnalysisAvailability` — independent data-quality score and three-tier analysis gate.
+- [x] Immutable result objects and the full 18-code `ReasonCode` catalogue.
+- [x] `PiecewiseLinearInterpolation` and `ProportionalGroupCap` support classes (BigDecimal throughout, no floats).
+- [x] Fixed two real float-truncation defects found during the full regression run: `MarketComplexityFactor`'s average calculation, and `IndividualOddsFactor`/`CombinedOddsFactor`'s anchor-table literals — both were silently coercing floats to ints via `BigDecimal::of()`.
+- [x] RF-003A: identified and corrected four canonical vectors (TV-003, TV-004/TV-015, TV-006, TV-009) in `RISK_RULE_SET_2026_1.md` whose original figures were produced by a reference script carrying the identical float-truncation defect — see `DECISION_LOG.md`. RF-003's formula itself required no change.
+- [x] 121 new Pest tests: per-factor boundary/monotonicity/reason-code coverage, data quality, analysis gate, all 19 scoreable canonical vectors exact, property-style invariants (order independence, determinism, bounds, monotonicity, symmetry).
+- [x] Full regression: 294/294 passing (up from 173). `pint --test` clean.
+- [x] Performance verified: 0.615ms per 20-leg slip (target <10ms).
+- [x] Confirmed no persistence, no weakest-leg logic, no AI/OCR/parser/UI, no approved math/taxonomy/normalization changed.
 
-## Later
-- [ ] E-04 Deterministic Risk Analysis.
-- [ ] E-05 Risk Report.
-- [ ] E-06 History and Journal.
+### E-06C — Analysis Persistence
+- [x] `App\Actions\Analysis\AnalyzeBettingSlip` — the orchestration boundary between the pure Risk Engine and persistence: checks `BettingSlip::analysisEligibility()`, normalizes the slip, runs `CalculateStructuralRisk`, persists the complete immutable result inside one DB transaction, transitions the slip to Analysed. Throws `BettingSlipNotAnalysableException` (carries the specific `AnalysisIneligibilityReason`s) when ineligible; nothing is persisted and the slip stays untouched on rejection.
+- [x] `SlipAnalysis` model/migration — one immutable row per completed analysis (`betting_slip_id` unique, `user_id` denormalized from the slip's own owner, never mass-assigned). Stores `availability`, `structural_score`/`risk_band` (nullable — null when Unavailable), `data_quality_score`/`band`, `limited_analysis`, and every engine output (`factor_results`, `interaction_adjustments`, `data_quality_deductions`, `factors_not_evaluated`, `reason_codes`) as plain JSON-safe arrays — every `BigDecimal` and enum already reduced to a string/value by the orchestration action, so the model has no dependency on the engine's value objects. Records `engine_version`, `rule_set_version`, `input_schema_version`, and `market_taxonomy_version` independently (four separate version axes, not one — `engine_version` was added under ADR-007, see below).
+- [x] `LegAnalysis` model/migration — one immutable row per leg, the normalized snapshot (sport/market codes, family, complexity, status, decimal odds, raw inputs) as it existed at analysis time, independent of any later taxonomy version.
+- [x] `SlipAnalysisPolicy` — `view` only, scoped to `user_id`; a `SlipAnalysis` is never created or edited through a user-facing request, only produced by `AnalyzeBettingSlip` from an already-authorized `BettingSlip`.
+- [x] `NormalizedBettingSlipLeg` extended with `decimalOdds` (fixed-precision string, carried through the normalization boundary since the engine needs it and it requires no normalization of its own).
+- [x] `BettingSlip::analysis()` (`HasOne`) added for retrieval; `SlipAnalysis::bettingSlip()`/`user()` and `SlipAnalysis::legAnalyses()`/`LegAnalysis::slipAnalysis()`/`bettingSlipLeg()` complete the graph both ways.
+- [x] Pest coverage: Full/Unavailable availability persisted correctly (null score/band on Unavailable), per-leg snapshot fidelity and ordering, JSON round-trip fidelity for factor results and interaction adjustments, enum-collection round-trip for reason codes, every ineligibility path (Draft/empty/already-Analysed/Archived) rejected with zero rows written, one-analysis-per-slip enforced at the database level, confirmation the engine itself persists nothing, determinism across two independently-built slips with identical inputs, both-directions relationship retrieval, and the policy (15 new tests: 13 + 2).
+- [x] `ADR-007` accepted (Product Office + Architecture Office) — the permanent engine/persistence/presentation layer boundary, forbidden call flow, and four-axis version traceability requirement. See `docs/adr/ADR-007-ANALYSIS-PERSISTENCE-BOUNDARY.md`.
+- [x] Closed a real gap ADR-007 surfaced: `engine_version` was missing from the persisted record entirely (only `rule_set_version`/`input_schema_version`/`market_taxonomy_version` existed). Added `CalculateStructuralRisk::ENGINE_VERSION` (`1.0`), threaded through `RiskAnalysisResult`, persisted as a new `slip_analyses.engine_version` column, asserted in `AnalyzeBettingSlipTest`.
+- [x] Flagged, not resolved (recorded in `ADR-007` and `DECISION_LOG.md`): full re-analysis support (a new record per re-analysis, historical records untouched) is architecturally described by ADR-007 but not yet reachable — blocked by `slip_analyses.betting_slip_id`'s unique constraint and by `Analysed` being a terminal lifecycle state (E-03B, `BettingSlipStatus::allowedTransitions()`) with no path back to `Ready`. Left as-is pending an explicit Product Office decision rather than silently changing a locked lifecycle rule or silently leaving the ADR unimplemented without a note.
+
+Pest: 309/309 passing (unchanged count — `engine_version` added an assertion to an existing test rather than a new one; the required, no-default column meant every factory/action call site had to supply it or the suite would fail outright). `pint --test` clean.
+
+### E-06C Validation — Production-Ready Foundation Validation (engineering-only, no product/code changes)
+- [x] Twelve-stage engineering validation sprint executed per the Engineering Office directive: repository audit, ADR-007 architecture boundary check, static analysis, database validation, persistence integrity, performance benchmark, security review, test review, documentation sync, engineering debt register, production readiness assessment. Full reports in `docs/engineering/`.
+- [x] Independently re-ran the toolchain: `composer validate` valid, `composer dump-autoload -o` clean (9,682 classes), `pint --test` passed, `pest --compact` 309/309 passing (799 assertions) — confirms `TASKS.md`'s own claimed count.
+- [x] Benchmarked the full `AnalyzeBettingSlip` pipeline (normalize → engine → persist) at 1/5/10/20 legs: linear scaling, ~11.5ms median at the 20-leg ceiling, well within any plausible request budget. (Distinct from E-06B's already-recorded pure-engine 0.615ms figure — the two should not be conflated.)
+- [x] Zero Category A (release-blocker) findings. Two dormant Category B items and fourteen Category C items logged to `docs/engineering/engineering-debt-register.md`. Three Category D observations logged for Product/Architecture Office (not acted on).
+- [x] Final recommendation: **READY WITH OBSERVATIONS** — see `docs/engineering/engineering-validation-report.md`. Customer-facing engineering (U-02) is cleared to proceed.
+- [x] Confirmed no product mathematics, taxonomy, UX wording, or feature scope was touched — audit only, per directive.
+
+### U-01 — SlipGuard UX Foundation (documentation only)
+- [x] `docs/05-ux/DESIGN_LANGUAGE.md`, `VISUAL_INSPIRATION.md`, `MOTION_SYSTEM.md`, `COMPONENT_PRINCIPLES.md`, `HOMEPAGE_STORYBOARD.md`, `DESIGN_TOKENS.md`, `ACCESSIBILITY.md`, `ICONOGRAPHY.md`, `IMAGE_GUIDELINES.md`, `RESPONSIVE_RULES.md` — the permanent design language, added alongside the existing `UX_RULES.md`.
+- [x] `CLAUDE.md`'s Frontend Work Rule and `PROJECT.md`'s UX Foundation Documents pointer.
+- [x] Directory correction: used the existing `docs/05-ux/` rather than creating a colliding `docs/06-ux/` (06 is already `docs/06-engineering/`).
+- [x] Confirmed no frontend components, pages, or placeholder screens were built — documentation only, per scope.
+
+### U-01A — UX Foundation Governance Hardening (documentation only)
+- [x] `docs/05-ux/EXPLAINABILITY_SYSTEM.md` — how analysis results are communicated (explanation hierarchy reconciled with `UX_RULES.md`, progressive disclosure, language rules, future compatibility notes only, no unbuilt features documented as if real).
+- [x] `docs/05-ux/EMPTY_STATES.md` — all 15 required empty/error states, OCR/parser states explicitly marked reserved placeholders (out of MVP scope).
+- [x] `docs/05-ux/TRUST_SIGNALS.md` — trust mechanisms, forbidden language, required vocabulary.
+- [x] Version/Status/Owner/Related-Documents header added to all 14 `docs/05-ux/` documents; every document cross-references its related documents.
+- [x] `CLAUDE.md`'s Frontend Work Rule strengthened with the full 14-document list, the "no new pattern without documentation" rule, and the Gap Rule.
+- [x] `PROJECT.md` updated to match.
+- [x] Confirmed no frontend code (Blade, Livewire, Filament, Tailwind, CSS, JavaScript) was changed.
+
+## Blocked
+- E-06D (weakest-leg / highest-risk-leg ranking, renumbered from E-06C — see the Naming note above) awaits its own sprint — E-06B deliberately implements only per-leg provisional factor contributions, no ranking.
+- Risk Rule Set 2026.1 awaits formal Product Office / Data Science sign-off (`docs/00-governance/DECISION_LOG.md`) — does not block Customer Experience Engineering below, since the engineering foundation implementing it is certified independently (see Production Foundation, above).
+
+(E-04 Deterministic Risk Analysis is no longer a blocked/future item — its mathematics were delivered under E-06A (design) / E-06B (implementation); see the Naming notes above. Retained here only as a pointer so this list stays accurate, not re-opened.)
+
+## Customer Experience Engineering
+*(formerly "Later" — archived history above is unchanged; this section is renamed and reordered to reflect the Production Foundation certification's transition statement, not new scope.)*
+- [ ] U-02 — Customer dashboard, analysis history, risk report presentation, journal linkage (the immediate next milestone; E-06C's persistence layer is its validated prerequisite).
+- [ ] E-05 Risk Report — presentation of the already-implemented deterministic result.
+- [ ] E-06D — Weakest-leg / highest-risk-leg ranking (see Blocked, above).
+- [ ] E-06 History and Journal — remaining scope beyond persistence (already delivered as E-06B/E-06C).
 - [ ] E-07 Public Trust Website.
 - [ ] E-08 MVP Hardening.

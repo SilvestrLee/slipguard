@@ -226,3 +226,137 @@ Pest: **173/173 passing** (up from 167).
 No production scoring classes, no database migration, no persistence, no weakest-leg implementation, no UI, no AI, no external sports data. The only code touched in this review was the normalization-boundary fix above, committed separately from the still-unapproved design document per the review's own commit gate.
 
 Pest: **173/173 passing** (unchanged from the fix above — no additional code changed in the document review itself).
+
+## Sprint E-06B — Deterministic Risk Engine Implementation
+
+**Status:** Delivered, pending Product Office / Data Science review.
+
+### Added
+- `App\Domain\Risk\Engine\CalculateStructuralRisk` — the engine's entry point. Pure calculator: accepts a `NormalizedBettingSlip`, returns an immutable `RiskAnalysisResult`. Never persists, never mutates the slip, never fetches external data. Follows Rule Set 2026.1 §7's calculation order exactly.
+- `App\Domain\Risk\RuleSets\RuleSet2026_1` — exposes every weight, cap, band boundary, and version constant; "no hidden mathematics."
+- `App\Domain\Risk\Contracts\RiskFactor` and all six factor implementations (`LegCountFactor`, `CombinedOddsFactor`, `IndividualOddsFactor`, `RiskConcentrationFactor`, `MarketComplexityFactor`, `RelationshipFactor` — RF-006 remains inactive, contribution 0, always visibly marked via its reason code).
+- `App\Domain\Risk\Engine\CalculateDataQuality` and `DetermineAnalysisAvailability` — the independent data-quality score and the three-tier analysis-availability gate (§17), never blending with structural risk.
+- Immutable result objects: `RiskAnalysisResult`, `FactorResult`, `FactorTrace`, `InteractionAdjustment`, `RiskBand`, `DataQualityBand`, `AnalysisAvailability`, `AnalysisGateResult`, `ReasonCode` (all 18 approved codes).
+- `App\Domain\Risk\Support\PiecewiseLinearInterpolation` and `ProportionalGroupCap` — shared, reusable BigDecimal arithmetic for the anchor-table factors and the two group caps (Group A ≤ 40, Group B ≤ 28).
+- Pest coverage: a dedicated test file per factor (boundary tables, monotonicity, reason-code thresholds), `CalculateDataQuality` (deduction, category cap, sport exclusion), `DetermineAnalysisAvailability` (all three tiers, worse-of-band resolution), every scoreable canonical vector compared exactly against the approved rule set, and a property-style suite (order independence, determinism, bounds, monotonicity, symmetry) — 121 new tests.
+
+### Fixed
+- **`MarketComplexityFactor` (RF-005):** computed its average using native PHP float division, then passed the float into `BigDecimal::of()` — a method whose signature only accepts `BigNumber|int|string`. PHP silently coerces a float argument to `int`, truncating (e.g. `5/3 = 1.667` became `1`), which is exactly the "silent conversion to floating point" the rule set's decimal precision policy forbids. Fixed to perform the division in BigDecimal throughout. Caught by a failing test (`8.3333` expected, `5.0000` got) during the full regression run, not the earlier hand-checked vectors.
+- **`IndividualOddsFactor` (RF-003) and `CombinedOddsFactor` (RF-002):** their anchor tables used PHP float literals (e.g. `1.5`) instead of strings for the same `BigDecimal::of()` call. `CombinedOddsFactor`'s anchors are all whole numbers so the defect was latent (no numeric effect), but `IndividualOddsFactor::RELATIVE_ANCHORS`' `1.5` breakpoint silently truncated to `1`, colliding with the `1.0` anchor and corrupting the whole relative-outlier table. Fixed by making every anchor table's x-values strings.
+
+### RF-003A — Canonical Vector Correction (Product Office review)
+- Investigating six vector-fidelity test failures that appeared after the fix above led to discovering that **the reference script which generated four of `RISK_RULE_SET_2026_1.md` §20's canonical vectors (TV-003, TV-004/TV-015, TV-006, TV-009) carried the identical float-truncation defect**, corrupting exactly the vectors whose max-to-median ratio falls between 1.0 and 2.0. §8's RF-003 formula itself was never ambiguous and required no change. Per Product Office's ruling, the rule set's formula is authoritative over the buggy script's output — the four affected vectors were corrected in the document instead (see `DECISION_LOG.md`). The other 15 of 19 scoreable vectors were confirmed correct throughout.
+- Also corrected three test-data errors of my own, unrelated to the bug: TV-004, TV-006, and TV-018 had guessed leg complexities (`moderate`/mixed `complex`) that didn't match the rule set's own documented RF-005 column; TV-009 was missing one `complex` leg. All three are corrected to match the document exactly.
+
+### Verified
+- **Formula fidelity:** every active factor (RF-001 through RF-005) and RF-006's explicit inactivity match Rule Set 2026.1 exactly — no weight, cap, band, taxonomy, or normalization changed.
+- **All 19 scoreable canonical vectors** (TV-001–TV-010, TV-014–TV-021) match the corrected rule set exactly, no tolerance. TV-013 (a single Tennis leg) is confirmed `Unavailable`, not scored — the Tier 1 sport gate (§17) supersedes the vector table's pre-gate-redesign standalone value, documented explicitly in a test.
+- **Performance:** 0.615ms per calculation on a 20-leg slip (well within the 10ms target), measured over 200 iterations after warm-up.
+- **Full regression:** 294/294 Pest tests passing (up from 173). `./vendor/bin/pint --test` clean.
+
+### Not Done (by design — scope)
+No persistence (`SlipAnalysis`, `LegAnalysis`, `AnalysisRequest`, `AnalysisFingerprint`, migrations, repositories) — delivered in Sprint E-06C below. No weakest-leg or highest-risk-leg identification (per-leg provisional factor contributions only — ranking is E-06D). No AI, OCR, parser, UI, premium logic, or localisation. No change to any approved weight, cap, band, taxonomy, or normalization rule.
+
+## Sprint E-06C — Analysis Persistence
+
+**Status:** Delivered, pending Product Office / Data Science review.
+
+### Naming Note
+This sprint's code initially labelled itself "E-06C," which collided with the roadmap's then-current E-06C (weakest-leg/highest-risk-leg ranking), so it was briefly tracked as E-06D pending clarification. Product Office then ruled (`docs/00-governance/DECISION_LOG.md`, 2026-07-25) that analysis persistence is a genuine prerequisite for U-02 — Dashboard, History, Risk Report retrieval, Journal linkage, and rule-set/version traceability cannot be built correctly against an in-memory-only `RiskAnalysisResult`. It is inserted into the sequence as **E-06C — Analysis Persistence**, and weakest-leg/highest-risk-leg ranking is renumbered **E-06D**. Sequence: E-06B (engine) → E-06C (persistence) → E-06D (weakest-leg) → U-02.
+
+### Added
+- `App\Actions\Analysis\AnalyzeBettingSlip` — the orchestration boundary between the pure Risk Engine (E-06B) and persistence. Checks `BettingSlip::analysisEligibility()`, normalizes the slip, runs `CalculateStructuralRisk`, persists the complete immutable result inside one database transaction, and transitions the slip to Analysed. Throws `App\Exceptions\BettingSlipNotAnalysableException` (carrying the specific `AnalysisIneligibilityReason`s) when ineligible — nothing is persisted and the slip is left untouched.
+- `App\Models\SlipAnalysis` and its migration — one immutable row per completed analysis (`betting_slip_id` unique at the database level, `user_id` denormalized from the slip's own owner and deliberately excluded from mass assignment). Persists `availability`, a nullable `structural_score`/`risk_band` (null when Unavailable), `data_quality_score`/`band`, `limited_analysis`, and the engine's full output (`factor_results`, `interaction_adjustments`, `data_quality_deductions`, `factors_not_evaluated`, `reason_codes`) as plain, JSON-safe arrays — every `BigDecimal` and enum is reduced to a string/value by the orchestration action first, so the model carries no dependency on the engine's value objects. Records four independent version axes (`engine_version`, `rule_set_version`, `input_schema_version`, `market_taxonomy_version`) rather than one — `engine_version` was added later in this sprint, see the ADR-007 entry below.
+- `App\Models\LegAnalysis` and its migration — one immutable row per leg, preserving the normalized snapshot (sport/market codes, family, complexity, status, decimal odds, raw inputs) exactly as it was at analysis time, independent of any later taxonomy version.
+- `App\Policies\SlipAnalysisPolicy` — `view` only, scoped to `user_id`. A `SlipAnalysis` is never created or edited through a user-facing request.
+- `NormalizedBettingSlipLeg` extended with a `decimalOdds` fixed-precision string, carried through the normalization boundary since the engine needs it.
+- Relationship graph completed both ways: `BettingSlip::analysis()`, `SlipAnalysis::bettingSlip()`/`user()`/`legAnalyses()`, `LegAnalysis::slipAnalysis()`/`bettingSlipLeg()`.
+- `database/factories/SlipAnalysisFactory.php` and `LegAnalysisFactory.php`.
+- 15 new Pest tests (`tests/Feature/Analysis/`): availability persisted correctly for both Full and Unavailable slips (null score/band on Unavailable), per-leg snapshot fidelity and display-order, JSON round-trip fidelity for factor results and interaction adjustments, enum-collection round-trip for reason codes, every ineligibility path (Draft, empty, already-Analysed, Archived) rejected with zero rows written, one-analysis-per-slip enforced at the database level (`QueryException` on violation), confirmation the engine itself persists nothing, determinism across two independently-built slips with identical inputs, both-directions relationship retrieval, and the policy.
+
+### Verified
+- Full regression: 309/309 Pest tests passing (up from 294). `./vendor/bin/pint --test` clean.
+- No change to any approved weight, cap, band, taxonomy, or normalization rule; the Risk Engine itself remains untouched and still never persists anything (asserted directly by a dedicated test).
+
+### Not Done (by design — scope)
+No weakest-leg/highest-risk-leg ranking (E-06D, a separate sprint). No UI, no AI, no `AnalysisRequest`/`AnalysisFingerprint` deduplication tracking, no history/journal surface, no localisation.
+
+### ADR-007 — Analysis Persistence Boundary (Product Office + Architecture Office)
+- **Accepted.** Formalizes the permanent boundary this sprint's code already followed: the engine (Layer 3) never touches persistence/HTTP/UI/infrastructure; persistence (Layer 4, `AnalyzeBettingSlip`) wraps the engine and never recalculates; presentation (Layer 5 — Dashboard, History, Journal, Risk Report, API, none built yet) reads persisted analyses only and must never invoke the engine or mutate a persisted record. See `docs/adr/ADR-007-ANALYSIS-PERSISTENCE-BOUNDARY.md`.
+- **Fixed a real gap the ADR surfaced:** `engine_version` was entirely missing from the persisted record — only `rule_set_version`/`input_schema_version`/`market_taxonomy_version` existed, despite `engine_version` being a documented requirement since the original architecture docs (`docs/02-architecture/DOMAIN_MODEL.md`, `docs/03-data-science/RISK_ENGINE.md`) and explicitly flagged "Not yet implemented" in `RISK_RULE_SET_2026_1.md` §1. Added `CalculateStructuralRisk::ENGINE_VERSION` (`1.0`), threaded through `RiskAnalysisResult` and `AnalyzeBettingSlip`, persisted as a new `slip_analyses.engine_version` column (migration edited in place — pre-commit, locally re-migrated with `migrate:fresh`, not a follow-up migration). Existing test extended with an assertion; count unchanged at 309/309 since the column is required with no default, so every call site had to supply it or the whole suite would fail.
+- **Flagged, deliberately not fixed:** ADR-007 describes re-analysis (same slip analysed again → new independent record, historical records untouched) as permanent architecture, but that's not reachable today — `slip_analyses.betting_slip_id` is a unique database constraint and `Analysed` is a terminal `BettingSlipStatus` (E-03B; no transition back to `Ready`). Closing this gap means dropping the unique constraint, likely moving `BettingSlip::analysis()` to a `latestOfMany()` relation alongside a plain `HasMany`, and revisiting the E-03B lifecycle rule — a real behavior change to a previously locked decision, not a documentation fix. Recorded in `docs/00-governance/DECISION_LOG.md` (2026-07-25) and left for an explicit Product Office decision rather than silently implemented or silently left unmentioned.
+
+Pest: 309/309 passing (unchanged — see above). `./vendor/bin/pint --test` clean after the `engine_version` addition.
+
+## Sprint U-01 — SlipGuard UX Foundation
+
+**Status:** Delivered. Documentation only — no frontend components, pages, or placeholder screens were built, per the sprint's explicit scope.
+
+### Added
+- `docs/05-ux/DESIGN_LANGUAGE.md` — the UX constitution: philosophy, emotional goals, product personality, hierarchy, white-space/typography/layout philosophy, trust-first principles, progressive disclosure, cognitive load reduction, data explanation philosophy, brand tone, and constraints.
+- `docs/05-ux/VISUAL_INSPIRATION.md` — approved characteristics (generous spacing, restrained colour, calm interactions, etc.) and explicitly rejected ones (casino colours, gambling imagery, flashing indicators, dense dashboards, etc.), each with its reasoning.
+- `docs/05-ux/MOTION_SYSTEM.md` — durations, easing, allowed transitions, hover/loading/scroll behaviour, micro-interactions, reduced-motion accessibility, and forbidden animation patterns.
+- `docs/05-ux/COMPONENT_PRINCIPLES.md` — purpose, spacing, radius, elevation, interaction, accessibility, responsive behaviour, usage rules, and anti-patterns for every component the product currently needs (buttons, cards, badges, risk indicators, navigation, section headers, hero blocks, forms, upload areas, analysis cards, journal cards, reports, timeline, progress indicators).
+- `docs/05-ux/HOMEPAGE_STORYBOARD.md` — the seven-section homepage narrative (Hero → Problem → How It Works → Example Report → Trust → Journal → CTA), each section's purpose, emotion, message, visual priority, interaction, and exit action.
+- `docs/05-ux/DESIGN_TOKENS.md` — colours, typography, spacing scale, radius scale, elevation, opacity, animation timing, container widths, grid, breakpoints, icon sizes, and button heights, mapped to Tailwind v4's `@theme` CSS-variable approach.
+- `docs/05-ux/ACCESSIBILITY.md` — contrast ratios, keyboard navigation, focus states, screen reader expectations, motion reduction, touch targets, readable typography, colour independence, and dark mode considerations.
+- `docs/05-ux/ICONOGRAPHY.md` — preferred icon style (outline, 1.5px stroke, soft joins), approved metaphors (shield, magnifier, warning, check), and icons to avoid (football, money bags, casino chips, slot machines, roulette, confetti).
+- `docs/05-ux/IMAGE_GUIDELINES.md` — approved imagery (minimal illustrations, abstract shapes, ticket mockups, shield graphics, product screenshots) and rejected imagery (sport action photography, celebrations, fans/crowds, bookmaker screenshots, casino imagery).
+- `docs/05-ux/RESPONSIVE_RULES.md` — desktop/tablet/mobile behaviour for containers, spacing, typography, stacking, navigation, cards, touch spacing, and scrolling.
+- `CLAUDE.md`'s new Frontend Work Rule: before any UI implementation, review `DESIGN_LANGUAGE.md`, `VISUAL_INSPIRATION.md`, `MOTION_SYSTEM.md`, `COMPONENT_PRINCIPLES.md`, `DESIGN_TOKENS.md`, and `HOMEPAGE_STORYBOARD.md` — documents take precedence over conflicting implementation choices.
+- `PROJECT.md`'s new "UX Foundation Documents" pointer.
+
+### Note — Directory Correction
+The sprint brief specified `docs/06-ux/`. That number is already used by `docs/06-engineering/`, and a UX directory already existed at `docs/05-ux/` (containing `UX_RULES.md`, referenced throughout existing skills and `CLAUDE.md`'s Required Reading). All ten documents were added to the existing `docs/05-ux/` instead of creating a colliding, duplicate-numbered folder.
+
+### Not Done (by design — scope)
+No frontend components, Blade views, Livewire components, or Filament resources were built or modified. No redesign of any existing screen.
+
+## Sprint U-01A — UX Foundation Governance Hardening
+
+**Status:** Delivered. Documentation and governance only — no frontend code changed.
+
+### Added
+- `docs/05-ux/EXPLAINABILITY_SYSTEM.md` — the constitutional guide for how every analysis screen communicates its results (not how the engine calculates them): philosophy, principles, the Explanation Hierarchy (reconciled explicitly against `UX_RULES.md`'s existing Risk Report Hierarchy, not a silent replacement), progressive disclosure (what's visible vs. hidden by default), always/never language rules, customer-trust rules for limitations, and a Future Compatibility section (weakest-leg, rule-set versioning, historical comparisons, the future relationship factor, multiple sports) that documents only the accommodation, not the unbuilt features themselves.
+- `docs/05-ux/EMPTY_STATES.md` — 15 empty/error/unavailable states (no slips, no analyses, no journal entries, no archived slips, no history, no notifications, no saved reports, unavailable analysis, unsupported sport, no OCR results, future parser unavailable, network failure, permission denied, unexpected error, maintenance mode), each with purpose, headline, supporting text, recommended illustration, primary/secondary CTA, user emotion, and accessibility considerations. The two OCR/parser-related states are explicitly marked reserved placeholders (OCR and bookmaker parsing are out of MVP scope, `PROJECT.md`) rather than designed speculatively.
+- `docs/05-ux/TRUST_SIGNALS.md` — every reserved trust mechanism (versioned rule sets, deterministic analysis, data quality independence, analysis timestamps, normalization status, supported/unsupported sports, limited/unavailable messaging), a permanent forbidden-language list, and a required-vocabulary list, plus where each trust signal is required to appear.
+
+### Changed
+- Every document in `docs/05-ux/` (all 10 from Sprint U-01, plus the pre-existing `UX_RULES.md`, plus the 3 new documents above — 14 total) now begins with a consistent Version / Status / Applies To / Owner / Last Updated / Related Documents header (a table, not YAML front matter) and cross-references its related documents — no orphan documents.
+- `CLAUDE.md`'s Frontend Work Rule strengthened: the full applicable-document list now includes the three new documents; added a rule that no new component/interaction/animation/spacing/typography/colour/icon/illustration pattern may be introduced without first being documented in `docs/05-ux/`; added an explicit Gap Rule (stop → extend the UX Constitution → get Product Office approval → resume, rather than inventing UX decisions in code).
+- `PROJECT.md`'s UX Foundation Documents pointer updated to list all 14 documents and the Gap Rule.
+
+### Not Done (by design — scope)
+No frontend components, Blade views, Livewire components, Filament resources, Tailwind config, CSS, or JavaScript were built or modified. No existing UX philosophy from Sprint U-01 was contradicted — only extended and cross-referenced.
+
+## Sprint E-06C Validation — Production-Ready Foundation Validation
+
+**Status:** Delivered. Engineering validation only — no product behaviour, mathematics, taxonomy, UX, or feature code was changed.
+
+### Added
+- `docs/engineering/` — twelve deliverables from a full engineering validation sprint (repository audit, ADR-007 architecture boundary check, static analysis, database validation, persistence integrity, performance benchmark, security review, test review, documentation sync, engineering debt register, production readiness assessment, and the master `engineering-validation-report.md`).
+- Final engineering recommendation: **READY WITH OBSERVATIONS**. Zero Category A (release-blocker) findings across all ten audit stages; 309/309 Pest tests passing (799 assertions), `pint --test` and `composer validate` clean. Two dormant Category B items and fourteen Category C items logged to `docs/engineering/engineering-debt-register.md` for future sprints; three Category D items logged as Product/Architecture Office observations tied to unstarted roadmap work (U-02's presentation layer, ADR-007's already-tracked re-analysis gap).
+
+### Findings of note (non-blocking, tracked — see the debt register for full detail)
+- `NormalizeBettingSlip` (Domain/Normalization layer) reads the Eloquent `App\Models\BettingSlip` directly — a boundary-purity softness, not a call-flow violation of ADR-007.
+- `slip_analyses`/`leg_analyses` foreign keys use `cascadeOnDelete()`; a hard delete of a `BettingSlip`/`User` would silently remove historical analysis records. Currently unreachable via any customer path — flagged for explicit Architecture Office resolution before any future account/admin-deletion feature.
+
+### Environment note
+The local Herd-linked `php`/`php83` binaries fail at process start (`dyld` symbol error, unrelated to the repository). All validation commands were run via `/usr/local/bin/php` (Homebrew, 8.5.8), which satisfies `composer.json`'s `^8.3` constraint.
+
+### Not Done (by design — scope)
+No code was modified. No product/UX/mathematics decisions were made or changed. Customer-facing engineering (U-02 and beyond) is cleared to proceed per this sprint's final recommendation.
+
+## Milestone — Production Foundation Certified, Platform Engineering Closed
+
+**Status:** Delivered. Formal close-out of Platform Engineering following the E-06C Validation sprint's `READY WITH OBSERVATIONS` recommendation.
+
+### Added
+- `docs/engineering/PRODUCTION_FOUNDATION_CERTIFICATE.md` — the permanent engineering certification of the SlipGuard platform foundation: governance version axes (Rule Set 2026.1, Risk Engine 1.0, Input/Analysis Schema 1.0, Football Taxonomy 1.0, Governance 1.0, UX Constitution 1.0), the full validation-stage summary, test/performance/architecture/security/documentation summaries, outstanding engineering debt overview, the final `READY WITH OBSERVATIONS` recommendation, platform status, and the Platform Engineering → Customer Experience Engineering transition statement.
+
+### Recorded, Not Resolved
+- The certificate explicitly notes that **Risk Rule Set 2026.1 has not yet received formal Product Office / Data Science sign-off** (`docs/00-governance/DECISION_LOG.md` still records it as "Proposed, ready for approval"). This is a governance fact carried into the certificate, not something Engineering can or does resolve — it does not block certifying the engineering foundation that implements the rule set.
+- The certificate also records that the repository is **not** git-clean at the moment of certification (12 modified, 83 untracked files spanning several already-delivered but uncommitted sprints — E-06B, E-06C, ADR-007, U-01/U-01A, the E-06C Validation sprint itself, and this milestone). Content validity and commit status are recorded as independent facts.
+
+### Not Done (by design — scope)
+No further engineering debt was sought out. No refactoring, redesign, or recalibration of deterministic mathematics occurred. This milestone closes Platform Engineering; future work proceeds under Customer Experience Engineering (see `TASKS.md`).

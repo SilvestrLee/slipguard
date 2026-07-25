@@ -1,5 +1,16 @@
 # UX Rules
 
+| Field | Value |
+|---|---|
+| Version | 1.0 |
+| Status | Approved |
+| Applies To | SlipGuard MVP |
+| Owner | Product Office |
+| Last Updated | 2026-07-24 |
+| Related Documents | [Design Language](DESIGN_LANGUAGE.md), [Explainability System](EXPLAINABILITY_SYSTEM.md), [Component Principles](COMPONENT_PRINCIPLES.md), [Accessibility](ACCESSIBILITY.md) |
+
+---
+
 ## Goal
 Make betting-risk analysis understandable to a non-technical accumulator bettor.
 
