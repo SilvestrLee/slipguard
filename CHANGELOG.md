@@ -409,3 +409,26 @@ No change to the Risk Engine, Rule Set, persistence layer, ADR-007, or any gover
 
 ### Product Office Review (2026-07-25)
 Approved without changes requested. The proposed design-token values were formally accepted as canonical — not provisional — and `docs/05-ux/DESIGN_TOKENS.md`'s provenance note updated accordingly; future UI work must reuse them rather than introducing new values. Product Office also explicitly reconfirmed, for the record, that the following remain reserved for a future, separately-approved milestone and must not be inferred or implemented ahead of that approval: Discipline Trend, Customer Betting Behaviour Analytics, Historical Improvement Metrics, Average Risk Band, Customer Scorecards, Recommendations, Coaching Features (`docs/00-governance/DECISION_LOG.md`). Next authorized sprint: U-02.5, Deterministic Analysis Report Experience — presentation/explainability only, no mathematical or architectural changes authorized.
+
+## TOOL-UX-001 — Tooling Verification and Invocation Policy
+
+**Status:** Delivered. Documentation, repository hygiene, and tool verification only — no application code, tests, routes, migrations, models, or UX implementation changed.
+
+### Added
+- Tool Invocation Policy in `CLAUDE.md`: UI UX Pro Max and 21st.dev MCP approved for design reference/inspiration only, never as a source of committed code or assets; any resulting UX idea still requires `docs/05-ux/` documentation and Product Office/UX Studio approval before implementation, per the existing Frontend Work Rule and Gap Rule.
+- "Approved Tooling Policy" section in `PROJECT.md`, cross-referencing the above.
+- `API_KEY_21ST` documented (unset, optional) in `.env.example`, with a pointer to `.mcp.json` and the new policy.
+
+### Changed
+- `.gitignore`: added `/.claude/settings.local.json` as defense-in-depth — it was previously protected only by a contributor-machine-local global gitignore entry, not by anything tracked in the repository itself.
+
+### Verified (smoke test)
+- `.mcp.json` holds no literal secret — only an `${API_KEY_21ST}` env-var reference — and is safe to keep committed.
+- `mcp__21st__search` is live and returns real catalog data; every result surfaced a `npx shadcn@latest add ...` React/shadcn install command, confirming 21st.dev is a code-installation tool rather than a passive mood board.
+- UI UX Pro Max's guideline database (`search.py`) is live, runs fully offline, and wrote no files; a deliberately obscure query ("risk indicator") correctly returned zero results instead of a fabricated one.
+
+### Recommendation
+Because 21st.dev's own output format is an installable package reference, the reference-only constraint in `CLAUDE.md` is load-bearing, not a formality — any future contributor tempted to run a returned `npx shadcn@latest add ...` command directly would introduce a second frontend framework and silently break the Blade+Livewire Locked Decision. No enforcement beyond documentation exists today (e.g. no CI check blocking a `shadcn.config.json` or `components.json` from appearing); acceptable for now given the small team, worth a lint/CI guard if the team grows.
+
+### Not Done (by design — scope)
+Figma MCP connectivity noted but not exercised beyond being available. Indeed MCP intentionally excluded from this policy — unrelated to SlipGuard's UI/UX work. No PHP, Blade, Livewire, Tailwind, migration, database, test, Risk Engine, Rule Set, or UX implementation was touched.

@@ -10,6 +10,16 @@ Note recorded by the certificate, not resolved by it: Risk Rule Set 2026.1 still
 - [x] Cross-referenced from `CLAUDE.md`'s Source-of-Truth Order, `PROJECT.md`, `docs/adr/ADR-INDEX.md`, and refreshed `docs/00-governance/REPOSITORY_STATE.md` (which was 2026-07-23-stale) and `DECISION_LOG.md`.
 - [x] Confirmed no PHP, Blade, Livewire, Tailwind, migration, database, test, Risk Engine, Rule Set, persistence, or UX implementation was touched — documentation only, per scope.
 
+### TOOL-UX-001 — Tooling Verification and Invocation Policy (documentation/tooling only)
+- [x] Confirmed `.mcp.json` (21st.dev MCP server config) holds no literal secret — only an `${API_KEY_21ST}` env-var reference; safe to keep tracked in git. Documented the optional, unset-by-default variable in `.env.example`.
+- [x] Added `/.claude/settings.local.json` to the repo's own `.gitignore` as defense-in-depth (previously protected only by a contributor-machine-local global gitignore, not by anything in-repo).
+- [x] Ran a minimal read-only smoke test: `mcp__21st__search` (returned real catalog data — every result is a `npx shadcn@latest add ...` React/shadcn install command) and UI UX Pro Max's local guideline database (`search.py`, offline, no files written; correctly reported a zero-result query rather than fabricating one).
+- [x] **Finding from the smoke test:** 21st.dev is fundamentally a React/shadcn code-installation tool, not a passive mood board — confirming that "reference/inspiration only, never installed" is a necessary constraint, not a precautionary one, given the Locked Decision that customer UI is Blade+Livewire only.
+- [x] Recorded a Tool Invocation Policy in `CLAUDE.md` scoping UI UX Pro Max and 21st.dev MCP to design reference/inspiration only — no generated code, asset, or file from either tool is ever committed; any resulting UX idea still goes through the existing Frontend Work Rule/Gap Rule (`docs/05-ux/` + Product Office/UX Studio approval) before implementation.
+- [x] Cross-referenced the policy from `PROJECT.md`'s new "Approved Tooling Policy" section.
+- [x] Figma MCP noted as connected under the same reference-only constraint, not yet exercised. **Indeed MCP explicitly excluded** — unrelated to SlipGuard's UI/UX work, unrelated to this task, not approved for use here.
+- [x] Confirmed no PHP, Blade, Livewire, Tailwind, migration, database, test, Risk Engine, Rule Set, or UX implementation was touched — documentation and repository-hygiene only, per scope.
+
 ## Active Milestone
 U-02 — Customer Dashboard: delivered and **Product Office approved** (2026-07-25) — see below. Next: U-02.5, Deterministic Analysis Report Experience (authorized, not yet started).
 

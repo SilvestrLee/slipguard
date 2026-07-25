@@ -62,6 +62,16 @@ No implementation may introduce a new component pattern, interaction pattern, an
 
 **Gap Rule:** if implementation encounters a UX situation the documentation doesn't cover, stop. Extend the relevant UX Constitution document, obtain Product Office approval, then resume. Never invent a UX decision inside code.
 
+## Tool Invocation Policy
+Verified 2026-07-25 (TASKS.md `TOOL-UX-001`; full record in `PROJECT.md`).
+
+- **UI UX Pro Max** (Claude Code plugin) and **21st.dev MCP** (configured in `.mcp.json`) are approved for design *reference and inspiration only* — generic UX guideline lookups, style/colour/typography/layout research. Verified live: UI UX Pro Max runs a local, offline guideline database (no network call, no files written); 21st.dev MCP returns real catalog data over the network.
+- Neither tool is ever a source of committed code, assets, or files. 21st.dev's results are React/shadcn install commands (`npx shadcn@latest add ...`); installing or copying one would silently introduce a second frontend framework, breaking the Locked Decision that customer UI is Blade+Livewire only. Treat every result as inspiration to be manually reinterpreted in Blade/Livewire/Tailwind, never as a drop-in.
+- A UX idea sourced from either tool still goes through the Frontend Work Rule and Gap Rule above unchanged: it must land in `docs/05-ux/` before implementation, with Product Office/UX Studio approval for anything genuinely new. Being "verified" makes a tool safe to query — it does not pre-approve its output.
+- `.mcp.json` is safe to commit: it holds no literal secret, only an `${API_KEY_21ST}` env-var reference. Never replace that with a literal key. The variable is documented (unset, optional) in `.env.example`.
+- Figma MCP: connected, not yet exercised beyond connectivity; the same reference-only constraint applies when it is used.
+- Indeed MCP: present in this environment but unrelated to SlipGuard; out of scope for this policy and not to be invoked for SlipGuard work.
+
 ## Just-in-Time Documentation
 Do not create or expand documents unless they directly support the current milestone or preserve a stable cross-project decision.
 
