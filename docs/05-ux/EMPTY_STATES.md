@@ -122,7 +122,7 @@ Each state below defines: Purpose, Headline, Supporting text, Recommended illust
 | Headline | "We couldn't analyze this slip." |
 | Supporting text | States the specific reason in plain language, e.g. "One or more legs are for a sport SlipGuard doesn't yet support" or "Too many selections on this slip couldn't be recognized." Never a generic "something went wrong" — the gate always knows why (`EXPLAINABILITY_SYSTEM.md`'s Customer Trust). |
 | Recommended illustration | Minimal warning/information icon, not an error/danger icon — this is a known limitation, not a system failure. |
-| Primary CTA | "Edit this slip" → builder, scrolled/highlighted to the affected leg(s) where possible. |
+| Primary CTA | "Analyse another slip" → builder, for a new slip. *(Corrected 2026-07-25, `docs/00-governance/DECISION_LOG.md` PD-10: previously "Edit this slip" — the analysed slip transitions to `Analysed` for every outcome including Unavailable, so it cannot return to the builder; verified in `AnalyzeBettingSlip::execute()`.)* |
 | Secondary CTA | "Learn what SlipGuard supports" → a supported-sports/markets reference. |
 | User emotion | Informed, not blamed — the slip isn't "wrong," SlipGuard's coverage is just limited today. |
 | Accessibility | Reason text is real text (not baked into an image), announced on load via a live region if reached without a full page navigation. |
@@ -135,7 +135,7 @@ Each state below defines: Purpose, Headline, Supporting text, Recommended illust
 | Headline | "SlipGuard doesn't support [sport] yet." |
 | Supporting text | "Structural risk analysis is currently available for football only. We're evaluating other sports for future coverage." |
 | Recommended illustration | Minimal shield or information icon — never the sport's own iconography (`ICONOGRAPHY.md`'s Icons to Avoid). |
-| Primary CTA | "Edit this slip" (remove/replace the unsupported leg). |
+| Primary CTA | "Analyse another slip" (build a new one without the unsupported leg). *(Corrected 2026-07-25, PD-10 — see Unavailable Analysis above.)* |
 | Secondary CTA | None. |
 | User emotion | Informed, not dismissed. |
 | Accessibility | Same as Unavailable Analysis. |
