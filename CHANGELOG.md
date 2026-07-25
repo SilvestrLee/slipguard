@@ -432,3 +432,40 @@ Because 21st.dev's own output format is an installable package reference, the re
 
 ### Not Done (by design — scope)
 Figma MCP connectivity noted but not exercised beyond being available. Indeed MCP intentionally excluded from this policy — unrelated to SlipGuard's UI/UX work. No PHP, Blade, Livewire, Tailwind, migration, database, test, Risk Engine, Rule Set, or UX implementation was touched.
+
+## U-03.3 — Analysis Experience Implementation (delivered, all 10 stages)
+
+**Status:** Delivered. Founder-authorized implementation sprint — all 10 stages complete and tested.
+
+### Added
+- `docs/00-governance/DECISION_LOG.md` PD-09 and PD-10: PD-09 resolves `U-03.2`'s Open Issue OI-03 (Limited Analysis drops "Edit this slip"); PD-10 corrects a factual error in `U-03.1` §9 discovered during Stage 1 (`AnalyzeBettingSlip::execute()` calls `markAnalysed()` unconditionally for all three availability outcomes — Unavailable does not keep the slip `Ready`, contrary to what `U-03.1` had asserted). Both decisions apply the same resolution: no "Edit this slip" action on any completed analysis, only "Analyse another slip" / "Return to dashboard." No lifecycle or architecture code changed — only customer-facing copy and the governance record, matching `AnalyzeBettingSlip`'s actual, unchanged behaviour.
+- Route `analyze/{bettingSlip}/report` and `resources/views/livewire/betting-slips/report.blade.php` — the first customer-facing screen displaying a persisted `SlipAnalysis`, implementing `U-03.2` §20's real 10-section report hierarchy (Analysis state, Overall Structural Risk, Main Contributing Factor, Supporting Contributing Factors, Data Quality, Limitation information [Limited only], Trust statement, Methodology, Report details, Exit actions) across all three outcomes (Full/Limited/Unavailable), reading only persisted data — never invokes the Risk Engine (ADR-007).
+- An "Analyze" action and `wire:loading`-scoped transition panel on the slip index (`resources/views/livewire/betting-slips/index.blade.php`), using PD-07's approved transition copy verbatim — no fabricated progress stages or percentages, since the transition is simply the real (synchronous) request in flight.
+- `tests/Feature/Analysis/SlipAnalysisReportTest.php` (8 tests): Full/Limited/Unavailable rendering with correct headline copy and score/band where applicable, no "Edit this slip" text on any variant, cross-user 403, unanalysed-slip 404, guest redirect to login, the Analyze action's redirect to the new report, and a determinism check (repeated report views never mutate the persisted analysis or create a duplicate row).
+
+### Changed
+- The slip index's existing "View" link for `Analysed` slips previously pointed at a read-only builder view (a stand-in, since no report existed) — now correctly resolves to the new report route.
+- `docs/05-ux/U-03/U-03.1-SOURCE-REVIEW-AND-OUTPUT-INVENTORY.md` §9 Lifecycle Inventory and its Retry-support matrix corrected per PD-10.
+- `docs/05-ux/U-03/U-03.2-CUSTOMER-ANALYSIS-JOURNEY-AND-STORYBOARD.md`: Frame L-07, Frame U-03, §30, the OI-03 register entry, and the governance traceability matrix all updated to reflect PD-09/PD-10 and correct the superseded "Edit this slip" language.
+- `docs/05-ux/EMPTY_STATES.md`'s "Unavailable Analysis" and "Unsupported Sport" entries: primary CTA corrected from "Edit this slip" to "Analyse another slip" per PD-10.
+
+### Verified
+- Pest: 325/325 passing (317 prior + 8 new). `pint --test` clean (one new test file auto-fixed for import ordering).
+- Live server check (`php artisan serve`): the new route resolves cleanly and correctly redirects unauthenticated access to login. Full interactive/visual browser verification was not completed — this environment's Playwright install fails ("does not support chromium on mac12"); recorded honestly rather than skipped over.
+
+### Added (Stages 6–10)
+- `resources/views/livewire/layout/navigation.blade.php`: replaced the below-header collapsing mobile panel with the full-height right-side navigation drawer specified in `U-03.2` §42–§46 — Groups 1–3 (Primary Workspace, Account, Supporting Information) using SlipGuard's own existing labels only, active-state via weight + background + leading accent bar + `aria-current="page"` (never colour alone), a keyboard focus trap, `Escape`-to-close, body scroll lock, safe-area padding, and focus restored to the menu trigger on close. Desktop's existing horizontal nav bar is untouched (§45). 3 new Pest tests (`tests/Feature/MobileNavigationDrawerTest.php`).
+- A query-count ceiling test for the report screen (`tests/Feature/Analysis/SlipAnalysisReportTest.php`), mirroring the Dashboard's existing convention (<15 queries regardless of factor/leg count).
+
+### Fixed (Stage 7 — accessibility review)
+- `closeDrawer()` was forcing focus back onto the mobile-menu trigger even when the drawer was closed by selecting a navigation destination (about to navigate away regardless). Split into `closeDrawer()` (Escape/close-button/overlay — restores focus to the trigger) and `selectDestination()` (navigation clicks — lets standard browser/Livewire focus handling take over), per `U-03.2` §43's Drawer State Matrix.
+- A broken duplicate `class`/`:class`/`x-bind:class` attribute on the Methodology section's chevron icon in `report.blade.php` (leftover from authoring; inconsistent with the correct pattern two lines below it) — corrected to a single `class` with `x-bind:class` layered on top, as Alpine expects.
+- `report.blade.php`'s Report Details panel was `grid grid-cols-1 sm:grid-cols-2` — two columns from `sm` upward. `COMPONENT_PRINCIPLES.md`'s Reports rule is single-column at every breakpoint, no exceptions; changed to always single-column.
+
+### Verified (Stages 8–10)
+- **Deterministic integrity:** `grep`-confirmed `report.blade.php` never references `CalculateStructuralRisk`, `NormalizeBettingSlip`, or `AnalyzeBettingSlip` — it reads persisted `$bettingSlip->analysis` only. `AnalyzeBettingSlip::execute()` is invoked from exactly one customer surface app-wide (the slip index's `analyzeSlip()` action). ADR-007's boundary intact.
+- **Regression:** full suite 329/329 passing (317 baseline + 9 report tests + 3 drawer tests). `pint --test` clean.
+- **Responsive:** class-level audit only (no hardcoded pixel widths in any new file). Stated honestly: not a rendered-pixel visual check — this environment's Playwright cannot install its bundled Chromium ("does not support chromium on mac12").
+
+### Not Done (by design — scope)
+No Risk Engine, Rule Set, or ADR-007 boundary change at any stage — presentation-only, reading persisted data exclusively. Full interactive/visual browser verification was not completed, for the environment reason stated above, not skipped over silently.
