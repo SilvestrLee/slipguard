@@ -17,7 +17,7 @@
         <div class="min-h-screen flex flex-col bg-gray-50">
             <header class="border-b border-gray-200">
                 <div class="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
-                    <span class="text-lg font-semibold tracking-tight text-gray-900">SlipGuard</span>
+                    <img src="{{ asset('brand/slipguard-logo-light-transparent.svg') }}" alt="SlipGuard" class="h-8 w-auto shrink-0">
 
                     <nav class="flex items-center gap-2">
                         @auth

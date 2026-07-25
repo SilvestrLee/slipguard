@@ -60,8 +60,8 @@ new class extends Component
         <div class="flex justify-between h-16">
             <div class="flex">
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate class="text-lg font-semibold tracking-tight text-gray-900">
-                        SlipGuard
+                    <a href="{{ route('dashboard') }}" wire:navigate aria-label="SlipGuard dashboard">
+                        <img src="{{ asset('brand/slipguard-logo-light-transparent.svg') }}" alt="" aria-hidden="true" class="h-8 w-auto shrink-0">
                     </a>
                 </div>
 
@@ -154,7 +154,7 @@ new class extends Component
          style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);">
 
         <div class="flex items-center justify-between h-16 px-4 border-b border-neutral-200 shrink-0">
-            <span class="text-lg font-semibold tracking-tight text-neutral-900">SlipGuard</span>
+            <img src="{{ asset('brand/slipguard-logo-light-transparent.svg') }}" alt="SlipGuard" class="h-8 w-auto shrink-0">
             <button x-ref="drawerClose" @click="closeDrawer()" aria-label="{{ __('Close menu') }}"
                     class="inline-flex items-center justify-center p-2 rounded-md text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
                 <x-heroicon-o-x-mark class="h-6 w-6" />

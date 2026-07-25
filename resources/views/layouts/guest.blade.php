@@ -17,8 +17,8 @@
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-50">
             <div>
-                <a href="/" wire:navigate class="text-xl font-semibold tracking-tight text-gray-900">
-                    SlipGuard
+                <a href="/" wire:navigate aria-label="SlipGuard home">
+                    <img src="{{ asset('brand/slipguard-logo-light-transparent.svg') }}" alt="" aria-hidden="true" class="h-8 w-auto shrink-0">
                 </a>
             </div>
 
