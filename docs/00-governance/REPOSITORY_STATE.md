@@ -1,26 +1,26 @@
 # Repository State
 
-**Snapshot date:** 2026-07-23
+**Snapshot date:** 2026-07-25
 
 ## Repository Status
 
-Planning — Completed.
+Production Foundation Certified — `READY WITH OBSERVATIONS` (`docs/engineering/PRODUCTION_FOUNDATION_CERTIFICATE.md`, certifying commit `18d1c4c`). Entering Customer Experience Engineering.
 
 ## Architecture
 
-Stable. See `docs/adr/` — ADR-001 through ADR-004 are Accepted. ADR-005 (authentication strategy) is Proposed, pending founder approval, and does not block declaring the rest of the architecture stable.
+Stable and certified. See `docs/adr/` — ADR-001 through ADR-007 are all Accepted. ADR-007 (Analysis Persistence Boundary) is the current architectural frame; its layering and the Risk Engine are frozen per `docs/00-governance/ENGINEERING_CONSTITUTION.md` §8 (Foundation Freeze) and change only through the process that section defines.
 
 ## Documentation
 
-Frozen. See `CLAUDE.md`'s Documentation Freeze section and `docs/00-governance/SGOS_VERSION.md`.
+Frozen, per `CLAUDE.md`'s Documentation Freeze section and `docs/00-governance/SGOS_VERSION.md`. Governance is now additionally consolidated in `docs/00-governance/ENGINEERING_CONSTITUTION.md` (authority boundaries, behaviour-change policy, foundation freeze).
 
 ## Current Focus
 
-Implementation.
+Customer Experience Engineering.
 
 ## Current Sprint
 
-E-02A — Customer Identity Foundation.
+G-01 — Governance Consolidation (documentation only). Next: U-02 (Customer dashboard, history, risk report presentation, journal).
 
 ## Primary Output
 

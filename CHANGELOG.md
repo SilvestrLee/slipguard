@@ -360,3 +360,21 @@ No code was modified. No product/UX/mathematics decisions were made or changed. 
 
 ### Not Done (by design — scope)
 No further engineering debt was sought out. No refactoring, redesign, or recalibration of deterministic mathematics occurred. This milestone closes Platform Engineering; future work proceeds under Customer Experience Engineering (see `TASKS.md`).
+
+## Sprint G-01 — Governance Consolidation
+
+**Status:** Delivered. Documentation only — no PHP, Blade, Livewire, Tailwind, migrations, database, tests, Risk Engine, Rule Set, persistence, or UX implementation was changed.
+
+### Added
+- `docs/00-governance/ENGINEERING_CONSTITUTION.md` — the permanent authority-and-change-governance reference: an Authority Matrix (Product Office, Data Science Lab, Architecture Office, Engineering Office, UX Studio), the Behaviour Change Policy (stop/document/escalate on ambiguity), Certified Architecture Preservation, Repository Evolution Philosophy, the Documentation Authority Hierarchy, an Observability Convention (documentation only), a Refactoring Policy, and the Foundation Freeze (the nine components now baseline infrastructure as of certifying commit `18d1c4c`, and the four ways they may still evolve).
+- `docs/00-governance/GOVERNANCE_CONSOLIDATION_G01.md` — the audit trail behind the Constitution: which existing repository decisions each section codifies, a repository validation report (no duplicated governance, no conflicting authority definitions, no orphan documents, all cross-references resolve), a cross-reference table mapping the Documentation Authority Hierarchy's nine tiers to real files, a summary of the nine constitutional additions, and a final governance audit against all ten G-01 success criteria.
+
+### Changed
+- `CLAUDE.md`'s Source-of-Truth Order now points to the Engineering Constitution under "Governance."
+- `PROJECT.md` gained a short "Engineering Constitution" pointer section, alongside the existing UX Foundation Documents pointer.
+- `docs/adr/ADR-INDEX.md` gained a one-line pointer to the Constitution for authority/escalation questions, without restating its content.
+- `docs/00-governance/DECISION_LOG.md`: added the Production Foundation certification and the Engineering Constitution consolidation as Locked decisions.
+- `docs/00-governance/REPOSITORY_STATE.md` refreshed — it was still dated 2026-07-23 and named E-02A as the current sprint; now reflects Production Foundation Certified status, G-01, and the Customer Experience Engineering focus. (This document is explicitly a living snapshot, not a durable record, per its own Note — refreshing it is expected maintenance, not scope creep.)
+
+### Explicitly Not Done (by design — scope)
+No new governance was invented — every addition traces to a prior, demonstrated repository decision (see the audit trail). No Locked decision was changed. No code, test, migration, Risk Engine, Rule Set, persistence, or UX implementation was touched.

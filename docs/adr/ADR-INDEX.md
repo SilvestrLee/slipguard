@@ -11,3 +11,5 @@
 | ADR-007 | Analysis persistence boundary — engine stays a pure calculator, persistence wraps it, presentation never invokes the engine or mutates a persisted analysis | Accepted |
 
 Create ADRs only for durable architecture, security, cost, or maintainability decisions.
+
+Authority boundaries (who may approve architecture changes) and the behaviour-change escalation policy are recorded in `docs/00-governance/ENGINEERING_CONSTITUTION.md`, not restated here.

@@ -5,6 +5,11 @@
 
 Note recorded by the certificate, not resolved by it: Risk Rule Set 2026.1 still awaits formal Product Office / Data Science sign-off (`docs/00-governance/DECISION_LOG.md`) — the engineering foundation implementing it is certified independently of that pending product decision.
 
+### G-01 — Governance Consolidation (documentation only)
+- [x] Consolidated governance principles already in consistent use (authority separation, stop/document/escalate, architecture preservation, versioned evolution, one-document-per-concern, refactoring restraint, foundation freeze) into `docs/00-governance/ENGINEERING_CONSTITUTION.md` — no new governance invented, audit trail in `docs/00-governance/GOVERNANCE_CONSOLIDATION_G01.md`.
+- [x] Cross-referenced from `CLAUDE.md`'s Source-of-Truth Order, `PROJECT.md`, `docs/adr/ADR-INDEX.md`, and refreshed `docs/00-governance/REPOSITORY_STATE.md` (which was 2026-07-23-stale) and `DECISION_LOG.md`.
+- [x] Confirmed no PHP, Blade, Livewire, Tailwind, migration, database, test, Risk Engine, Rule Set, persistence, or UX implementation was touched — documentation only, per scope.
+
 ## Active Milestone
 E-06C — Analysis Persistence (delivered, pending Product Office / Data Science review). E-06C Validation (engineering validation sprint) and the Production Foundation certification are now also delivered — see above. Next: Customer Experience Engineering (U-02).
 
