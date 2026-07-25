@@ -1,6 +1,8 @@
 <?php
 
+use App\Actions\Analysis\AnalyzeBettingSlip;
 use App\Domain\BettingSlip\BettingSlipStatus;
+use App\Exceptions\BettingSlipNotAnalysableException;
 use App\Models\BettingSlip;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -9,6 +11,8 @@ use Livewire\Volt\Component;
 new #[Layout('layouts.app')] class extends Component
 {
     public string $statusFilter = 'all';
+
+    public string $analysisError = '';
 
     /**
      * Delete one of the current user's own Draft or Ready slips.
@@ -21,6 +25,32 @@ new #[Layout('layouts.app')] class extends Component
         $this->authorize('delete', $bettingSlip);
 
         $bettingSlip->delete();
+    }
+
+    /**
+     * U-03.2 §13 — the transition is the (brief, synchronous) Livewire
+     * request itself; no fabricated stages. On success, navigates straight
+     * to the report (Stage 5). AnalyzeBettingSlip's own eligibility check
+     * is the real guard; this button only ever appears for Ready slips, so
+     * BettingSlipNotAnalysableException is a defensive path, not expected.
+     */
+    public function analyzeSlip(int $bettingSlipId): void
+    {
+        $bettingSlip = BettingSlip::findOrFail($bettingSlipId);
+
+        $this->authorize('update', $bettingSlip);
+
+        $this->analysisError = '';
+
+        try {
+            (new AnalyzeBettingSlip)->execute($bettingSlip);
+        } catch (BettingSlipNotAnalysableException $e) {
+            $this->analysisError = __("This slip couldn't be analyzed: :reason", ['reason' => implode(' ', $e->eligibility->messages())]);
+
+            return;
+        }
+
+        $this->redirect(route('analyze.report', $bettingSlip), navigate: true);
     }
 
     public function setFilter(string $status): void
@@ -70,6 +100,12 @@ new #[Layout('layouts.app')] class extends Component
             </a>
         </div>
 
+        @if ($analysisError)
+            <div role="alert" class="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+                {{ $analysisError }}
+            </div>
+        @endif
+
         @if ($hasAnySlips)
             <div class="flex items-center gap-1 border-b border-gray-200 text-sm">
                 @foreach (['all' => __('All'), 'draft' => __('Draft'), 'ready' => __('Ready'), 'analysed' => __('Analysed'), 'archived' => __('Archived')] as $value => $label)
@@ -91,8 +127,13 @@ new #[Layout('layouts.app')] class extends Component
         @else
             <div class="bg-white border border-gray-200 rounded-lg divide-y divide-gray-200">
                 @foreach ($bettingSlips as $bettingSlip)
+                    @php
+                        $primaryRoute = $bettingSlip->status === BettingSlipStatus::Analysed
+                            ? route('analyze.report', $bettingSlip)
+                            : route('analyze.edit', $bettingSlip);
+                    @endphp
                     <div wire:key="slip-{{ $bettingSlip->id }}" class="p-4 sm:p-5 flex items-center justify-between gap-4">
-                        <a href="{{ route('analyze.edit', $bettingSlip) }}" wire:navigate class="min-w-0 flex-1">
+                        <a href="{{ $primaryRoute }}" wire:navigate class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
                                 <p class="text-sm font-medium text-gray-900 truncate">
                                     {{ $bettingSlip->name ?: __('Untitled slip') }}
@@ -113,10 +154,19 @@ new #[Layout('layouts.app')] class extends Component
                         </a>
 
                         <div class="flex items-center gap-3 shrink-0">
-                            <a href="{{ route('analyze.edit', $bettingSlip) }}" wire:navigate
-                               class="text-sm font-medium text-gray-600 hover:text-gray-900">
-                                {{ $bettingSlip->isEditable() ? __('Edit') : __('View') }}
-                            </a>
+                            @if ($bettingSlip->status === BettingSlipStatus::Ready)
+                                <button type="button" wire:click="analyzeSlip({{ $bettingSlip->id }})"
+                                        wire:loading.attr="disabled" wire:target="analyzeSlip({{ $bettingSlip->id }})"
+                                        class="text-sm font-semibold text-gray-900 hover:text-gray-700 disabled:opacity-50">
+                                    <span wire:loading.remove wire:target="analyzeSlip({{ $bettingSlip->id }})">{{ __('Analyze') }}</span>
+                                    <span wire:loading wire:target="analyzeSlip({{ $bettingSlip->id }})" role="status">{{ __('Analysing…') }}</span>
+                                </button>
+                            @else
+                                <a href="{{ $primaryRoute }}" wire:navigate
+                                   class="text-sm font-medium text-gray-600 hover:text-gray-900">
+                                    {{ $bettingSlip->isEditable() ? __('Edit') : __('View report') }}
+                                </a>
+                            @endif
                             @if (in_array($bettingSlip->status, [BettingSlipStatus::Draft, BettingSlipStatus::Ready], true))
                                 <button type="button"
                                         x-data=""
@@ -131,6 +181,16 @@ new #[Layout('layouts.app')] class extends Component
                             @endif
                         </div>
                     </div>
+
+                    @if ($bettingSlip->status === BettingSlipStatus::Ready)
+                        <div wire:loading wire:target="analyzeSlip({{ $bettingSlip->id }})" role="status"
+                             class="px-4 sm:px-5 pb-4 sm:pb-5 -mt-2">
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <p class="text-sm font-medium text-gray-900">{{ __('Analysing your slip') }}</p>
+                                <p class="mt-0.5 text-sm text-gray-500">{{ __('SlipGuard is reviewing the structural risk in your selections.') }}</p>
+                            </div>
+                        </div>
+                    @endif
 
                     <x-modal name="confirm-slip-deletion-{{ $bettingSlip->id }}" focusable>
                         <div class="p-6">

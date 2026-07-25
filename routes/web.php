@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function () {
     Volt::route('analyze', 'betting-slips.index')->name('analyze');
     Volt::route('analyze/create', 'betting-slips.builder')->name('analyze.create');
     Volt::route('analyze/{bettingSlip}/edit', 'betting-slips.builder')->name('analyze.edit');
+    Volt::route('analyze/{bettingSlip}/report', 'betting-slips.report')->name('analyze.report');
 
     Route::view('history', 'coming-soon', ['title' => 'History'])->name('history');
     Route::view('journal', 'coming-soon', ['title' => 'Journal'])->name('journal');

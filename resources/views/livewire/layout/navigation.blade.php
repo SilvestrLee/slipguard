@@ -16,7 +16,46 @@ new class extends Component
     }
 }; ?>
 
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-200">
+<nav
+    x-data="{
+        open: false,
+        openDrawer() {
+            this.open = true;
+            document.body.classList.add('overflow-hidden');
+            this.$nextTick(() => this.$refs.drawerClose.focus());
+        },
+        closeDrawer() {
+            this.open = false;
+            document.body.classList.remove('overflow-hidden');
+            this.$nextTick(() => this.$refs.menuTrigger.focus());
+        },
+        selectDestination() {
+            // §43's Drawer State Matrix: a destination click hands focus to
+            // standard navigation, unlike Escape/close-button/overlay closes
+            // — forcing focus back onto a trigger the user is navigating
+            // away from would fight the browser's own focus handling.
+            this.open = false;
+            document.body.classList.remove('overflow-hidden');
+        },
+        trapFocus(event) {
+            if (! this.open) return;
+            const focusables = this.$refs.drawer.querySelectorAll('a[href], button:not([disabled])');
+            if (! focusables.length) return;
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (! event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        },
+    }"
+    @keydown.escape.window="closeDrawer()"
+    @keydown.tab.window="trapFocus($event)"
+    class="bg-white border-b border-gray-200"
+>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
@@ -91,53 +130,86 @@ new class extends Component
             </div>
 
             <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out" aria-label="{{ __('Toggle navigation') }}">
-                    <x-heroicon-o-bars-3 x-show="! open" class="h-6 w-6" />
-                    <x-heroicon-o-x-mark x-cloak x-show="open" class="h-6 w-6" />
+                <button x-ref="menuTrigger" @click="openDrawer()"
+                        :aria-expanded="open.toString()" aria-controls="mobile-drawer"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out" aria-label="{{ __('Toggle navigation') }}">
+                    <x-heroicon-o-bars-3 class="h-6 w-6" />
                 </button>
             </div>
         </div>
     </div>
 
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('analyze')" :active="request()->routeIs('analyze')" wire:navigate>
-                {{ __('Analyze Slip') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('history')" :active="request()->routeIs('history')" wire:navigate>
-                {{ __('History') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('journal')" :active="request()->routeIs('journal')" wire:navigate>
-                {{ __('Journal') }}
-            </x-responsive-nav-link>
+    {{-- U-03.2 §42–§46 — full-height mobile navigation drawer (mobile/tablet only; desktop nav above is unchanged, §45). --}}
+    <div x-show="open" x-cloak
+         x-transition:enter="transition-opacity duration-300 ease-out" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity duration-300 ease-in" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         @click="closeDrawer()"
+         class="fixed inset-0 z-40 bg-neutral-900/50 sm:hidden" aria-hidden="true"></div>
+
+    <div id="mobile-drawer" x-ref="drawer" x-show="open" x-cloak
+         x-transition:enter="transition-transform duration-300 ease-out" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition-transform duration-300 ease-in" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
+         class="fixed inset-y-0 right-0 z-50 w-full max-w-xs bg-white shadow-xl flex flex-col sm:hidden"
+         role="navigation" aria-label="{{ __('Main menu') }}"
+         style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);">
+
+        <div class="flex items-center justify-between h-16 px-4 border-b border-neutral-200 shrink-0">
+            <span class="text-lg font-semibold tracking-tight text-neutral-900">SlipGuard</span>
+            <button x-ref="drawerClose" @click="closeDrawer()" aria-label="{{ __('Close menu') }}"
+                    class="inline-flex items-center justify-center p-2 rounded-md text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                <x-heroicon-o-x-mark class="h-6 w-6" />
+            </button>
         </div>
 
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-                <div class="font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
+        <div class="flex-1 overflow-y-auto py-4">
+            <div class="px-2 space-y-1">
+                @foreach ([
+                    ['route' => 'dashboard', 'label' => __('Dashboard')],
+                    ['route' => 'analyze', 'label' => __('Analyze Slip')],
+                    ['route' => 'history', 'label' => __('History')],
+                    ['route' => 'journal', 'label' => __('Journal')],
+                ] as $item)
+                    @php $isActive = request()->routeIs($item['route']); @endphp
+                    <a href="{{ route($item['route']) }}" wire:navigate @click="selectDestination()"
+                       @if ($isActive) aria-current="page" @endif
+                       class="flex items-center gap-3 min-h-11 px-3 py-2.5 rounded-md text-base
+                           {{ $isActive ? 'font-semibold text-neutral-900 bg-neutral-100 border-s-4 border-accent-strong' : 'font-medium text-neutral-600 border-s-4 border-transparent hover:bg-neutral-50 hover:text-neutral-900' }}
+                           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                        {{ $item['label'] }}
+                    </a>
+                @endforeach
             </div>
 
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('settings')" wire:navigate>
-                    {{ __('Settings') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('help')" wire:navigate>
-                    {{ __('Help') }}
-                </x-responsive-nav-link>
-
-                <button wire:click="logout" class="w-full text-start">
-                    <x-responsive-nav-link>
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
+            <div class="mt-4 pt-4 px-2 border-t border-neutral-200 space-y-1">
+                <div class="px-3 pb-1 text-xs font-medium text-neutral-500">{{ auth()->user()->name }}</div>
+                @foreach ([
+                    ['route' => 'profile', 'label' => __('Profile')],
+                    ['route' => 'settings', 'label' => __('Settings')],
+                ] as $item)
+                    <a href="{{ route($item['route']) }}" wire:navigate @click="selectDestination()"
+                       class="flex items-center min-h-11 px-3 py-2.5 rounded-md text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                        {{ $item['label'] }}
+                    </a>
+                @endforeach
+                <button wire:click="logout"
+                        class="w-full text-start flex items-center min-h-11 px-3 py-2.5 rounded-md text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                    {{ __('Log Out') }}
                 </button>
             </div>
+
+            <div class="mt-4 pt-4 px-2 border-t border-neutral-200 space-y-1">
+                <a href="{{ route('help') }}" wire:navigate @click="selectDestination()"
+                   class="flex items-center min-h-11 px-3 py-2.5 rounded-md text-base font-medium text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                    {{ __('Help') }}
+                </a>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-neutral-200 shrink-0">
+            <a href="{{ route('analyze.create') }}" wire:navigate @click="selectDestination()"
+               class="flex items-center justify-center min-h-11 w-full px-4 rounded-md bg-accent-strong text-white font-semibold text-sm hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                {{ __('Analyse a slip') }}
+            </a>
         </div>
     </div>
 </nav>
