@@ -1,6 +1,137 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/forms";
 
+/*
+ * Design tokens — docs/05-ux/DESIGN_TOKENS.md is the source of truth.
+ * Colours are defined as CSS custom properties overridden under a dark-mode
+ * media query, then aliased into Tailwind's @theme so every `bg-neutral-50`,
+ * `text-risk-high`, etc. utility resolves to the correct value automatically
+ * — no `dark:` variant needed per usage site (ACCESSIBILITY.md: respect
+ * `prefers-color-scheme` by default, implemented once at the token level).
+ */
+
+:root {
+    --neutral-50: #f8fafc;
+    --neutral-100: #f1f5f9;
+    --neutral-200: #e2e8f0;
+    --neutral-300: #cbd5e1;
+    --neutral-400: #94a3b8;
+    --neutral-500: #64748b;
+    --neutral-600: #475569;
+    --neutral-700: #334155;
+    --neutral-800: #1e293b;
+    --neutral-900: #0f172a;
+    --neutral-950: #020617;
+
+    --accent: #2563eb;
+    --accent-strong: #1d4ed8;
+
+    --risk-low: #059669;
+    --risk-low-strong: #047857;
+    --risk-moderate: #d97706;
+    --risk-moderate-strong: #b45309;
+    --risk-high: #ea580c;
+    --risk-high-strong: #c2410c;
+    --risk-very-high: #b91c1c;
+
+    --quality-strong: #0f766e;
+    --quality-good: #0284c7;
+    --quality-limited: #6366f1;
+    --quality-insufficient: #64748b;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --neutral-50: #0f172a;
+        --neutral-100: #1e293b;
+        --neutral-200: #334155;
+        --neutral-300: #475569;
+        --neutral-400: #64748b;
+        --neutral-500: #94a3b8;
+        --neutral-600: #cbd5e1;
+        --neutral-700: #e2e8f0;
+        --neutral-800: #f1f5f9;
+        --neutral-900: #f8fafc;
+        --neutral-950: #ffffff;
+
+        --accent: #60a5fa;
+        --accent-strong: #60a5fa;
+
+        --risk-low: #34d399;
+        --risk-low-strong: #34d399;
+        --risk-moderate: #fbbf24;
+        --risk-moderate-strong: #fbbf24;
+        --risk-high: #fb923c;
+        --risk-high-strong: #fb923c;
+        --risk-very-high: #f87171;
+
+        --quality-strong: #2dd4bf;
+        --quality-good: #38bdf8;
+        --quality-limited: #a5b4fc;
+        --quality-insufficient: #94a3b8;
+    }
+}
+
 @theme {
     --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+    --font-tabular: "Figtree", ui-monospace;
+
+    --color-neutral-50: var(--neutral-50);
+    --color-neutral-100: var(--neutral-100);
+    --color-neutral-200: var(--neutral-200);
+    --color-neutral-300: var(--neutral-300);
+    --color-neutral-400: var(--neutral-400);
+    --color-neutral-500: var(--neutral-500);
+    --color-neutral-600: var(--neutral-600);
+    --color-neutral-700: var(--neutral-700);
+    --color-neutral-800: var(--neutral-800);
+    --color-neutral-900: var(--neutral-900);
+    --color-neutral-950: var(--neutral-950);
+
+    --color-accent: var(--accent);
+    --color-accent-strong: var(--accent-strong);
+
+    --color-risk-low: var(--risk-low);
+    --color-risk-low-strong: var(--risk-low-strong);
+    --color-risk-moderate: var(--risk-moderate);
+    --color-risk-moderate-strong: var(--risk-moderate-strong);
+    --color-risk-high: var(--risk-high);
+    --color-risk-high-strong: var(--risk-high-strong);
+    --color-risk-very-high: var(--risk-very-high);
+
+    --color-quality-strong: var(--quality-strong);
+    --color-quality-good: var(--quality-good);
+    --color-quality-limited: var(--quality-limited);
+    --color-quality-insufficient: var(--quality-insufficient);
+
+    /* Radius scale — DESIGN_TOKENS.md (overrides Tailwind's slightly different defaults) */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+
+    /* Animation timing — MOTION_SYSTEM.md */
+    --duration-instant: 100ms;
+    --duration-fast: 150ms;
+    --duration-standard: 200ms;
+    --duration-deliberate: 300ms;
+    --duration-max: 400ms;
+
+    --ease-entrance: var(--ease-out);
+    --ease-exit: var(--ease-in);
+    --ease-state: var(--ease-in-out);
+}
+
+/*
+ * Reduced motion — MOTION_SYSTEM.md's Reduced Motion Accessibility,
+ * implemented once so no component has to remember it individually.
+ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

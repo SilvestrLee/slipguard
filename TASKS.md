@@ -11,7 +11,26 @@ Note recorded by the certificate, not resolved by it: Risk Rule Set 2026.1 still
 - [x] Confirmed no PHP, Blade, Livewire, Tailwind, migration, database, test, Risk Engine, Rule Set, persistence, or UX implementation was touched — documentation only, per scope.
 
 ## Active Milestone
-E-06C — Analysis Persistence (delivered, pending Product Office / Data Science review). E-06C Validation (engineering validation sprint) and the Production Foundation certification are now also delivered — see above. Next: Customer Experience Engineering (U-02).
+U-02 — Customer Dashboard: delivered and **Product Office approved** (2026-07-25) — see below. Next: U-02.5, Deterministic Analysis Report Experience (authorized, not yet started).
+
+### U-02 — Customer Dashboard Experience (Delivered — Product Office approved)
+- [x] Replaced the E-02 placeholder `dashboard.blade.php` (static view, no real data) with a full-page Volt component (`resources/views/livewire/dashboard.blade.php`) reading only persisted data — `Auth::user()->slipAnalyses()`/`bettingSlips()` — never invoking the Risk Engine (ADR-007).
+- [x] Hero with a single primary CTA ("Analyze a slip") and, only when a Draft/Ready slip exists, one secondary CTA ("Continue previous slip") — resolves a conflict between the directive's separate "Hero" and "Primary Action Card" sections and `COMPONENT_PRINCIPLES.md`'s "exactly one primary button per screen" rule by merging them into one.
+- [x] Recent Analyses (up to 5, `Analysis Card` shape: date, selection count, risk band) — **intentionally non-interactive**: the Risk Report screen (E-05) doesn't exist yet, so there's no destination to link a card to. Revisit once E-05 ships.
+- [x] Progress section deliberately scoped down to literal counts only (Total analyses, Completed this week, Last analysis) — omitted the directive's suggested "Average Risk Band" (would require inventing a categorical-to-numeric averaging method) and "Discipline Trend" (an undefined product concept) rather than inventing new customer-facing metrics/mathematics.
+- [x] Journal preview always renders `EMPTY_STATES.md`'s "No Journal Entries" state — the Journal feature itself isn't built yet (E-06).
+- [x] Trust panel using only `TRUST_SIGNALS.md`'s approved mechanisms and Required Language — omitted the directive's "No AI Guesswork" (not approved language; no AI feature exists yet to reference).
+- [x] **Resolved a real, pre-existing UX Constitution gap**: `DESIGN_TOKENS.md` named every colour token but specified no concrete values. Proposed and got founder approval for concrete WCAG-AA values (light + dark), documented in `DESIGN_TOKENS.md`, implemented as Tailwind v4 `@theme` tokens in `resources/css/app.css` (first real implementation of the token system — previously only `--font-sans` existed).
+- [x] Added a skip-to-content link and `id="main-content"` to the shared `layouts/app.blade.php` — `ACCESSIBILITY.md` requires one on every page and none existed anywhere in the app; small, standards-based, required fix, not scope creep.
+- [x] Added `User::slipAnalyses()` relationship (mirrors the existing `bettingSlips()` pattern).
+- [x] Fixed a real, silent bug found during verification: a stale `public/hot` file (gitignored, leftover from a prior `npm run dev` session) was making **every page in the app** load with zero CSS/JS applied, in every environment. Deleted; not a git-visible change since the file was already ignored, but worth knowing about.
+- [x] Pest coverage (`tests/Feature/DashboardTest.php`, 8 new tests): No Slips vs. No Analyses empty states, Continue-previous-slip visibility, populated Recent Analyses (selection count, risk band), Progress section gating, Unavailable-analysis rendering (no crash on null risk band), cross-user ownership isolation, and a query-count ceiling assertion. Updated `WorkspaceAccessTest`'s dashboard assertion to match the new (more correct) copy and empty-state logic.
+- [x] Verified in a real browser (system Chrome via Playwright) at desktop/tablet/mobile for both an empty-state and a populated-state user; zero console errors.
+- [x] Confirmed no Risk Engine, Rule Set, persistence, or ADR-007 change — read-only presentation work only.
+
+Pest: 317/317 passing. `pint --test` clean.
+
+Product Office review (2026-07-25): **Approved**, including formal acceptance of the proposed design-token values as canonical (`docs/00-governance/DECISION_LOG.md`). The following product concepts were explicitly reconfirmed as reserved for a future, separately-approved milestone — not to be inferred or built ahead of approval: Discipline Trend, Customer Betting Behaviour Analytics, Historical Improvement Metrics, Average Risk Band, Customer Scorecards, Recommendations, Coaching Features.
 
 **Naming note (E-03B):** a prior sprint was directed as "E-04" but contained no mathematics or risk scoring — tracked as E-03B instead, since canonical E-04 (Deterministic Risk Analysis) is a different, still-blocked thing.
 
@@ -156,8 +175,9 @@ Pest: 309/309 passing (unchanged count — `engine_version` added an assertion t
 
 ## Customer Experience Engineering
 *(formerly "Later" — archived history above is unchanged; this section is renamed and reordered to reflect the Production Foundation certification's transition statement, not new scope.)*
-- [ ] U-02 — Customer dashboard, analysis history, risk report presentation, journal linkage (the immediate next milestone; E-06C's persistence layer is its validated prerequisite).
-- [ ] E-05 Risk Report — presentation of the already-implemented deterministic result.
+- [x] U-02 — Customer dashboard (delivered and Product Office approved, 2026-07-25; see above). History, risk report presentation, and journal linkage were not part of U-02's actual delivered scope — split out below as U-02.5 and beyond.
+- [ ] U-02.5 — Deterministic Analysis Report Experience (authorized, not yet started): present a completed analysis to the customer via the already-certified Risk Engine and persistence layer. No mathematical, Rule Set, or architecture changes authorized — presentation/explainability/UX only.
+- [ ] E-05 Risk Report — presentation of the already-implemented deterministic result (substantially the same scope as U-02.5 above; reconcile naming when U-02.5 starts).
 - [ ] E-06D — Weakest-leg / highest-risk-leg ranking (see Blocked, above).
 - [ ] E-06 History and Journal — remaining scope beyond persistence (already delivered as E-06B/E-06C).
 - [ ] E-07 Public Trust Website.

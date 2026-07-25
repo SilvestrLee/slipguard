@@ -43,4 +43,9 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasMany(BettingSlip::class);
     }
+
+    public function slipAnalyses(): HasMany
+    {
+        return $this->hasMany(SlipAnalysis::class);
+    }
 }

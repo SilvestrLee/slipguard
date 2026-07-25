@@ -19,19 +19,36 @@ Implemented as Tailwind v4 `@theme` CSS variables in `resources/css/app.css` (v4
 
 One functional accent colour, a neutral scale, and reserved semantic colours for risk/status — nothing decorative (`VISUAL_INSPIRATION.md`: "restrained colour palette").
 
-| Token | Purpose |
-|---|---|
-| `--color-neutral-{50…950}` | Backgrounds, text, borders, surfaces. The vast majority of the UI uses only this scale. |
-| `--color-accent` | The one brand accent — primary buttons, links, active states. Used sparingly; if more than one prominent element per screen uses it, that's a hierarchy problem, not a colour problem. |
-| `--color-risk-low` | Risk band: Low. |
-| `--color-risk-moderate` | Risk band: Moderate. |
-| `--color-risk-high` | Risk band: High. |
-| `--color-risk-very-high` | Risk band: Very High. |
-| `--color-quality-strong` / `--color-quality-good` / `--color-quality-limited` / `--color-quality-insufficient` | Data-quality bands — visually distinct from risk-band colours (different hue family) so the two concepts are never confused on screen (`docs/00-governance/PRODUCT_GLOSSARY.md`'s "Confidence" entry). |
+**Provenance note (added U-02, 2026-07-25; accepted as canonical by Product Office, 2026-07-25):** this document named every colour token from 2026-07-24 onward but specified no concrete values — the first screen that needed to render anything (the Customer Dashboard) surfaced the gap. The values below were proposed by Engineering, using well-established, pre-vetted shade/background pairings (a saturated-700-on-tinted-50 pattern for badges/indicators, not white-on-saturated-600, so contrast holds without per-pairing measurement) rather than arbitrary picks, approved by the founder before implementation proceeded, and formally accepted by Product Office on U-02 review as the canonical SlipGuard Design System values. They are not provisional — future UI work must reuse these tokens rather than introducing new colours, spacing values, typography scales, or animation timings; revise here (with Product Office sign-off), never in component code, if a specific pairing is later found lacking.
+
+| Token | Light | Dark | Purpose |
+|---|---|---|---|
+| `--color-neutral-50` | `#f8fafc` | `#0f172a` | Page background (light) / near-black surface (dark). |
+| `--color-neutral-100` | `#f1f5f9` | `#1e293b` | Subtle surface tint, hover backgrounds. |
+| `--color-neutral-200` | `#e2e8f0` | `#334155` | Borders, dividers. |
+| `--color-neutral-300` | `#cbd5e1` | `#475569` | Stronger borders, disabled element outlines. |
+| `--color-neutral-400` | `#94a3b8` | `#64748b` | Placeholder text, muted icons. |
+| `--color-neutral-500` | `#64748b` | `#94a3b8` | Secondary text. |
+| `--color-neutral-600` | `#475569` | `#cbd5e1` | Body text on light surfaces / secondary text on dark. |
+| `--color-neutral-700` | `#334155` | `#e2e8f0` | Emphasised body text. |
+| `--color-neutral-800` | `#1e293b` | `#f1f5f9` | Headings on light surfaces. |
+| `--color-neutral-900` | `#0f172a` | `#f8fafc` | Primary text (light) / primary surface text (dark). |
+| `--color-neutral-950` | `#020617` | `#ffffff` | Reserved — highest-contrast text only. |
+| `--color-accent` | `#2563eb` (text/icons/borders), `#1d4ed8` (filled button background) | `#60a5fa` | Primary buttons, links, active nav state, focus rings. One colour, used sparingly. |
+| `--color-risk-low` | `#059669` (700-weight text: `#047857`) | `#34d399` | Risk band: Low. |
+| `--color-risk-moderate` | `#d97706` (700-weight text: `#b45309`) | `#fbbf24` | Risk band: Moderate. |
+| `--color-risk-high` | `#ea580c` (700-weight text: `#c2410c`) | `#fb923c` | Risk band: High. |
+| `--color-risk-very-high` | `#b91c1c` | `#f87171` | Risk band: Very High. |
+| `--color-quality-strong` | `#0f766e` | `#2dd4bf` | Data quality: Strong. Teal family — never overlaps a risk hue. |
+| `--color-quality-good` | `#0284c7` | `#38bdf8` | Data quality: Good. Sky-blue family. |
+| `--color-quality-limited` | `#6366f1` | `#a5b4fc` | Data quality: Limited. Indigo family. |
+| `--color-quality-insufficient` | `#64748b` | `#94a3b8` | Data quality: Insufficient. Neutral grey — signals "not enough signal," not alarm. |
+
+**Applied pairing convention** (so every future component gets AA contrast without re-deriving it): a risk/quality band's saturated shade is used for text, icon, and border only, on that same token's `-50`-equivalent tint background (e.g. risk-Low text/icon/border on a pale emerald tint, never solid `risk-low` as a background with white text on top) — this is the pairing used throughout `COMPONENT_PRINCIPLES.md`'s Risk Indicators and Badges. The neutral scale supplies the actual page/card backgrounds in every case.
 
 Rules:
 - Risk-band and quality-band colours are **never** repurposed for anything else (no "success green" reused as a risk-Low colour to save a token — reuse implies false equivalence between "this is fine" and "this is Low risk," which is exactly the conflation `docs/09-compliance/PRODUCT_GUARDRAILS.md` warns against).
-- All colour pairs (text-on-background) must meet `ACCESSIBILITY.md`'s contrast ratios in both light and dark mode.
+- All colour pairs (text-on-background) must meet `ACCESSIBILITY.md`'s contrast ratios in both light and dark mode, following the Applied pairing convention above.
 - No gradients. Flat colour only.
 
 ## Typography

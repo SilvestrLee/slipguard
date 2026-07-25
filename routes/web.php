@@ -15,7 +15,7 @@ Route::get('/health', function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Volt::route('dashboard', 'dashboard')->name('dashboard');
 
     Route::view('profile', 'profile')->name('profile');
 

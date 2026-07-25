@@ -23,8 +23,8 @@ test('the dashboard greets the user and offers the primary call to action', func
         ->get(route('dashboard'))
         ->assertOk()
         ->assertSee('Jane')
-        ->assertSee('Analyze your first slip')
-        ->assertSee('No analyses yet.');
+        ->assertSee('Analyze a slip')
+        ->assertSee('No slips yet.');
 });
 
 test('coming soon pages identify themselves and link back to the dashboard', function () {

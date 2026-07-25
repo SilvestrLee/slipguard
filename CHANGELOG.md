@@ -378,3 +378,34 @@ No further engineering debt was sought out. No refactoring, redesign, or recalib
 
 ### Explicitly Not Done (by design — scope)
 No new governance was invented — every addition traces to a prior, demonstrated repository decision (see the audit trail). No Locked decision was changed. No code, test, migration, Risk Engine, Rule Set, persistence, or UX implementation was touched.
+
+## Sprint U-02 — Customer Dashboard Experience
+
+**Status:** Delivered — **Product Office approved**, 2026-07-25. The first customer-facing screen built against the UX Constitution (`docs/05-ux/`, U-01/U-01A) and the certified Production Foundation.
+
+### Added
+- `resources/views/livewire/dashboard.blade.php` — a full-page Volt component replacing the E-02 placeholder dashboard: Hero with one primary CTA and a conditional secondary CTA, Recent Analyses (non-interactive — no Risk Report screen exists yet to link to), a scoped-down Progress section (literal counts only), a Journal preview (permanent empty state — Journal isn't built), and a Trust panel using only `TRUST_SIGNALS.md`'s approved language.
+- Concrete colour values for every token `DESIGN_TOKENS.md` had named but never specified (neutral scale, accent, 4 risk-band colours, 4 data-quality-band colours, light + dark) — proposed by Engineering, approved by the founder, documented in `DESIGN_TOKENS.md`, implemented in `resources/css/app.css` as Tailwind v4 `@theme` tokens with a `prefers-color-scheme: dark` override layer and a global `prefers-reduced-motion: reduce` rule (`MOTION_SYSTEM.md`).
+- A skip-to-content link in `resources/views/layouts/app.blade.php` (`ACCESSIBILITY.md` requires one on every page; none existed anywhere in the app before this).
+- `User::slipAnalyses()` Eloquent relationship.
+- `tests/Feature/DashboardTest.php` (8 tests): empty states, Continue-previous-slip visibility, populated analyses rendering, Progress gating, Unavailable-analysis handling, cross-user isolation, query-count ceiling.
+
+### Changed
+- `routes/web.php`: `dashboard` is now a Volt full-page route (was a static `Route::view`).
+- `tests/Feature/WorkspaceAccessTest.php`: updated its dashboard assertion to match the new copy and the new No-Slips-vs-No-Analyses distinction (the old assertion checked for "No analyses yet." even for a user with zero slips, which the new, more correct empty-state logic no longer says).
+
+### Gaps Identified and Resolved by Deliberate Scope Reduction, Not Silently Guessed
+- **Colour values** (above) — the single largest gap; escalated to the founder before proceeding rather than inventing values unilaterally.
+- **Progress metrics** — omitted "Average Risk Band" (would require inventing a categorical→numeric averaging method) and "Discipline Trend" (an undefined product concept); kept only literal, already-computable counts.
+- **Analysis Card interactivity** — cards are non-interactive; `COMPONENT_PRINCIPLES.md` says they should link to "the full report," which doesn't exist yet (E-05).
+- **Trust copy** — omitted "No AI Guesswork" (not in `TRUST_SIGNALS.md`'s Required Language; no AI feature exists to reference).
+- **Hero vs. Primary Action Card** — merged into one section; having both as separately-styled primary CTAs would have violated `COMPONENT_PRINCIPLES.md`'s "exactly one primary button per screen" rule.
+
+### Fixed (found during verification, unrelated to this sprint's own changes)
+- A stale, gitignored `public/hot` file (leftover from a previous `npm run dev` session) was causing **every page in the application** to load with no CSS or JS applied at all, in any environment. Deleted locally; not a git-visible change since the file was never tracked, but recorded here so the cause isn't a mystery if it recurs.
+
+### Not Done (by design — scope)
+No change to the Risk Engine, Rule Set, persistence layer, ADR-007, or any governance document. No new screens beyond the dashboard itself (the skip-link and colour-token additions are shared-layer prerequisites, not new screens).
+
+### Product Office Review (2026-07-25)
+Approved without changes requested. The proposed design-token values were formally accepted as canonical — not provisional — and `docs/05-ux/DESIGN_TOKENS.md`'s provenance note updated accordingly; future UI work must reuse them rather than introducing new values. Product Office also explicitly reconfirmed, for the record, that the following remain reserved for a future, separately-approved milestone and must not be inferred or implemented ahead of that approval: Discipline Trend, Customer Betting Behaviour Analytics, Historical Improvement Metrics, Average Risk Band, Customer Scorecards, Recommendations, Coaching Features (`docs/00-governance/DECISION_LOG.md`). Next authorized sprint: U-02.5, Deterministic Analysis Report Experience — presentation/explainability only, no mathematical or architectural changes authorized.

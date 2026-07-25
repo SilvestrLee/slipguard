@@ -15,6 +15,11 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
+        <a href="#main-content"
+           class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-md focus:bg-accent-strong focus:text-white focus:text-sm focus:font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+            {{ __('Skip to content') }}
+        </a>
+
         <div class="min-h-screen flex flex-col bg-gray-50">
             <livewire:layout.navigation />
 
@@ -26,7 +31,7 @@
                 </header>
             @endif
 
-            <main class="flex-1">
+            <main id="main-content" class="flex-1">
                 {{ $slot }}
             </main>
 
