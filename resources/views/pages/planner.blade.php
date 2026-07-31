@@ -62,15 +62,13 @@
         <div class="container-marketing mx-auto px-6 py-20 text-center">
             <h2 id="planner-cta-heading" class="text-2xl font-semibold text-white">{{ __('Plan your next accumulator with SlipGuard') }}</h2>
             @auth
-                <a href="{{ route('analyze') }}" wire:navigate
-                   class="mt-6 inline-flex items-center px-6 py-3 text-sm font-semibold text-indigo-700 bg-white rounded-md hover:bg-indigo-50 transition-colors duration-instant">
+                <x-marketing-cta-button :href="route('analyze')" wire:navigate class="mt-6">
                     {{ __('Go to your slips') }}
-                </a>
+                </x-marketing-cta-button>
             @else
-                <a href="{{ route('register') }}" wire:navigate
-                   class="mt-6 inline-flex items-center px-6 py-3 text-sm font-semibold text-indigo-700 bg-white rounded-md hover:bg-indigo-50 transition-colors duration-instant">
+                <x-marketing-cta-button :href="route('register')" wire:navigate class="mt-6">
                     {{ __('Get Started') }}
-                </a>
+                </x-marketing-cta-button>
             @endauth
         </div>
     </section>

@@ -127,10 +127,9 @@
     <section class="light-sweep bg-gradient-cta" aria-labelledby="analyse-cta-heading">
         <div class="container-marketing mx-auto px-6 py-20 text-center">
             <h2 id="analyse-cta-heading" class="text-2xl font-semibold text-white">{{ __('See what a full report looks like') }}</h2>
-            <a href="{{ route('reports') }}" wire:navigate
-               class="mt-6 inline-flex items-center px-6 py-3 text-sm font-semibold text-indigo-700 bg-white rounded-md hover:bg-indigo-50 transition-colors duration-instant">
+            <x-marketing-cta-button :href="route('reports')" wire:navigate class="mt-6">
                 {{ __('View an example report') }}
-            </a>
+            </x-marketing-cta-button>
         </div>
     </section>
 </x-public-layout>

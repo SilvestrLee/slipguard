@@ -219,11 +219,11 @@
                             class="hero-dashboard-frame light-sweep relative rounded-xl border bg-surface-card overflow-hidden shadow-elevation-2 transition-[opacity,transform] duration-700 ease-out"
                             :class="reduceMotion ? '' : (shown ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-[0.985] translate-y-4')"
                         >
-                            <img src="{{ asset('images/homepage/slipguard-dashboard-demo-light.webp') }}"
+                            <img src="{{ asset('images/homepage/slipguard-dashboard-demo-light.webp') }}?v=20260731-current-logo"
                                  width="1400" height="820" loading="eager"
                                  alt="{{ __('SlipGuard demonstration workspace showing structural risk summaries, recent analyses, planning activity and customer decision history.') }}"
                                  class="hero-dashboard-image hero-dashboard-image--light w-full h-auto block">
-                            <img src="{{ asset('images/homepage/slipguard-dashboard-demo-dark.webp') }}"
+                            <img src="{{ asset('images/homepage/slipguard-dashboard-demo-dark.webp') }}?v=20260731-current-logo"
                                  width="1400" height="820" loading="eager" alt="" aria-hidden="true"
                                  class="hero-dashboard-image hero-dashboard-image--dark w-full h-auto block">
                         </div>
@@ -711,15 +711,13 @@
             </h2>
             <div class="mt-7 flex flex-col sm:flex-row items-center justify-center gap-4">
                 @auth
-                    <a href="{{ route('analyze.create') }}" wire:navigate
-                       class="inline-flex items-center justify-center h-12 px-6 text-sm font-semibold text-indigo-700 bg-white rounded-md hover:bg-indigo-50 transition-colors duration-instant">
+                    <x-marketing-cta-button :href="route('analyze.create')" wire:navigate :fixed-height="true">
                         {{ __('Analyse a slip') }}
-                    </a>
+                    </x-marketing-cta-button>
                 @else
-                    <a href="{{ route('register') }}" wire:navigate
-                       class="inline-flex items-center justify-center h-12 px-6 text-sm font-semibold text-indigo-700 bg-white rounded-md hover:bg-indigo-50 transition-colors duration-instant">
+                    <x-marketing-cta-button :href="route('register')" wire:navigate :fixed-height="true">
                         {{ __('Get Started') }}
-                    </a>
+                    </x-marketing-cta-button>
                 @endauth
                 <a href="{{ route('pricing') }}" wire:navigate class="text-sm font-semibold text-blue-100 hover:text-white">
                     {{ __('View pricing') }}
