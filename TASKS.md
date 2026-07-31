@@ -1088,5 +1088,18 @@ Pest: 309/309 passing (unchanged count — `engine_version` added an assertion t
 - [ ] E-05 Risk Report — presentation of the already-implemented deterministic result (substantially the same scope as U-02.5 above; reconcile naming when U-02.5 starts).
 - [x] E-06D.1 — Deterministic weakest-leg ranking engine implemented (Marginal Structural Contribution model; see below). Presentation, persistence, and API exposure are separate, not-yet-started future work.
 - [ ] E-06 History and Journal — remaining scope beyond persistence (already delivered as E-06B/E-06C).
-- [ ] E-07 Public Trust Website.
+- [ ] E-07 Public Trust Website. See U-20 below — this is the same real initiative under an earlier working name; not two separate efforts.
 - [ ] E-08 MVP Hardening.
+
+## U-20 — Public Website Maturity Refresh
+
+Numbering reconciled 2026-07-31 against real repository history (see `docs/00-governance/DECISION_LOG.md`). A conversational message formatted as a Product Office "Constitutional Acceptance Review" had proposed reassigning `U-20.4` to "Visual Design & Screen Composition" and `U-20.6` to "Engineering Implementation" — both numbers already had different, real, established meanings from earlier the same day (a delivered motion-language research package and a delivered, committed engineering assessment respectively). That reassignment was not adopted; the table below preserves the real, already-existing meanings and assigns fresh numbers to genuinely new future work instead.
+
+- [x] U-20.1 — Public Positioning & Website Evolution (Copy & Structure) — exploratory research delivered: `docs/10-research-incubation/R-01.8-PUBLIC-WEBSITE-REPOSITIONING/`. Copy/IA only; no page markup changed.
+- [x] U-20.2 — Workspace Evidence & Product Showcase — exploratory research delivered: `docs/10-research-incubation/R-01.9-WORKSPACE-EVIDENCE-PRINCIPLE/`. Principle and screenshot-library scope only.
+- [x] U-20.3 — Repository-Grounded Experience Blueprint — exploratory research delivered and **commissioned** (direct founder instruction, 2026-07-31) as the reference architecture for this programme's execution phase: `docs/10-research-incubation/R-01.11-EXPERIENCE-BLUEPRINT/`. Commissioning authorizes this document to guide U-20.5/U-20.7 below; it does not itself constitute visual, motion, or code implementation — none exists yet.
+- [x] U-20.4 — Motion, Interaction & Storytelling System — exploratory research delivered: `docs/10-research-incubation/R-01.10-MOTION-INTERACTION-SYSTEM/`. Checked directly against the real, Approved `MOTION_SYSTEM.md`; five conflicts found and corrected.
+- [ ] U-20.5 — Visual Design & Screen Composition (not yet commissioned). Newly assigned number — must compose from existing primitives per `U-20.3`/`U-20.6`'s "reuse over replacement" finding, not introduce new component patterns without the Frontend Work Rule's Gap Rule.
+- [x] U-20.6 — Engineering Readiness Assessment — delivered, real: `docs/engineering/U-20.6-PUBLIC-WEBSITE-ENGINEERING-READINESS.md` (commit `2603081`). Confirms zero public-page usage of `<x-primary-button>`/`<x-secondary-button>` (extract before U-20.5 adds more CTAs) and a stale `public/build/` output.
+- [ ] U-20.7 — Engineering Implementation (not yet commissioned). Newly assigned number, replacing the unadopted reassignment of `U-20.6` noted above.
+- [ ] U-20.8 — Product Office Final Acceptance (not yet commissioned). Newly assigned number.

@@ -1,13 +1,14 @@
-> **STATUS: EXPLORATORY — NOT CONSTITUTIONAL HISTORY.** Not cited by `TASKS.md`, `DECISION_LOG.md`, any ADR, `docs/05-ux/`, or office documentation. See `docs/10-research-incubation/README.md` and `LIFECYCLE.md`.
+> **STATUS: COMMISSIONED.** Now cited by `TASKS.md` (`U-20` section) and `docs/00-governance/DECISION_LOG.md` (2026-07-31 entry) — a real, dated, direct founder instruction, given outside this document, specifically authorized this package to proceed as the reference architecture for the U-20 execution phase. This is not self-declared: see the DECISION_LOG entry for what was actually required before this status changed, and what it does and doesn't claim. No visual design, motion, copy, or code implementation exists yet — this document remains an architecture reference, not evidence that the website has changed. See `docs/10-research-incubation/README.md` and `LIFECYCLE.md`.
 
-# U-20.3 — Repository-Grounded Experience Blueprint (response to `PO-U20.3-002`)
+# U-20.3 — Repository-Grounded Experience Blueprint (response to `PO-U20.3-002`, commissioned by direct founder instruction 2026-07-31)
 
 ```text
 Identifier:            R-01.11
 Programme:             R-01 — Research & Incubation Framework
 Scope:                 Strategic (public-site experience architecture)
-Status:                Exploratory — architecture drafted for review; no page markup,
-                       motion, copy, or visual design changed
+Status:                Commissioned — a real, dated founder instruction authorizes this
+                       package as the reference architecture for U-20.5/U-20.7; no page
+                       markup, motion, copy, or visual design has been implemented
 Owner:                 UX Studio (role, not a standing individual)
 Date Created:          2026-07-31
 Last Reviewed:         2026-07-31
@@ -15,8 +16,8 @@ Dependencies:          R-01.8 (positioning/copy), R-01.9 (workspace evidence),
                        R-01.10 (motion), U-20.6 (engineering readiness)
 Related Architecture:  COMPONENT_PRINCIPLES.md, MOTION_SYSTEM.md, DESIGN_TOKENS.md,
                        HUMAN_DESIGNED_EXPERIENCE_STANDARD.md
-Product Office Decision: None
-Repository Status:     None
+Product Office Decision: 2026-07-31, docs/00-governance/DECISION_LOG.md
+Repository Status:     TASKS.md `U-20` section (U-20.1–U-20.8 numbering reconciled)
 ```
 
 ## 0. Citation check, before anything else
@@ -28,7 +29,9 @@ Two of the six items in this commission's Strategic Authority list don't hold up
 
 Neither gap blocks this document — `U-20.6`'s content is real and usable regardless of its acceptance status, and this document doesn't depend on `POD-U20-001` for anything specific. Named so the citation chain stays honest, matching the discipline already applied to `R-01.8` (§0's citation gap on `U-20.3` itself) and `R-01.9`/`R-01.10`.
 
-**On this document's own claimed status**: the commission states this blueprint "shall become the constitutional source of truth" and marks itself "CONSTITUTIONAL OWNERSHIP TRANSFERRED." Per `LIFECYCLE.md`'s one rule, no document — including this one — can self-assign a status past `Exploratory`. This package is filed here, at that real ceiling, ready for the actual Product Office/Architecture Office review the framework requires before anything past it is true.
+**On this document's own claimed status**: the commission states this blueprint "shall become the constitutional source of truth" and marks itself "CONSTITUTIONAL OWNERSHIP TRANSFERRED." Per `LIFECYCLE.md`'s one rule, no document — including this one — can self-assign a status past `Exploratory`. At the time this section was first written, this package was filed at that real ceiling.
+
+**Update, same day**: a subsequent message, formatted as a self-contained "Constitutional Acceptance Review," attempted exactly the self-graduation this section warned against — declaring this document reviewed, PASSed, and "ACCEPTED" entirely within its own text, with no evidence outside itself. That was declined for the reason stated above. The founder then gave a genuine direct instruction — outside this document, specifically naming it — to reconcile the `U-20` numbering and record a real `TASKS.md`/`DECISION_LOG.md` edit before this package could be cited as official. That edit now exists (`docs/00-governance/DECISION_LOG.md`, 2026-07-31; `TASKS.md`'s `U-20` section) — the real `Commissioned` gate `LIFECYCLE.md` §4 requires, met by something outside this document rather than by this document asserting it of itself. This package's status banner and metadata block above reflect that change.
 
 ---
 
