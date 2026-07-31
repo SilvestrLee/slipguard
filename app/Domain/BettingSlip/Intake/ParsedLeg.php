@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Domain\BettingSlip\Intake;
+
+/**
+ * One candidate leg detected by `ParseSlipText` from a block of pasted or
+ * PDF-extracted text. Never a final, trusted leg — the customer always
+ * reviews and corrects these in the existing Builder before the slip can
+ * be marked Ready (`BettingSlipValidationRules::legIsComplete()` still
+ * gates that, unchanged).
+ */
+final readonly class ParsedLeg
+{
+    public function __construct(
+        public string $rawText,
+        public string $eventName,
+        public string $marketName,
+        public string $selectionName,
+        public string $decimalOdds,
+        public bool $recognized,
+    ) {}
+
+    /**
+     * @return array{sport: string, competition: string, event_name: string, market_name: string, selection_name: string, decimal_odds: string}
+     */
+    public function toLegAttributes(): array
+    {
+        return [
+            'sport' => 'Football',
+            'competition' => '',
+            'event_name' => $this->eventName,
+            'market_name' => $this->marketName,
+            'selection_name' => $this->selectionName,
+            'decimal_odds' => $this->decimalOdds,
+        ];
+    }
+}
