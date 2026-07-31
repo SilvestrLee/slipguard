@@ -1,0 +1,27 @@
+{
+  "before": [
+    "matrix(1, 0, 0, 1, 0, 0)",
+    "matrix(1, 0, 0, 1, 0, 0)",
+    "matrix(1, 0, 0, 1, 0, 0)",
+    "matrix(1, 0, 0, 1, 0, 0)"
+  ],
+  "afterScroll": [
+    "matrix(1, 0, 0, 1, 0, -13)",
+    "matrix(1, 0, 0, 1, 0, 17)",
+    "matrix(1, 0, 0, 1, 0, -8)",
+    "matrix(1, 0, 0, 1, 0, 11)"
+  ],
+  "afterStop": [
+    "matrix(1, 0, 0, 1, 0, -13)",
+    "matrix(1, 0, 0, 1, 0, 17)",
+    "matrix(1, 0, 0, 1, 0, -8)",
+    "matrix(1, 0, 0, 1, 0, 11)"
+  ],
+  "immediateStopVerified": true,
+  "reducedMotionTransforms": [
+    "none",
+    "none",
+    "none",
+    "none"
+  ]
+}

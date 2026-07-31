@@ -1,0 +1,23 @@
+{
+  "scroll": {
+    "before": {
+      "bodyY": 0,
+      "workspaceY": 0,
+      "sidebarTop": 0,
+      "headerTop": 0
+    },
+    "after": {
+      "bodyY": 0,
+      "workspaceY": 900,
+      "sidebarTop": 0,
+      "headerTop": 0
+    }
+  },
+  "focus": {
+    "focusOpen": "Close navigation",
+    "focusClosed": "Open navigation"
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+}
