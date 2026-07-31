@@ -72,6 +72,18 @@ Run tests with:
 php artisan test
 ```
 
+### If `php`, `composer`, or `vendor/bin/pint` fail with a `dyld` / `Symbol not found` error
+
+This is a broken local PHP installation, not a project defect — `composer.json` correctly declares `"php": "^8.3"`, and this project has no CI configuration to be affected by it. On a machine with multiple installed PHP versions (e.g. Herd alongside Homebrew), the *first* `php` resolved on `PATH` can be a shim binary that's dynamically linked against a newer `libc++` than the one actually present on the system — the failure looks like:
+
+```
+dyld[...]: Symbol not found: (__ZNSt3__122__libcpp_verbose_abortEPKcz)
+  Referenced from: '.../php83'
+  Expected in: '/usr/lib/libc++.1.dylib'
+```
+
+Diagnose with `which -a php` — if a working PHP install exists elsewhere on the machine (check `php -v` for each result), invoke tools through that binary explicitly (e.g. `/usr/local/bin/php artisan test`, `/usr/local/bin/php vendor/bin/pint`) until the broken installation is repaired or removed from `PATH`. There is no fix for this inside the repository — Composer itself resolves through the same broken `PATH` entry, so no `composer.json` script can route around it either. Repairing or reordering the broken PHP installation is a one-time, per-machine fix outside this project's scope.
+
 ## Branch Strategy
 
 - `main` — released/stable.
