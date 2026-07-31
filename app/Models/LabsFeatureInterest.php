@@ -13,7 +13,7 @@ class LabsFeatureInterest extends Model
     /** @use HasFactory<LabsFeatureInterestFactory> */
     use HasFactory;
 
-    protected $fillable = ['user_id', 'labs_feature_id', 'type'];
+    protected $fillable = ['user_id', 'email', 'labs_feature_id', 'type', 'platform_preference'];
 
     protected function casts(): array
     {
