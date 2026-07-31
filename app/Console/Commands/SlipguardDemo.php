@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Models\MarketIntelligenceFixture;
+use App\Models\MarketIntelligenceMarketQuote;
 use App\Models\User;
 use Database\Seeders\Demo\DemoUserSeeder;
 use Database\Seeders\Demo\DemoWorkspaceSeeder;
@@ -53,6 +55,11 @@ class SlipguardDemo extends Command
 
         $this->info("Betting slips seeded: {$result['slips']['count']} ({$result['slips']['oldest']} to {$result['slips']['newest']})");
         $this->info("Journal entries seeded: {$result['journal_entries']}");
+        $this->info("Market Intelligence fixtures seeded: {$result['market_intelligence']['fixtures']} ({$result['market_intelligence']['quotes']} quotes)");
+
+        if (! config('slipguard-market-intelligence.enabled')) {
+            $this->comment('MARKET_WIDE_PLANNER_ENABLED is false — the Builder route is not registered. Set it in .env for this local review session to reach /market-intelligence/build.');
+        }
 
         return self::SUCCESS;
     }
@@ -71,7 +78,9 @@ class SlipguardDemo extends Command
         $this->info('Betting slips: '.$user->bettingSlips()->count());
         $this->info('Slip analyses: '.$user->slipAnalyses()->count());
         $this->info('Journal entries: '.$user->journalEntries()->count());
+        $this->info('Market Intelligence fixtures: '.MarketIntelligenceFixture::count().' ('.MarketIntelligenceMarketQuote::count().' quotes)');
         $this->comment('SLIPGUARD_DEMO_ENABLED='.(env('SLIPGUARD_DEMO_ENABLED') ? 'true' : 'false (default)'));
+        $this->comment('MARKET_WIDE_PLANNER_ENABLED='.(config('slipguard-market-intelligence.enabled') ? 'true' : 'false (default)'));
 
         return self::SUCCESS;
     }

@@ -45,12 +45,14 @@ class DemoWorkspaceSeeder
 
         $slipResult = (new DemoSlipSeeder)->run($user);
         $journalCount = (new DemoJournalSeeder)->run($user);
+        $marketIntelligenceResult = (new DemoMarketIntelligenceSeeder)->run();
 
         return [
             'email' => $user->email,
             'generated_password' => $userResult['generated_password'],
             'slips' => $slipResult,
             'journal_entries' => $journalCount,
+            'market_intelligence' => $marketIntelligenceResult,
             'rebuilt' => true,
         ];
     }
