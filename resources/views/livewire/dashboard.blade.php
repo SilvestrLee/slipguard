@@ -28,16 +28,13 @@ new #[Layout('layouts.app')] class extends Component
         };
     }
 
-    /** Mirrors riskBandToken() above — the Planner's latest revision reuses the same band vocabulary. */
+    /**
+     * A Planner regeneration event's risk band is nullable (no evaluation has run yet);
+     * riskBandToken() is the single authoritative mapping otherwise — never duplicated here.
+     */
     public function plannerRiskBandToken(?RiskBand $band): string
     {
-        return match ($band) {
-            RiskBand::Low => 'low',
-            RiskBand::Moderate => 'moderate',
-            RiskBand::High => 'high',
-            RiskBand::VeryHigh => 'very-high',
-            default => 'moderate',
-        };
+        return $band === null ? 'moderate' : $this->riskBandToken($band);
     }
 
     /** Display label for a market family — FootballMarketTaxonomyV1's own vocabulary, never a second taxonomy. */
