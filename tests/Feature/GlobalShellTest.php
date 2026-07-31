@@ -131,7 +131,7 @@ test('the public header retains motion while the authenticated shell uses a stab
 test('the public header icon has a static height class, not only an Alpine-bound one, so it never renders at its native SVG size before hydration', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
-    expect($html)->toContain('class="h-10 w-auto shrink-0 transition-[opacity,height] duration-300 ease-out"');
+    expect($html)->toContain('class="h-8 w-auto shrink-0 transition-[opacity,height] duration-300 ease-out md:h-10"');
 });
 
 /**
@@ -172,6 +172,35 @@ test('the public header uses a translucent, blurred (glassmorphism) surface rath
         ->assertOk()
         ->assertSee('backdrop-blur-md', false)
         ->assertSee('bg-surface-page/70', false);
+});
+
+test('the public header provides a dedicated accessible mobile navigation drawer', function () {
+    $html = $this->get(route('home'))->assertOk()->getContent();
+
+    expect($html)->toContain('aria-controls="public-mobile-menu"')
+        ->toContain('aria-label="'.__('Open navigation').'"')
+        ->toContain('aria-label="'.__('Close navigation').'"')
+        ->toContain('aria-label="'.__('Public navigation').'"')
+        ->toContain('role="dialog"')
+        ->toContain('aria-modal="true"')
+        ->toContain('x-on:keydown.escape.window="closeMenu()"')
+        ->toContain('x-on:keydown.tab.window="trapMenuFocus($event)"')
+        ->toContain('x-on:resize.window="if (window.innerWidth >= 768) closeMenu(false)"');
+});
+
+test('the public mobile drawer exposes every primary destination and account action', function () {
+    $response = $this->get(route('home'))->assertOk();
+
+    foreach (['analyse', 'planner.public', 'reports', 'pricing', 'login', 'register'] as $routeName) {
+        $response->assertSee(route($routeName), false);
+    }
+
+    $response
+        ->assertSee('Search')
+        ->assertSee('Language')
+        ->assertSee('Theme')
+        ->assertSee('Sign In')
+        ->assertSee('Get Started');
 });
 
 test('the approved header brand icon is the single source in both themes', function () {
