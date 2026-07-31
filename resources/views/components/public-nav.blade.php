@@ -339,7 +339,7 @@
             </div>
             <div class="flex min-h-12 items-center justify-between gap-3 px-3">
                 <span class="text-sm font-medium text-neutral-600">{{ __('Language') }}</span>
-                <x-language-selector />
+                <x-language-selector x-on:click="closeMenu(false)" />
             </div>
             <div class="flex min-h-12 items-center justify-between gap-3 px-3">
                 <span class="text-sm font-medium text-neutral-600">{{ __('Theme') }}</span>
@@ -378,4 +378,5 @@
     outside the filtered ancestor is the standard fix.
 --}}
 <x-command-palette :items="$publicPaletteItems" />
+<x-language-modal />
 </div>

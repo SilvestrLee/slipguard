@@ -288,4 +288,5 @@ new class extends Component
     </aside>
 
     <x-command-palette :items="$this->paletteItems()" />
+    <x-language-modal />
 </div>

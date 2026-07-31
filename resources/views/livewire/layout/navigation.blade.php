@@ -340,4 +340,5 @@ new class extends Component
     </div>
 
     <x-command-palette :items="$this->paletteItems()" />
+    <x-language-modal />
 </nav>
