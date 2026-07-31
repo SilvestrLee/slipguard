@@ -781,6 +781,69 @@
 .hero-dashboard-frame {
     border-color: var(--neutral-300);
 }
+.hero-dashboard-viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    touch-action: pan-x;
+}
+.hero-dashboard-viewport::-webkit-scrollbar {
+    display: none;
+}
+.hero-dashboard-viewport:focus-visible {
+    border-radius: 0.75rem;
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+@media (max-width: 767px) {
+    .hero-dashboard-viewport {
+        /*
+         * Bleed to the physical right edge so the dashboard reads as a
+         * continuation behind the viewport, not as a thumbnail cropped
+         * inside the marketing container.
+         */
+        margin-right: calc(50% - 50vw);
+    }
+    .hero-dashboard-frame {
+        /*
+         * Two visible panels on normal phones, while the viewport-height
+         * floor keeps the full, undistorted 1400:820 source at least 50svh
+         * tall on unusually narrow/tall devices.
+         */
+        width: max(200%, 85.37svh);
+        max-width: none;
+    }
+    .hero-dashboard-image {
+        height: auto;
+        object-fit: contain;
+    }
+}
+.hero-dashboard-drag-hint {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    gap: 0.375rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--surface-primary) 88%, transparent);
+    padding: 0.45rem 0.65rem;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-elevation-1);
+    pointer-events: none;
+    backdrop-filter: blur(10px);
+}
+@media (max-width: 767px) {
+    .hero-dashboard-drag-hint {
+        display: inline-flex;
+    }
+}
 :root[data-theme="dark"] .hero-dashboard-glow::before { opacity: 0.35; }
 :root[data-theme="dark"] .hero-dashboard-frame { border-color: var(--neutral-400); }
 @media (prefers-color-scheme: dark) {

@@ -69,6 +69,7 @@ test('the Invisible Risk demonstration shows real weakest-leg contribution and a
  */
 test('the hero shows a real, theme-aware Demo Workspace dashboard screenshot, clearly labelled as an evolving preview', function () {
     $html = $this->get('/')->assertOk()->getContent();
+    $css = file_get_contents(resource_path('css/app.css'));
 
     expect($html)->toContain('Product Preview')
         ->toContain('actively evolving')
@@ -76,8 +77,25 @@ test('the hero shows a real, theme-aware Demo Workspace dashboard screenshot, cl
         ->toContain('slipguard-dashboard-demo-dark.webp')
         ->toContain('hero-dashboard-image--light')
         ->toContain('hero-dashboard-image--dark')
+        ->toContain('hero-dashboard-viewport')
+        ->toContain('Swipe horizontally to explore the full dashboard preview.')
+        ->toContain('Drag to explore')
         ->not->toContain('SlipGuard — Risk Report')
-        ->not->toContain('Sample Structural Report');
+        ->not->toContain('Sample Structural Report')
+        ->and($css)->toContain('width: max(200%, 85.37svh)')
+        ->toContain('scrollbar-width: none')
+        ->toContain('object-fit: contain')
+        ->toContain('margin-right: calc(50% - 50vw)')
+        ->toContain('.hero-dashboard-drag-hint')
+        ->toContain('@media (max-width: 767px)');
+});
+
+test('the hero actions remain aligned across mobile tablet and desktop layouts', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('sm:justify-center lg:grid lg:justify-items-end xl:flex xl:justify-end')
+        ->toContain('sm:w-auto lg:w-56 xl:w-auto');
 });
 
 test('guests see Analyse Your Slip and Sign In; authenticated users see Dashboard', function () {

@@ -1,5 +1,21 @@
 # SlipGuard Tasks
 
+## Public Mobile Header and Homepage Hero — 2026-07-31
+
+**Status:** Implemented and browser-verified.
+
+- [x] Replaced the overcrowded public mobile header action row with an accessible off-canvas navigation drawer while leaving desktop navigation unchanged.
+- [x] Added focus placement, focus trapping, Escape dismissal, trigger-focus restoration, body-scroll locking and close-after-navigation behaviour.
+- [x] Made the homepage dashboard preview a two-view mobile canvas: the screenshot renders at twice the visible width with a minimum `50svh` height and can be explored by touch drag or keyboard arrows without a visible horizontal scrollbar.
+- [x] Preserved the screenshot's complete 1400:820 composition without cropping or distortion, bled the preview to the physical right edge, added a restrained drag affordance, and aligned both mobile hero actions as equal full-width controls.
+- [x] Corrected tablet CTA alignment: the single-column portrait layout centres the action pair; the two-column landscape layout uses equal 224px controls aligned to the right content column; wider desktop returns to intrinsic inline widths.
+- [x] Restricted “Drag to explore” to viewports below 768px, exactly where the dashboard screenshot uses the two-view canvas; it is absent wherever the full screenshot is visible.
+- [x] Added one shared Home-icon “Return to Website” action on the right side of every authenticated sticky workspace header, linking to the public homepage.
+- [x] Contained public-page horizontal overflow so the fixed atmosphere cannot create page-level sideways scrolling.
+- [x] Verification: 67 focused tests / 521 assertions passed; production frontend build passed; `git diff --check` passed.
+- [x] Browser verification passed at 320px, 375px, 390px and 430px for drawer state/focus, scroll locking, theme-control availability and dashboard-preview horizontal movement, with no page errors.
+- [x] Evidence report: `docs/engineering/PUBLIC-MOBILE-HEADER-AND-HERO-2026-07-31.md`.
+
 ## Theme Stability Remediation — 2026-07-31
 
 **Status:** Implemented and browser-verified.

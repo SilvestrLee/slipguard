@@ -50,11 +50,19 @@
                     @endif
                 </div>
 
-                @if (isset($workspaceActions))
-                    <div class="shrink-0">
+                <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+                    @if (isset($workspaceActions))
                         {{ $workspaceActions }}
-                    </div>
-                @endif
+                    @endif
+
+                    <a href="{{ route('home') }}" wire:navigate
+                       class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-surface-card px-3 text-xs font-semibold text-neutral-700 transition-colors duration-instant hover:border-neutral-400 hover:bg-surface-soft hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:px-4 sm:text-sm"
+                       aria-label="{{ __('Return to Website') }}">
+                        <x-heroicon-o-home class="size-4 shrink-0" aria-hidden="true" />
+                        <span class="sm:hidden">{{ __('Website') }}</span>
+                        <span class="hidden sm:inline">{{ __('Return to Website') }}</span>
+                    </a>
+                </div>
             </div>
         </header>
 

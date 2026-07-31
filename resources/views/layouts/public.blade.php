@@ -21,7 +21,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
-    <body class="font-sans antialiased">
+    <body class="overflow-x-clip font-sans antialiased">
         {{--
             U-08.1 (`PO-U08.1-AC-001` §14/§15) — fixed atmospheric background
             layer: four large, heavily blurred indigo forms (within the

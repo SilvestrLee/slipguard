@@ -35,6 +35,19 @@ test('Sprint 9 uses a fixed authenticated sidebar and a right workspace with a s
         ->toContain('aria-current="page"');
 });
 
+test('authenticated sticky headers provide a shared return to the public website action', function () {
+    $user = User::factory()->create();
+
+    foreach (['dashboard', 'history'] as $routeName) {
+        $this->actingAs($user)
+            ->get(route($routeName))
+            ->assertOk()
+            ->assertSee('Return to Website')
+            ->assertSee('aria-label="Return to Website"', false)
+            ->assertSee('href="'.route('home').'"', false);
+    }
+});
+
 test('the authenticated shell provides an accessible mobile navigation drawer', function () {
     $user = User::factory()->create();
     $html = $this->actingAs($user)->get(route('dashboard'))->assertOk()->getContent();
@@ -380,6 +393,7 @@ test('every layout links a real favicon, rendered from the approved brand icon, 
 
     foreach ([$public, $guest, $portal] as $html) {
         expect($html)->toContain('rel="icon"')
+            ->toContain(asset('favicon.ico'))
             ->toContain(asset('favicon-32.png'))
             ->toContain('rel="apple-touch-icon"');
     }

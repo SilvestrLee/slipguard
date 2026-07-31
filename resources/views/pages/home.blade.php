@@ -125,21 +125,21 @@
                         instruction, 2026-07-28, superseding this same
                         commission's own §8 recommendation to re-add it).
                     --}}
-                    <div class="lg:col-span-5 lg:pt-14 text-end">
-                        <div class="flex flex-wrap items-center justify-end gap-3">
+                    <div class="text-center lg:col-span-5 lg:pt-14 lg:text-end">
+                        <div class="grid w-full gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-center lg:grid lg:justify-items-end xl:flex xl:justify-end">
                             @auth
                                 <a href="{{ route('analyze.create') }}" wire:navigate
-                                   class="inline-flex items-center justify-center h-14 px-8 text-base font-semibold text-white bg-gradient-button rounded-md hover:brightness-110 transition-[filter] duration-instant">
+                                   class="inline-flex h-14 w-full items-center justify-center rounded-md bg-gradient-button px-8 text-base font-semibold text-white transition-[filter] duration-instant hover:brightness-110 sm:w-auto lg:w-56 xl:w-auto">
                                     {{ __('Analyse Your Slip') }}
                                 </a>
                             @else
                                 <a href="{{ route('register') }}" wire:navigate
-                                   class="inline-flex items-center justify-center h-14 px-8 text-base font-semibold text-white bg-gradient-button rounded-md hover:brightness-110 transition-[filter] duration-instant">
+                                   class="inline-flex h-14 w-full items-center justify-center rounded-md bg-gradient-button px-8 text-base font-semibold text-white transition-[filter] duration-instant hover:brightness-110 sm:w-auto lg:w-56 xl:w-auto">
                                     {{ __('Analyse Your Slip') }}
                                 </a>
                             @endauth
                             <a href="{{ route('reports') }}" wire:navigate
-                               class="inline-flex items-center justify-center h-14 px-6 text-base font-semibold text-neutral-700 border border-neutral-300 rounded-md hover:bg-surface-soft hover:border-neutral-400 transition-colors duration-instant focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                               class="inline-flex h-14 w-full items-center justify-center rounded-md border border-neutral-300 px-6 text-base font-semibold text-neutral-700 transition-colors duration-instant hover:border-neutral-400 hover:bg-surface-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:w-auto lg:w-56 xl:w-auto">
                                 {{ __('See Example Report') }}
                             </a>
                         </div>
@@ -202,18 +202,35 @@
                     z-index was tried first and did get covered).
                 --}}
                 <div class="hero-dashboard-glow relative z-10 mt-4 -mb-12 sm:-mb-16">
-                    {{-- U-08.1 §11: this is now the Hero's one named "premium light sweep" placement, moved from the removed report illustration. --}}
+                    <p id="dashboard-preview-pan-help" class="sr-only">
+                        {{ __('Swipe horizontally to explore the full dashboard preview. Keyboard users can use the left and right arrow keys.') }}
+                    </p>
                     <div
-                        class="hero-dashboard-frame light-sweep relative rounded-xl border bg-surface-card overflow-hidden shadow-elevation-2 transition-[opacity,transform] duration-700 ease-out"
-                        :class="reduceMotion ? '' : (shown ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-[0.985] translate-y-4')"
+                        class="hero-dashboard-viewport"
+                        tabindex="0"
+                        role="region"
+                        aria-label="{{ __('Interactive dashboard preview') }}"
+                        aria-describedby="dashboard-preview-pan-help"
+                        x-on:keydown.right.prevent="$el.scrollBy({ left: $el.clientWidth / 2, behavior: reduceMotion ? 'auto' : 'smooth' })"
+                        x-on:keydown.left.prevent="$el.scrollBy({ left: -$el.clientWidth / 2, behavior: reduceMotion ? 'auto' : 'smooth' })"
                     >
-                        <img src="{{ asset('images/homepage/slipguard-dashboard-demo-light.webp') }}"
-                             width="1400" height="820" loading="eager"
-                             alt="{{ __('SlipGuard demonstration workspace showing structural risk summaries, recent analyses, planning activity and customer decision history.') }}"
-                             class="hero-dashboard-image hero-dashboard-image--light w-full h-auto block">
-                        <img src="{{ asset('images/homepage/slipguard-dashboard-demo-dark.webp') }}"
-                             width="1400" height="820" loading="eager" alt="" aria-hidden="true"
-                             class="hero-dashboard-image hero-dashboard-image--dark w-full h-auto block">
+                        {{-- U-08.1 §11: this is now the Hero's one named "premium light sweep" placement, moved from the removed report illustration. --}}
+                        <div
+                            class="hero-dashboard-frame light-sweep relative rounded-xl border bg-surface-card overflow-hidden shadow-elevation-2 transition-[opacity,transform] duration-700 ease-out"
+                            :class="reduceMotion ? '' : (shown ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-[0.985] translate-y-4')"
+                        >
+                            <img src="{{ asset('images/homepage/slipguard-dashboard-demo-light.webp') }}"
+                                 width="1400" height="820" loading="eager"
+                                 alt="{{ __('SlipGuard demonstration workspace showing structural risk summaries, recent analyses, planning activity and customer decision history.') }}"
+                                 class="hero-dashboard-image hero-dashboard-image--light w-full h-auto block">
+                            <img src="{{ asset('images/homepage/slipguard-dashboard-demo-dark.webp') }}"
+                                 width="1400" height="820" loading="eager" alt="" aria-hidden="true"
+                                 class="hero-dashboard-image hero-dashboard-image--dark w-full h-auto block">
+                        </div>
+                    </div>
+                    <div class="hero-dashboard-drag-hint md:hidden" aria-hidden="true">
+                        <span>{{ __('Drag to explore') }}</span>
+                        <x-heroicon-o-arrow-right class="size-4" />
                     </div>
                 </div>
             </div>
