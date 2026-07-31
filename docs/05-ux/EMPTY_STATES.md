@@ -49,6 +49,19 @@ Each state below defines: Purpose, Headline, Supporting text, Recommended illust
 | User emotion | Guided to the next concrete step. |
 | Accessibility | Same as No Slips. |
 
+### No Labs Features *(added 2026-07-26, SD-002/Programme U-13)*
+
+| Field | Value |
+|---|---|
+| Purpose | No published Labs feature exists yet (e.g. before an administrator publishes the first one). |
+| Headline | "Nothing published yet." |
+| Supporting text | "We're preparing what's next for SlipGuard. Check back soon." |
+| Recommended illustration | Minimal compass/roadmap icon (`ICONOGRAPHY.md`). |
+| Primary CTA | "Return to dashboard" → dashboard. |
+| Secondary CTA | None. |
+| User emotion | Reassured, not confused by an apparently broken page. |
+| Accessibility | Same as No Slips. |
+
 ### No Journal Entries
 
 | Field | Value |

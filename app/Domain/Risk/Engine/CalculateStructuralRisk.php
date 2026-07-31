@@ -130,6 +130,7 @@ class CalculateStructuralRisk
             ruleSetVersion: RuleSet2026_1::VERSION,
             inputSchemaVersion: RuleSet2026_1::INPUT_SCHEMA_VERSION,
             marketTaxonomyVersion: FootballMarketTaxonomyV1::VERSION,
+            rescaledScorePrecise: $isUnavailable ? null : $rescaled,
         );
     }
 }

@@ -188,8 +188,28 @@ new #[Layout('layouts.app')] class extends Component
     }
 }; ?>
 
-<div class="py-10 sm:py-12">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="workspace-page">
+    <div class="container-reading workspace-gutter mx-auto">
+
+        <nav class="mb-5 flex flex-wrap items-center gap-2 text-sm text-neutral-500" aria-label="{{ __('Analysis journey') }}">
+            <a href="{{ route('analyze') }}" wire:navigate class="font-medium hover:text-neutral-900">
+                {{ __('Analyse Slip') }}
+            </a>
+            <x-heroicon-o-chevron-right class="size-4" aria-hidden="true" />
+            <span aria-current="page" class="font-semibold text-neutral-800">{{ __('Risk Report') }}</span>
+        </nav>
+
+        @if ($completion = session('analysis_completion'))
+            <x-workspace.completion-summary :title="__('Analysis complete')" class="mb-6" aria-live="polite" aria-atomic="true">
+                <p>
+                    {{ trans_choice(':count selection processed|:count selections processed', $completion['selections_processed'], ['count' => $completion['selections_processed']]) }}
+                    <span aria-hidden="true"> · </span>
+                    {{ trans_choice(':count structural factor evaluated|:count structural factors evaluated', $completion['structural_factors_evaluated'], ['count' => $completion['structural_factors_evaluated']]) }}
+                    <span aria-hidden="true"> · </span>
+                    {{ __('Report prepared') }}
+                </p>
+            </x-workspace.completion-summary>
+        @endif
 
         {{-- §20.1 Analysis state --}}
         <h1 class="text-2xl sm:text-3xl font-semibold text-neutral-900">
@@ -202,8 +222,16 @@ new #[Layout('layouts.app')] class extends Component
             @endif
         </h1>
         <p class="mt-1 text-sm text-neutral-500">
+            <span class="font-medium text-neutral-700">{{ $this->bettingSlip->displayLabel() }}</span>
+            <span aria-hidden="true"> · </span>
             {{ __('Analysed :time', ['time' => $analysis->created_at->diffForHumans()]) }}
         </p>
+
+        <a href="{{ route('history') }}" wire:navigate
+           class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-accent-strong hover:text-accent">
+            {{ __('View all analysis reports') }}
+            <x-heroicon-o-arrow-right class="size-4" aria-hidden="true" />
+        </a>
 
         <div class="mt-8 space-y-12">
 
@@ -211,7 +239,7 @@ new #[Layout('layouts.app')] class extends Component
                 {{-- Unavailable: Frames U-01/U-02/U-03/U-04 — no score, no band, no factors, no data quality --}}
                 <section aria-labelledby="unavailable-reason-heading">
                     <h2 id="unavailable-reason-heading" class="sr-only">{{ __('Reason') }}</h2>
-                    <div class="bg-neutral-50 border border-neutral-200 rounded-lg p-6">
+                    <div class="bg-surface-card shadow-elevation-1 border border-neutral-200/60 rounded-lg p-6">
                         <p class="text-sm text-neutral-700">
                             @switch($this->unavailableReason())
                                 @case('unsupported_sport')
@@ -240,27 +268,22 @@ new #[Layout('layouts.app')] class extends Component
                     {{-- §20.6 Limitation information — shown in the same initial view, never below the fold --}}
                     <section aria-labelledby="limitation-heading">
                         <h2 id="limitation-heading" class="text-sm font-semibold text-neutral-500 uppercase tracking-wide">{{ __('Limitation') }}</h2>
-                        <div class="mt-3 bg-neutral-50 border border-neutral-200 rounded-lg p-6">
-                            <p class="text-sm text-neutral-700">
-                                {{ __('SlipGuard completed the analysis, but some slip information could not be fully evaluated.') }}
-                            </p>
-                            <p class="mt-2 text-sm text-neutral-600">
+                        <x-workspace.limited-data-notice class="mt-3" :title="__('Limited analysis available')">
+                            <p>{{ __('SlipGuard completed the analysis, but some slip information could not be fully evaluated.') }}</p>
+                            <p class="mt-2">
                                 {{ __("Some selections in this slip use markets SlipGuard could only partially recognise. The result below reflects everything SlipGuard was able to evaluate — it doesn't affect how the score itself is calculated for the selections that were fully understood.") }}
                             </p>
-                        </div>
+                        </x-workspace.limited-data-notice>
                     </section>
                 @endif
 
                 {{-- §20.2 Overall Structural Risk --}}
                 <section aria-labelledby="structural-risk-heading">
                     <h2 id="structural-risk-heading" class="text-sm font-semibold text-neutral-500 uppercase tracking-wide">{{ __("Structural risk") }}</h2>
-                    <div class="mt-3 bg-neutral-50 border border-neutral-200 rounded-lg p-6 sm:p-8">
+                    <div class="workspace-primary-card mt-3 rounded-lg p-6 sm:p-8">
                         @php $token = $this->riskBandToken($analysis->risk_band); @endphp
                         <div class="flex items-center gap-3">
-                            <span class="inline-flex items-center gap-1.5 text-base font-semibold px-4 py-2 rounded-lg border text-risk-{{ $token }} bg-risk-{{ $token }}/10 border-risk-{{ $token }}/30">
-                                <x-heroicon-o-exclamation-triangle class="size-5" aria-hidden="true" />
-                                {{ $analysis->risk_band->label() }}
-                            </span>
+                            <x-workspace.risk-badge :band="$analysis->risk_band->label()" :tone="$token" class="text-base px-4 py-2" />
                             <span class="text-2xl font-semibold text-neutral-900 [font-variant-numeric:tabular-nums]">
                                 {{ $analysis->structural_score }}<span class="text-sm font-normal text-neutral-500">/100</span>
                             </span>
@@ -272,7 +295,7 @@ new #[Layout('layouts.app')] class extends Component
                 {{-- §20.3 Main Contributing Factor --}}
                 <section aria-labelledby="main-factor-heading">
                     <h2 id="main-factor-heading" class="text-sm font-semibold text-neutral-500 uppercase tracking-wide">{{ __('Main Contributing Factor') }}</h2>
-                    <div class="mt-3 bg-neutral-50 border border-neutral-200 rounded-lg p-6">
+                    <div class="mt-3 bg-surface-card shadow-elevation-1 border border-neutral-200/60 rounded-lg p-6">
                         @if ($main = $this->mainContributingFactor())
                             <p class="text-sm font-semibold text-neutral-900">{{ $this->factorName($main['factor_code']) }}</p>
                             <p class="mt-1 text-sm text-neutral-600">{{ $this->factorExplanation($main['factor_code']) }}</p>
@@ -286,9 +309,9 @@ new #[Layout('layouts.app')] class extends Component
 
                 {{-- §20.4 Supporting Contributing Factors --}}
                 @if ($this->supportingFactors()->isNotEmpty())
-                    <section aria-labelledby="supporting-factors-heading" x-data="{ open: false }">
+                    <section aria-labelledby="supporting-factors-heading" x-data="{ open: false }" data-print-expand>
                         <h2 id="supporting-factors-heading" class="text-sm font-semibold text-neutral-500 uppercase tracking-wide">{{ __('Other contributing factors') }}</h2>
-                        <div class="mt-3 bg-neutral-50 border border-neutral-200 rounded-lg divide-y divide-neutral-200">
+                        <div class="mt-3 bg-surface-card shadow-elevation-1 border border-neutral-200/60 rounded-lg divide-y divide-neutral-200">
                             @foreach ($this->supportingFactors()->take(2) as $factor)
                                 <div class="p-5">
                                     <p class="text-sm font-medium text-neutral-900">
@@ -303,7 +326,7 @@ new #[Layout('layouts.app')] class extends Component
                                 </div>
                             @endforeach
                             @if ($this->supportingFactors()->count() > 2)
-                                <div x-show="open" x-cloak class="divide-y divide-neutral-200">
+                                <div id="supporting-factors-panel" x-show="open" x-cloak class="divide-y divide-neutral-200">
                                     @foreach ($this->supportingFactors()->skip(2) as $factor)
                                         <div class="p-5">
                                             <p class="text-sm font-medium text-neutral-900">
@@ -331,7 +354,7 @@ new #[Layout('layouts.app')] class extends Component
                 {{-- §20.5 Data Quality --}}
                 <section aria-labelledby="data-quality-heading">
                     <h2 id="data-quality-heading" class="text-sm font-semibold text-neutral-500 uppercase tracking-wide">{{ __('Data quality') }}</h2>
-                    <div class="mt-3 bg-neutral-50 border border-neutral-200 rounded-lg p-6">
+                    <div class="mt-3 bg-surface-card shadow-elevation-1 border border-neutral-200/60 rounded-lg p-6">
                         <p class="text-sm font-semibold text-neutral-900">{{ ucfirst($analysis->data_quality_band->value) }}</p>
                         <p class="mt-1 text-sm text-neutral-600">{{ $this->dataQualityExplanation($analysis->data_quality_band) }}</p>
                     </div>
@@ -348,29 +371,29 @@ new #[Layout('layouts.app')] class extends Component
                 </section>
 
                 {{-- §20.8 Methodology --}}
-                <section aria-labelledby="methodology-heading" x-data="{ open: false }">
+                <section aria-labelledby="methodology-heading" x-data="{ open: false }" data-print-expand>
                     <h2 id="methodology-heading" class="sr-only">{{ __('Methodology') }}</h2>
                     <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-controls="methodology-panel"
-                            class="w-full flex items-center justify-between text-start bg-neutral-50 border border-neutral-200 rounded-lg p-5 text-sm font-medium text-neutral-700 hover:bg-neutral-100">
+                            class="w-full flex items-center justify-between text-start bg-surface-card shadow-elevation-1 border border-neutral-200/60 rounded-lg p-5 text-sm font-medium text-neutral-700 hover:bg-neutral-100">
                         {{ __('How was this analysis produced?') }}
                         <x-heroicon-o-chevron-down class="size-4 shrink-0 transition-transform" x-bind:class="open ? 'rotate-180' : ''" aria-hidden="true" />
                     </button>
-                    <div id="methodology-panel" x-show="open" x-cloak class="mt-3 bg-neutral-50 border border-neutral-200 rounded-lg p-6 text-sm text-neutral-600 space-y-4">
+                    <div id="methodology-panel" x-show="open" x-cloak class="mt-3 bg-surface-card shadow-elevation-1 border border-neutral-200/60 rounded-lg p-6 text-sm text-neutral-600 space-y-4">
                         <p>{{ __('This score comes from a fixed set of rules that look at how a slip is built — the number of selections, the odds involved, how those odds are distributed, and how complex the markets are. The same slip always produces the same result under the current rule set. Data quality is assessed separately and never changes the score itself — it only tells you how completely SlipGuard could evaluate the information you provided.') }}</p>
                         <p>{{ __('Relationship analysis between selections is not active in the current Rule Set.') }}</p>
                     </div>
                 </section>
 
                 {{-- §20.9 Report details --}}
-                <section aria-labelledby="report-details-heading" x-data="{ open: false }">
+                <section aria-labelledby="report-details-heading" x-data="{ open: false }" data-print-expand>
                     <h2 id="report-details-heading" class="sr-only">{{ __('Report details') }}</h2>
                     <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-controls="report-details-panel"
-                            class="w-full flex items-center justify-between text-start bg-neutral-50 border border-neutral-200 rounded-lg p-5 text-sm font-medium text-neutral-700 hover:bg-neutral-100">
+                            class="w-full flex items-center justify-between text-start bg-surface-card shadow-elevation-1 border border-neutral-200/60 rounded-lg p-5 text-sm font-medium text-neutral-700 hover:bg-neutral-100">
                         {{ __('View report details') }}
                         <x-heroicon-o-chevron-down class="size-4 shrink-0" x-bind:class="open ? 'rotate-180' : ''" aria-hidden="true" />
                     </button>
                     {{-- Single-column at every breakpoint — COMPONENT_PRINCIPLES.md's Reports rule: "never becomes multi-column even on desktop." --}}
-                    <dl id="report-details-panel" x-show="open" x-cloak class="mt-3 bg-neutral-50 border border-neutral-200 rounded-lg p-6 space-y-4 text-sm">
+                    <dl id="report-details-panel" x-show="open" x-cloak class="mt-3 bg-surface-card shadow-elevation-1 border border-neutral-200/60 rounded-lg p-6 space-y-4 text-sm">
                         <div>
                             <dt class="text-neutral-500">{{ __('Analysed') }}</dt>
                             <dd class="text-neutral-900">{{ $analysis->created_at->format('j M Y, H:i') }}</dd>
@@ -395,17 +418,65 @@ new #[Layout('layouts.app')] class extends Component
                 </section>
             @endif
 
-            {{-- §20.10 Exit actions — PD-08/PD-09/PD-10: identical across all three outcomes, no "Edit this slip" anywhere --}}
-            <section aria-label="{{ __('Exit actions') }}" class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-neutral-200">
-                <a href="{{ route('analyze.create') }}" wire:navigate
+            {{-- §20.10 Exit actions — PD-08/PD-09/PD-10: identical across all three outcomes, no "Edit this slip" anywhere. Print is print:hidden — a customer printing the page doesn't want the button that triggered printing on the page itself. --}}
+            <section aria-label="{{ __('Exit actions') }}" class="flex flex-col gap-3 border-t border-neutral-200 pt-4 sm:flex-row sm:flex-wrap print:hidden">
+                <a href="{{ route('journal.create', ['analysis' => $analysis->id]) }}" wire:navigate
                    class="inline-flex items-center justify-center h-12 px-6 rounded-md bg-accent-strong text-white font-semibold text-sm hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent transition-colors duration-instant">
+                    {{ __('Add Journal Reflection') }}
+                </a>
+                <a href="{{ route('history') }}" wire:navigate
+                   class="inline-flex items-center justify-center h-12 px-6 rounded-md border border-neutral-300 text-neutral-700 font-semibold text-sm hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent transition-colors duration-instant">
+                    {{ __('Return to Analysis History') }}
+                </a>
+                <a href="{{ route('analyze.create') }}" wire:navigate
+                   class="inline-flex items-center justify-center h-12 px-6 rounded-md border border-neutral-300 text-neutral-700 font-semibold text-sm hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent transition-colors duration-instant">
                     {{ __('Analyse another slip') }}
                 </a>
                 <a href="{{ route('dashboard') }}" wire:navigate
                    class="inline-flex items-center justify-center h-12 px-6 rounded-md border border-neutral-300 text-neutral-700 font-semibold text-sm hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent transition-colors duration-instant">
                     {{ __('Return to dashboard') }}
                 </a>
+                @if ($availability !== AnalysisAvailability::Unavailable)
+                    <button type="button" onclick="window.print()"
+                            class="inline-flex items-center justify-center h-12 px-6 rounded-md border border-neutral-300 text-neutral-700 font-semibold text-sm hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent transition-colors duration-instant sm:ms-auto">
+                        <x-heroicon-o-printer class="size-4 me-2" aria-hidden="true" />
+                        {{ __('Print / Save as PDF') }}
+                    </button>
+                @endif
             </section>
         </div>
     </div>
+
+    {{--
+        U-15.1 (COMPONENT_PRINCIPLES.md's Reports section): a printed report
+        must include everything the customer chose to keep, regardless of
+        which disclosure panels happened to be collapsed on screen — Alpine
+        toggles `open` via each section's own isolated x-data, so plain CSS
+        can't reach it without fighting inline styles. `Alpine.$data()` is
+        the supported, documented way to read/write an isolated scope's
+        state from outside it; native `beforeprint`/`afterprint` events
+        match this codebase's existing no-library-for-native-behaviour
+        pattern (the header scroll listener, U-14.3's logo rotation).
+    --}}
+    <script>
+        document.addEventListener('alpine:init', () => {
+            const expandForPrint = () => {
+                document.querySelectorAll('[data-print-expand]').forEach((el) => {
+                    const data = window.Alpine.$data(el);
+                    if (! data) { return; }
+                    el.dataset.printPreviousOpen = data.open ? '1' : '0';
+                    data.open = true;
+                });
+            };
+            const restoreAfterPrint = () => {
+                document.querySelectorAll('[data-print-expand]').forEach((el) => {
+                    const data = window.Alpine.$data(el);
+                    if (! data) { return; }
+                    data.open = el.dataset.printPreviousOpen === '1';
+                });
+            };
+            window.addEventListener('beforeprint', expandForPrint);
+            window.addEventListener('afterprint', restoreAfterPrint);
+        });
+    </script>
 </div>

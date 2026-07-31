@@ -60,6 +60,40 @@ test('analyzing a Full-availability slip persists the complete result and marks 
     expect($slip->fresh()->status->value)->toBe('analysed');
 });
 
+test('the optional presentation observer receives genuine lifecycle boundaries in order', function () {
+    $slip = readySlipWithLegs([
+        ['event_name' => 'Arsenal vs Chelsea', 'market_name' => 'Match Result', 'selection_name' => 'Arsenal', 'decimal_odds' => '1.90'],
+        ['event_name' => 'Liverpool vs Everton', 'market_name' => 'Over 2.5 Goals', 'selection_name' => 'Over 2.5', 'decimal_odds' => '1.65'],
+    ]);
+    $events = [];
+    $factsByEvent = [];
+
+    (new AnalyzeBettingSlip)->execute(
+        $slip,
+        function (string $event, array $facts) use (&$events, &$factsByEvent): void {
+            $events[] = $event;
+            $factsByEvent[$event] = $facts;
+        },
+    );
+
+    expect($events)->toBe([
+        'request_received',
+        'eligibility_validation_started',
+        'selections_validated',
+        'normalization_started',
+        'normalization_complete',
+        'structural_evaluation_started',
+        'structural_evaluation_complete',
+        'report_construction_started',
+        'persistence_started',
+        'analysis_complete',
+    ]);
+    expect($factsByEvent['request_received']['selections_received'])->toBe(2)
+        ->and($factsByEvent['selections_validated']['selections_validated'])->toBe(2)
+        ->and($factsByEvent['structural_evaluation_complete']['structural_factors_evaluated'])->toBe(6)
+        ->and($factsByEvent['structural_evaluation_complete']['rule_set_version'])->toBe('2026.1');
+});
+
 test('persists one LegAnalysis row per leg, in display order, with the normalized snapshot', function () {
     $slip = readySlipWithLegs([
         ['event_name' => 'Arsenal vs Chelsea', 'market_name' => 'Match Result', 'selection_name' => 'Arsenal', 'decimal_odds' => '1.90'],

@@ -48,23 +48,28 @@ These are descriptive — the common paths work already follows — not new proc
 
 **R**esponsible (does the work) · **A**ccountable (owns the decision, answers for it — exactly one per row) · **C**onsulted (input sought before deciding) · **I**nformed (told after deciding)
 
-| Decision Type | Product Office | Architecture Office | Engineering Office | UX Studio | Data Science Lab | Compliance Office |
-|---|---|---|---|---|---|---|
-| Product vision & scope | **A/R** | C | I | C | I | C |
-| Feature acceptance | **A/R** | C | C | C | C | C |
-| Risk mathematics / formulas / weights / thresholds | A | I | I | I | **A/R** | I |
-| Rule Set approval (formal acceptance) | **A** | I | I | I | **A** | I |
-| System architecture / layer boundaries | I | **A/R** | C | I | I | I |
-| Implementation (all application code) | I | C | **A/R** | C | C | I |
-| UX strategy (what the experience should achieve) | **A** | I | I | R | I | I |
-| UX execution (how a screen/flow is built) | C | I | C | **A/R** | I | I |
-| Testing & quality assurance | I | C | **A/R** | I | C | I |
-| Security & authorization model | I | C | **A/R** | I | I | C |
-| Regulatory / responsible-gambling claims & copy | A | I | I | C | I | **A/R** |
-| Release approval | **A** | C | **R** | I | I | C |
-| Governance documentation (this framework, ADRs, decision log) | **A** | R (ADRs) | R (engineering docs) | I | I | R (compliance docs) |
+| Decision Type | Product Office | Architecture Office | Engineering Office | UX Studio | Data Science Lab | Compliance Office | Parser Office |
+|---|---|---|---|---|---|---|---|
+| Product vision & scope | **A/R** | C | I | C | I | C | I |
+| Feature acceptance | **A/R** | C | C | C | C | C | C |
+| Risk mathematics / formulas / weights / thresholds | A | I | I | I | **A/R** | I | I |
+| Rule Set approval (formal acceptance) | **A** | I | I | I | **A** | I | I |
+| System architecture / layer boundaries | I | **A/R** | C | I | I | I | I |
+| External evidence-source viability, acquisition & validation contracts | I | C | C | I | C | C | **A/R** |
+| Implementation (all application code) | I | C | **A/R** | C | C | I | C |
+| UX strategy (what the experience should achieve) | **A** | I | I | R | I | I | I |
+| UX execution (how a screen/flow is built) | C | I | C | **A/R** | I | I | I |
+| Testing & quality assurance | I | C | **A/R** | I | C | I | C |
+| Security & authorization model | I | C | **A/R** | I | I | C | I |
+| Regulatory / responsible-gambling claims & copy | A | I | I | C | I | **A/R** | I |
+| Release approval | **A** | C | **R** | I | I | C | I |
+| Governance documentation (this framework, ADRs, decision log) | **A** | R (ADRs) | R (engineering docs) | I | I | R (compliance docs) | R (evidence-source docs) |
 
 Two rows show two Accountable cells deliberately (Rule Set approval; regulatory claims) — these mirror decisions this repository already treats as requiring **joint** sign-off (e.g. `RISK_RULE_SET_2026_1.md`: "becomes Accepted only on explicit Product Office / Data Science sign-off"). Joint accountability is the one intentional exception to "exactly one Accountable office" and only applies where an existing precedent already established it.
+
+## Notes on Parser Office
+
+Established 2026-07-26 (`docs/00-governance/DECISION_LOG.md`, `PO-U06.1-AC-001`), following a governance gap the Architecture Office identified during U-06.1 discovery (`docs/02-architecture/U-06.1-ARCHITECTURE-DISCOVERY.md` §9, R5): prior U-06 correspondence referenced a "Parser Office" that did not exist among the offices this framework originally established. Parser Office owns whether external evidence (fixture, market, or odds data SlipGuard does not itself generate) is obtainable, trustworthy, and governable in production — distinct from Architecture (structure), Data Science Lab (what evidence means mathematically once validated), and Engineering (implementation). See `docs/offices/PARSER_OFFICE.md`.
 
 ## Notes on UX Studio's Position
 

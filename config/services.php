@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    // U-17.5 — Capability B's Engineering Foundation Package. Internal/
+    // trial use only while `slipguard-market-intelligence.enabled` is false.
+    'the_odds_api' => [
+        'key' => env('THE_ODDS_API_KEY'),
+    ],
+
 ];

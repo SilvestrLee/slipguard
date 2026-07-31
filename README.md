@@ -2,15 +2,9 @@
 
 ## What This Is
 
-SlipGuard is a betting risk intelligence platform. It evaluates betting slips and exposes unnecessary structural risk. It does not predict match winners, provide tips, promise safe bets, or encourage more betting.
+SlipGuard is a betting decision intelligence platform. It evaluates betting slips, exposes unnecessary structural risk, and assists customers in constructing accumulators through deterministic, explainable planning. It does not predict match winners, promise safe bets, guarantee wins, or encourage more betting.
 
-SlipGuard is:
-
-- A betting risk intelligence platform.
-- A slip analysis tool.
-- A decision-support system.
-
-SlipGuard is not a bookmaker, tipster, prediction engine, or guaranteed-win system. See `docs/00-governance/VISION_AND_PRINCIPLES.md` for the full statement.
+SlipGuard is not a bookmaker, tipster, prediction engine, or guaranteed-win system. See `CLAUDE.md`'s Product Identity and Locked Decisions sections, `docs/00-governance/VISION_AND_PRINCIPLES.md`, and `docs/00-governance/DECISION_LOG.md` (SD-001) for the full, current statement.
 
 ## Technology Stack
 
@@ -40,7 +34,7 @@ CHANGELOG.md    Running log of what has shipped
 
 ## SGOS — SlipGuard Operating System
 
-`docs/` holds SGOS, the durable repository context: governance, product definition, architecture, the risk-engine contract, UX rules, engineering standards, quality strategy, delivery roadmap, and architecture decision records (`docs/adr/`). See `docs/00-governance/SGOS_VERSION.md` for the current version and versioning policy, and `docs/README.md` for the entry point.
+`docs/` holds SGOS, the durable repository context: governance, product definition, architecture, the risk-engine contract, UX rules, engineering standards, quality strategy, delivery roadmap, architecture decision records (`docs/adr/`), the standing constitution for each governance office (`docs/offices/`), and engineering validation/certification reports (`docs/engineering/`). See `docs/00-governance/SGOS_VERSION.md` for the current version and versioning policy, and `docs/README.md` for the entry point.
 
 Documentation philosophy: **just-in-time**. Only populate a document when it supports the current milestone or preserves a decision that must remain stable across milestones. Do not read `docs/_legacy-bootstrap/` for current direction — it is a superseded draft, preserved only as history (see its own README).
 
@@ -48,11 +42,11 @@ This repository, not chat history, is the source of truth. If you are picking th
 
 ## Current Milestone
 
-**Production Foundation: Certified (2026-07-25).** The deterministic engine, persistence boundary, and architectural layering have completed engineering validation (`docs/engineering/PRODUCTION_FOUNDATION_CERTIFICATE.md`, recommendation `READY WITH OBSERVATIONS`). Platform Engineering is closed; active work is now Customer Experience Engineering — see `TASKS.md`.
+This section intentionally does not name a specific milestone — that information goes stale the moment a sprint closes and this file is easy to forget to update. For current state, always check:
 
-**E-02 — Customer Foundation.** See `TASKS.md` for the active task list and `docs/08-operations/DELIVERY_ROADMAP.md` for the full roadmap:
-
-E-01 Engineering Initialization (complete) → **E-02 Customer Foundation** → E-03 Manual Slip Capture → E-04 Deterministic Risk Analysis (blocked on Data Science formula approval) → E-05 Risk Report → E-06 History and Journal → E-07 Public Trust Website → E-08 MVP Hardening → Release 1.0.
+- `TASKS.md` — the active milestone, in-progress/blocked/completed task lists, and the full roadmap sequence.
+- `docs/00-governance/REPOSITORY_STATE.md` — a dated snapshot of repository status, architecture stability, and current focus.
+- `docs/00-governance/DECISION_LOG.md` — the full, dated history of how the project got here.
 
 ## Running Locally
 
@@ -85,7 +79,7 @@ php artisan test
 
 ## Where to Begin
 
-Check `TASKS.md`'s "Ready" list for the current task. As of this writing, the next implementation work (customer authentication) depends on `docs/adr/ADR-005-AUTHENTICATION-STRATEGY.md` being approved by the founder — it currently carries a recommendation, not a decision. Don't start building against it until its status reads `Accepted`.
+Check `TASKS.md`'s Active Milestone section for the current task and its acceptance criteria.
 
 ## Working With Claude Code
 

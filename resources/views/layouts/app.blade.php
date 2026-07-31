@@ -7,40 +7,21 @@
 
         <title>{{ isset($title) ? $title.' - ' : '' }}{{ config('app.name', 'SlipGuard') }}</title>
 
+        @include('partials.favicon-links')
+
+        @include('partials.theme-init-script')
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
     </head>
     <body class="font-sans antialiased">
-        <a href="#main-content"
-           class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-md focus:bg-accent-strong focus:text-white focus:text-sm focus:font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
-            {{ __('Skip to content') }}
-        </a>
+        @include('partials.authenticated-shell', ['slot' => $slot, 'header' => $header ?? null])
 
-        <div class="min-h-screen flex flex-col bg-gray-50">
-            <livewire:layout.navigation />
-
-            @if (isset($header))
-                <header class="bg-white border-b border-gray-200">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
-
-            <main id="main-content" class="flex-1">
-                {{ $slot }}
-            </main>
-
-            <footer class="border-t border-gray-200 bg-white">
-                <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 text-sm text-gray-500 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <p>&copy; {{ now()->year }} SlipGuard. Structural risk analysis, not a prediction service.</p>
-                    <p class="text-gray-400">SlipGuard evaluates decision risk. It does not predict outcomes.</p>
-                </div>
-            </footer>
-        </div>
+        @livewireScripts
     </body>
 </html>

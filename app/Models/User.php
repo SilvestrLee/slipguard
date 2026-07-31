@@ -31,12 +31,24 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_internal' => 'boolean',
+            'can_manage_customer_data' => 'boolean',
+            'is_demo' => 'boolean',
         ];
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
         return (bool) $this->is_internal;
+    }
+
+    /**
+     * U-10.2 §2/OQ-1: a distinct grant from `is_internal` — an internal
+     * user does not automatically gain visibility into customer data by
+     * virtue of panel access alone.
+     */
+    public function canManageCustomerData(): bool
+    {
+        return (bool) $this->is_internal && (bool) $this->can_manage_customer_data;
     }
 
     public function bettingSlips(): HasMany
@@ -47,5 +59,26 @@ class User extends Authenticatable implements FilamentUser
     public function slipAnalyses(): HasMany
     {
         return $this->hasMany(SlipAnalysis::class);
+    }
+
+    public function labsFeatureInterests(): HasMany
+    {
+        return $this->hasMany(LabsFeatureInterest::class);
+    }
+
+    public function plannerSessions(): HasMany
+    {
+        return $this->hasMany(PlannerSession::class);
+    }
+
+    public function journalEntries(): HasMany
+    {
+        return $this->hasMany(JournalEntry::class);
+    }
+
+    /** Support Notes written about this user (as a customer), not by them. */
+    public function supportNotes(): HasMany
+    {
+        return $this->hasMany(SupportNote::class, 'customer_id')->latest();
     }
 }

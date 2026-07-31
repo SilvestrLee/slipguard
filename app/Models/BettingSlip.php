@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Domain\BettingSlip\AnalysisEligibility;
 use App\Domain\BettingSlip\AnalysisIneligibilityReason;
 use App\Domain\BettingSlip\BettingSlipStatus;
+use App\Domain\Planner\PlannerSessionStatus;
+use App\Exceptions\BettingSlipLockedByPlannerException;
 use App\Exceptions\InvalidBettingSlipTransitionException;
 use Database\Factories\BettingSlipFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +20,7 @@ class BettingSlip extends Model
     /** @use HasFactory<BettingSlipFactory> */
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'source_screenshot_path'];
 
     protected function casts(): array
     {
@@ -48,6 +50,38 @@ class BettingSlip extends Model
     }
 
     /**
+     * A repository-backed label for slips whose optional customer name is
+     * empty. It uses only recorded intake facts and never invents a fixture,
+     * competition, result, or analytical conclusion.
+     */
+    public function displayLabel(): string
+    {
+        if (filled(trim((string) $this->name))) {
+            return trim((string) $this->name);
+        }
+
+        $legs = $this->relationLoaded('legs')
+            ? $this->legs
+            : $this->legs()->get();
+
+        $firstEvent = trim((string) $legs->first()?->event_name);
+
+        if ($firstEvent !== '') {
+            $remaining = max($legs->count() - 1, 0);
+
+            return $remaining > 0
+                ? $firstEvent.' + '.$remaining.' more '.str('selection')->plural($remaining)
+                : $firstEvent;
+        }
+
+        if ($this->source_screenshot_path) {
+            return 'Screenshot slip';
+        }
+
+        return 'Slip from '.$this->created_at->format('j M Y');
+    }
+
+    /**
      * Lock this slip for analysis. Only a Draft slip with at least one
      * complete leg may become Ready.
      */
@@ -61,11 +95,53 @@ class BettingSlip extends Model
     }
 
     /**
-     * Unlock a Ready slip so it can be edited again.
+     * Unlock a Ready slip so it can be edited again. PD-008/ADR-009: refused
+     * while a non-terminal PlannerSession is using this slip as its source
+     * — the source slip is locked for the duration of an active planning
+     * session, released automatically once that session reaches a
+     * terminal status (Exported/Abandoned).
      */
     public function returnToDraft(): void
     {
+        if ($this->isLockedByPlanner()) {
+            throw new BettingSlipLockedByPlannerException;
+        }
+
         $this->transitionTo(BettingSlipStatus::Draft);
+    }
+
+    /**
+     * A computed fact, never a stored flag (ADR-009's source-slip lock
+     * representation) — always re-evaluated against current state, so it
+     * can never silently desync from the sessions that actually exist.
+     */
+    public function isLockedByPlanner(): bool
+    {
+        return $this->plannerSessions()
+            ->whereNotIn('status', [PlannerSessionStatus::Exported->value, PlannerSessionStatus::Abandoned->value])
+            ->exists();
+    }
+
+    /**
+     * U-07.8 validation finding: distinct from isLockedByPlanner() above.
+     * A PlannerSession row is never deleted regardless of its status
+     * (Abandoned/Exported are terminal, not removed) — and
+     * source_betting_slip_id's restrictOnDelete constraint (PD-008/PD-009's
+     * "permanently preserved" principle) therefore blocks deletion of a
+     * slip that was EVER used as a Planner source, not only while a
+     * session is still open. Deletion UIs must check this, not
+     * isLockedByPlanner(), which correctly excludes terminal sessions for
+     * its own (editing-lock) purpose but would wrongly imply deletion
+     * becomes safe again once a session ends.
+     */
+    public function hasPlannerHistory(): bool
+    {
+        return $this->plannerSessions()->exists();
+    }
+
+    public function plannerSessions(): HasMany
+    {
+        return $this->hasMany(PlannerSession::class, 'source_betting_slip_id');
     }
 
     /**

@@ -34,6 +34,8 @@ Only components the product currently needs are defined here. Add a new componen
 
 **Purpose:** group one coherent unit of content (a slip summary, a journal entry, an analysis result) as a single visually distinct surface.
 
+**Implemented U-12.0 (`PO-U12.0-001`) as `<x-card>`** — `variant="standard"` (default, bordered), `elevated`, `interactive` (pass `href`, renders as a single `<a>` per the Accessibility rule below), or `soft` (recessed, `surface-soft`). Uses the new `surface-card`/`shadow-elevation-*` tokens (`DESIGN_TOKENS.md`'s Surfaces/Elevation sections) instead of matching the page background exactly — a genuine, distinct lift, not just a border.
+
 - **Spacing:** internal padding `space-6` (desktop), `space-4` (mobile). Gap between stacked cards: `space-4`.
 - **Radius:** `radius-lg`.
 - **Elevation:** `elevation-1` at rest, `elevation-2` on hover only if the card is itself clickable/navigable.
@@ -42,10 +44,13 @@ Only components the product currently needs are defined here. Add a new componen
 - **Responsive:** cards never sit side-by-side on mobile unless they're intentionally short (badges, tags) — default to a single column.
 - **Usage rules:** one clear heading per card, one primary piece of information, supporting detail below.
 - **Anti-patterns:** nesting a card inside a card; putting more than one unrelated action inside a single card's footer.
+- **Homepage capability card (`U-15.2`):** the same `<x-card variant="interactive">` primitive, composed with an icon inside a small soft-accent circle (`bg-accent-strong/10 text-accent-strong`, not a bare icon) and a trailing arrow glyph that shifts on hover (`translate-x` only, `MOTION_SYSTEM.md` micro-interaction budget) — a content composition using the existing component, not a new base component.
 
 ## Badges
 
 **Purpose:** compact status labels — slip lifecycle status (Draft/Ready/Analysed/Archived), data-quality band, small tags. **Not** used for risk bands — see Risk Indicators below, which are a distinct, higher-stakes component.
+
+**Implemented U-12.0 (`PO-U12.0-001`) as `<x-badge>`** — `tone="neutral"` (default, lifecycle status) or `tone="quality-{strong,good,limited,insufficient}"` (data-quality band, using the existing quality tokens). Deliberately has no `risk-*` tone, so a badge can never be reached for a risk band by mistake.
 
 - **Spacing:** horizontal padding `space-2`, vertical `space-1`.
 - **Radius:** `radius-full` (pill) — badges are the one place a pill shape is appropriate, since they're compact labels, not action targets.
@@ -68,6 +73,46 @@ Only components the product currently needs are defined here. Add a new componen
 - **Responsive:** full-width on mobile, sized to content on desktop but never cramped.
 - **Usage rules:** always paired with a one-sentence plain-language explanation directly beneath it (`DESIGN_LANGUAGE.md`'s Data Explanation Philosophy). Never shown without at least the top reason.
 - **Anti-patterns:** a bare colour swatch or number with no label; reusing sportsbook-style "red = danger, green = safe" without also stating that Low risk is not "safe to bet" (`docs/09-compliance/PRODUCT_GUARDRAILS.md`) — SlipGuard never implies a band is permission to bet.
+
+## Alerts
+
+**Purpose:** a transient, page-level message — save confirmation, validation summary, a recoverable error. New component, added U-12.0 (`PO-U12.0-001`), consolidating flash-message blocks that previously used the raw Tailwind palette directly (`bg-red-50`, `bg-green-50`) with no dark-mode value.
+
+- **Spacing:** `space-4` horizontal/vertical padding.
+- **Radius:** `radius-md`.
+- **Elevation:** none — an alert sits flush in the content flow, not floating above it.
+- **Interaction:** static; dismissal (where offered) is a plain text/icon action, never the only way to stop seeing it (an alert tied to `session()->flash()` clears itself on the next request regardless).
+- **Accessibility:** `role="alert"`; colour is paired with the message text itself, never colour alone, consistent with every other status pattern in this document.
+- **Responsive:** full width of its container at every breakpoint.
+- **Usage rules:** implemented as `<x-alert variant="success|error|caution|info">` using the dedicated `alert-*` tokens (`DESIGN_TOKENS.md`) — never a risk/quality/labs token, and never the raw Tailwind palette directly.
+- **Anti-patterns:** stacking more than one alert at once; using an alert for a permanent, non-transient message (that's a `soft` Card, not an Alert).
+
+## Empty States
+
+**Purpose:** the "nothing here yet" state for a list screen (History, Journal, Planning History, Slip Index) — copy itself is `EMPTY_STATES.md`'s own authority, unchanged; this only unifies the markup.
+
+**Implemented U-12.0 (`PO-U12.0-001`) as `<x-empty-state>`** (`icon`, `title`, `description`, optional `action` slot) — a `surface-soft` panel with a dashed border, replacing four near-identical hand-written blocks.
+
+## Page Headers
+
+**Purpose:** the title + one-line description + one action pattern at the top of every in-app list screen.
+
+**Implemented U-12.0 (`PO-U12.0-001`) as `<x-page-header>`** (`title`, `description`, optional `action` slot) — mirrors `Section Headers`' rules below but for the top of a whole screen rather than a marketing-page section.
+
+## Metric Cards
+
+**Purpose:** a single numeric statistic with its label — the homepage Intelligence Credibility Section's metric grid, reusable anywhere else a system-level stat needs the same treatment.
+
+**Implemented U-12.0 (`PO-U12.0-001`) as `<x-metric-card>`** (`label`, `value`, `inverse` for use on a `surface-inverse` band).
+
+- **Spacing:** centred, `space-1` between value and label.
+- **Radius:** n/a — text only, no container.
+- **Elevation:** n/a.
+- **Interaction:** static.
+- **Accessibility:** the numeric value and its label are both always in the accessible text flow (never an image); count-up animation (where used) respects `prefers-reduced-motion` (`MOTION_SYSTEM.md`).
+- **Responsive:** wraps into the surrounding grid's own column count; no independent breakpoint behaviour.
+- **Usage rules:** always shows a real, verified value — never a fabricated or illustrative number (`docs/00-governance/DECISION_LOG.md`'s U-11.4 entry).
+- **Anti-patterns:** using this component to imply a customer-volume/adoption statistic before real data exists — see `EMPTY_STATES.md`'s "no misleading dashboard" principle.
 
 ## Navigation
 
@@ -107,6 +152,7 @@ Only components the product currently needs are defined here. Add a new componen
 - **Responsive:** headline drops one or two type-scale steps on mobile; never truncates or wraps awkwardly — write copy short enough to wrap cleanly at 375px.
 - **Usage rules:** one sentence of positioning, one sentence of supporting explanation, one primary action. No stat carousel, no logo wall, no auto-playing video.
 - **Anti-patterns:** anything from `VISUAL_INSPIRATION.md`'s Explicitly Rejected list — no flashing badges, no countdown, no "X people analysing slips right now."
+- **Report-preview treatment (`U-15.2`):** the hero's sample-report card carries a slim title-bar strip above its content (`SlipGuard — Risk Report`, one small icon) at `elevation-2` — one step above a standard card — so it reads as a piece of the actual product rather than a decorative mockup. No traffic-light window-chrome, no browser frame, no device bezel — those are literal-screenshot clichés `VISUAL_INSPIRATION.md` already rejects the spirit of ("noisy hero sections... competing claims").
 
 ## Forms
 
@@ -123,16 +169,18 @@ Only components the product currently needs are defined here. Add a new componen
 
 ## Upload Areas
 
-**Purpose:** reserved for future OCR/slip-image upload — **not built in the current MVP** (`PROJECT.md`'s MVP Non-Goals lists OCR as out of scope). Defined here only so a future sprint has a principle to follow, per Just-in-Time Documentation — do not build this component speculatively.
+**Purpose:** the drop-target control for Screenshot/PDF slip intake. Built U-11.3 as an honest shell (file selection only, no processing); `PO-U11.5A-001` has since approved real OCR/PDF extraction as an MVP capability, but that extraction engine is **not yet implemented** — pending Architecture/Parser/Compliance Office review, per `docs/00-governance/DECISION_LOG.md`. This section covers the control's visual grammar only, unaffected by whether extraction exists yet.
+
+**Implemented U-12.0 (`PO-U12.0-001`) as `<x-file-drop>`** (`inputId`, `accept`, `label`, `hint`) — extracted from the intake shell's two near-identical Screenshot/PDF blocks, now using `surface-soft` for the hover state instead of a flat neutral shade.
 
 - **Spacing:** generous internal padding (`space-8`+), large enough to feel like an obvious drop target.
 - **Radius:** `radius-lg`, dashed border to signal "drop zone" without needing colour.
 - **Elevation:** `elevation-1` on drag-over only.
-- **Interaction:** drag-over state, upload-progress state (skeleton, not spinner, per `MOTION_SYSTEM.md`), clear success/failure state.
-- **Accessibility:** a visible, keyboard-operable "choose file" fallback — drag-and-drop must never be the only path.
+- **Interaction:** drag-over state, upload-progress state (skeleton, not spinner, per `MOTION_SYSTEM.md`), clear success/failure state. Genuine drag-over/upload-progress states are not yet built — the current control accepts a click-to-browse file selection only, per U-11.3's scope.
+- **Accessibility:** a visible, keyboard-operable "choose file" fallback — drag-and-drop must never be the only path. Implemented as a `<label>` wrapping a `type="file"` input, not a `<div>` with a drop handler.
 - **Responsive:** full-width on mobile; opens the native camera/file picker.
 - **Usage rules:** state file-type/size limits before the user attempts an upload, not only after rejection.
-- **Anti-patterns:** none yet applicable — do not build until the OCR sprint is scoped.
+- **Anti-patterns:** implying automated extraction is active before it exists — every unsupported method must still show the honest "not available yet" notice (`docs/00-governance/DECISION_LOG.md`'s U-11.3 entries), unchanged by this component's styling.
 
 ## Analysis Cards
 
@@ -172,6 +220,7 @@ Only components the product currently needs are defined here. Add a new componen
 - **Responsive:** single-column, top-to-bottom on every breakpoint — this is a document to read, not a dashboard to scan, so it never becomes multi-column even on desktop.
 - **Usage rules:** must always follow `UX_RULES.md`'s exact hierarchy: headline → band → weakest leg → main reasons → per-leg detail → methodology/disclaimer → next action.
 - **Anti-patterns:** reordering the hierarchy for visual variety; hiding the disclaimer below the fold or in small print.
+- **Print & Save as PDF (`U-15.1`):** a report is a document the customer may reasonably want to keep or show someone else, so it must be genuinely printable — this uses the browser's native "Print" (which already offers "Save as PDF" as a destination on every major platform) rather than a generated-PDF endpoint, since no server-side PDF renderer exists in this codebase and one is not justified by this need alone. On print: collapsed sections (Other Contributing Factors beyond the first two, Methodology, Report Details) render fully expanded — nothing a customer chose to keep should be missing because an accordion happened to be closed; the persistent navigation, footer, and the two Exit Action buttons are hidden (`@media print`); the report's own single-column, top-to-bottom structure is otherwise unchanged, since it was already print-shaped before this rule existed. The trigger is a plain, secondary-style button placed beside the Exit Actions, calling the browser's own `window.print()` — no new component, animation, or interaction pattern introduced.
 
 ## Timeline
 
@@ -186,6 +235,19 @@ Only components the product currently needs are defined here. Add a new componen
 - **Usage rules:** each entry states what happened and when, in plain language ("Marked Ready," not a raw status code).
 - **Anti-patterns:** using timeline styling for content that isn't genuinely sequential.
 
+## Labs Feature Cards
+
+**Purpose:** present one future SlipGuard capability on the SlipGuard Labs page (SD-002, Programme U-13) — informational, never a promise (`docs/00-governance/DECISION_LOG.md`'s SD-002 Principle 1).
+
+- **Spacing:** matches the base Card component (`space-6` desktop / `space-4` mobile internal padding).
+- **Radius:** `radius-lg`.
+- **Elevation:** `elevation-1` at rest; no hover elevation change, since the card itself is not a navigation target (its buttons are the interactive elements, per the base Card component's own rule: a static-at-the-card-level surface doesn't get a misleading hover state).
+- **Interaction:** the status badge is static (see Badges, using the six Labs status tokens in `DESIGN_TOKENS.md`); "Notify Me"/"Join Beta" are ordinary secondary (outline) buttons that toggle to a confirmed state (label changes to "✓ Notified"/"✓ Joined Beta") on activation — never a third, separate confirmation screen.
+- **Accessibility:** status conveyed by label text plus colour, never colour alone, identical discipline to Risk Indicators and Badges elsewhere in this document.
+- **Responsive:** single column always (`Cards` component's own rule: cards never sit side-by-side on mobile unless intentionally short — a Labs card is a full content unit, not a short tag).
+- **Usage rules:** shows, at minimum: title, one status badge, a one/two-sentence summary, an optional "why this matters" line, and only the actions the feature actually enables (a feature with `beta_enabled: false` shows no "Join Beta" button at all, never a disabled one with no explanation).
+- **Anti-patterns:** any vote count, ranking, or "N people want this" social-proof number on the card — `VISUAL_INSPIRATION.md`'s Explicitly Rejected list already prohibits exactly this pattern on the homepage hero, and SD-002 itself defers all voting mechanisms; a bare status badge with no summary text (status alone is not informative enough to justify a whole card).
+
 ## Progress Indicators
 
 **Purpose:** show that something is in progress (analysis running, multi-step form) — see `MOTION_SYSTEM.md`'s Loading Behaviour for timing rules.
@@ -198,3 +260,18 @@ Only components the product currently needs are defined here. Add a new componen
 - **Responsive:** no change across breakpoints.
 - **Usage rules:** only shown for genuinely indeterminate or long-running (>2s) waits; never a fake/simulated progress bar.
 - **Anti-patterns:** a progress bar for an operation that completes in under 300ms (see Loading Behaviour) — that's motion without purpose.
+
+## Dialogs (Modals)
+
+**Purpose:** an interruptive, focused overlay for a single decision — confirming a destructive action (delete account, abandon a Planner session), never a routine information display (that's a Card or Alert).
+
+**Documented `U-16.0`** — this component shipped with the original Breeze scaffold and was never brought into the SGDS surface/elevation system during `U-12.0`, unlike Card/Badge/Alert. Standardised now: backdrop `bg-neutral-900/50` (matching the mobile navigation drawer's own backdrop exactly, one component away — previously a raw, non-token `bg-gray-500`); panel `bg-surface-card shadow-elevation-3` (the highest elevation in the product, since a modal sits above everything else on screen — previously `bg-neutral-50 shadow-xl`, indistinguishable in surface terms from the page behind it).
+
+- **Spacing:** panel padding is set by its own slot content (usually a `space-6` form), not the modal shell itself.
+- **Radius:** `radius-lg`.
+- **Elevation:** `elevation-3` — reserved for this component alone; nothing else in the product sits this high.
+- **Interaction:** focus-trapped (Tab/Shift+Tab cycle within the panel), closes on `Escape`, backdrop click, or an explicit action; body scroll locked while open.
+- **Accessibility:** focus moves to the first focusable element on open (where `focusable` is requested) and returns to the trigger on close; the backdrop is `aria-hidden`, the panel content carries its own heading.
+- **Responsive:** full-width with margin on mobile, capped at the requested `maxWidth` from tablet up.
+- **Usage rules:** exactly one modal open at a time; the action that opened it is the only way it closes besides Escape/backdrop — no modal auto-dismisses on a timer.
+- **Anti-patterns:** stacking a second modal on top of an open one; using a modal for content long enough to need its own scroll — that's a dedicated page.

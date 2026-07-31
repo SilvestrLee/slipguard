@@ -53,4 +53,16 @@ class UserFactory extends Factory
             'is_internal' => true,
         ]);
     }
+
+    /**
+     * U-10.2 §2: an internal staff member additionally granted the
+     * distinct customer-data permission (implies internal()).
+     */
+    public function operationsStaff(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_internal' => true,
+            'can_manage_customer_data' => true,
+        ]);
+    }
 }

@@ -2,7 +2,7 @@
 
 use App\Models\User;
 
-$workspaceRoutes = ['dashboard', 'profile', 'analyze', 'history', 'journal', 'help', 'settings'];
+$workspaceRoutes = ['dashboard', 'profile', 'analyze', 'history', 'journal', 'planner.history', 'help', 'settings'];
 
 test('guests are redirected to login from every workspace route', function (string $routeName) {
     $this->get(route($routeName))->assertRedirect(route('login'));
@@ -15,6 +15,13 @@ test('authenticated users can access every workspace route', function (string $r
         ->get(route($routeName))
         ->assertOk();
 })->with($workspaceRoutes);
+
+test('SlipGuard Labs is guest-visible (U-14.2) but interest actions remain customer-only', function () {
+    $this->get(route('labs'))->assertOk();
+
+    $user = User::factory()->create();
+    $this->actingAs($user)->get(route('labs'))->assertOk();
+});
 
 test('the dashboard greets the user and offers the primary call to action', function () {
     $user = User::factory()->create(['name' => 'Jane Doe']);
@@ -31,10 +38,17 @@ test('coming soon pages identify themselves and link back to the dashboard', fun
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->get(route('history'))
+        ->get(route('help'))
         ->assertOk()
-        ->assertSee('History')
+        ->assertSee('Help')
         ->assertSee('Back to Dashboard');
+});
+
+test('History and Journal are real Workspace screens, not coming-soon placeholders', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->get(route('history'))->assertOk()->assertDontSee('is on the way');
+    $this->actingAs($user)->get(route('journal'))->assertOk()->assertDontSee('is on the way');
 });
 
 test('the slip index shows an empty state for a new user', function () {

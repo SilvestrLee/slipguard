@@ -6,41 +6,43 @@ test('the mobile drawer exposes its accessibility contract', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertSee('id="mobile-drawer"', false)
-        ->assertSee('role="navigation"', false)
-        ->assertSee('aria-label="Main menu"', false)
-        ->assertSee('aria-controls="mobile-drawer"', false)
-        ->assertSee('Close menu')
-        ->assertSee('Toggle navigation');
+        ->assertSee('id="customer-navigation-drawer"', false)
+        ->assertSee('role="dialog"', false)
+        ->assertSee('aria-modal="true"', false)
+        ->assertSee('aria-label="Customer navigation"', false)
+        ->assertSee('aria-controls="customer-navigation-drawer"', false)
+        ->assertSee('Close navigation')
+        ->assertSee('Open navigation');
 });
 
-test('the mobile drawer uses Group 1/2/3 exactly, with no invented destinations', function () {
+test('the mobile drawer surfaces every real primary and utility destination, with no invented ones', function () {
     $response = $this->actingAs(User::factory()->create())->get(route('dashboard'));
 
     $response->assertOk();
     $response->assertSeeInOrder([
         'Dashboard',
-        'Analyze Slip',
-        'History',
+        'Analyse Slip',
+        'Build Accumulator',
+        'Analysis History',
         'Journal',
-        'Profile',
+        'Planning History',
+        'SlipGuard Labs',
+        'Help & methodology',
         'Settings',
-        'Log Out',
-        'Help',
-        'Analyse a slip',
+        'Log out',
     ]);
 
-    // OI-07: illustrative-only destinations from the source addendum stay excluded.
     $response->assertDontSee('How SlipGuard Works');
     $response->assertDontSee('Responsible Use');
 });
 
-test('the desktop navigation bar is unchanged by the mobile drawer', function () {
+test('the desktop sidebar is a distinct, always-present element from the mobile drawer', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('dashboard'))
         ->assertOk()
-        // The pre-existing desktop nav container (§45 — desktop retains the
-        // full horizontal bar, the drawer pattern is never used there).
-        ->assertSee('hidden space-x-8 sm:-my-px sm:ms-10 sm:flex', false)
-        ->assertSee('hidden sm:flex sm:items-center sm:ms-6 sm:gap-2', false);
+        // The fixed desktop sidebar (lg:flex, hidden below lg) is a
+        // structurally separate element from the mobile drawer (lg:hidden) —
+        // both render in the response, CSS decides which is visible.
+        ->assertSee('hidden w-72 flex-col border-r border-neutral-200 bg-surface-card/95 backdrop-blur-xl lg:flex', false)
+        ->assertSee('lg:hidden', false);
 });

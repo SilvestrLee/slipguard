@@ -6,7 +6,6 @@ use App\Models\BettingSlip;
 use App\Models\SlipAnalysis;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Livewire\Livewire;
 
 function reportLegAttributes(array $overrides = []): array
 {
@@ -48,6 +47,14 @@ test('a Full analysis report shows the score, band, and no edit action', functio
         ->assertSee('Analysis complete')
         ->assertSee((string) $analysis->structural_score)
         ->assertSee($analysis->risk_band->label())
+        ->assertSee($slip->displayLabel())
+        ->assertSee('Analyse Slip')
+        ->assertSee('Risk Report')
+        ->assertSee('View all analysis reports')
+        ->assertSee(route('history'), false)
+        ->assertSee('Add Journal Reflection')
+        ->assertSee(route('journal.create', ['analysis' => $analysis->id]), false)
+        ->assertSee('Return to Analysis History')
         ->assertSee('Analyse another slip')
         ->assertSee('Return to dashboard')
         ->assertDontSee('Edit this slip');
@@ -92,6 +99,31 @@ test('an Unavailable analysis report shows the reason and no score, band, or edi
         ->assertDontSee($analysis->risk_band?->label() ?? '__none__');
 });
 
+test('U-15.1: a Full analysis report offers Print / Save as PDF, but an Unavailable report does not', function () {
+    $slip = readySlipForReport([
+        ['event_name' => 'Arsenal vs Chelsea', 'market_name' => 'Match Result', 'selection_name' => 'Arsenal', 'decimal_odds' => '1.90'],
+        ['event_name' => 'Liverpool vs Everton', 'market_name' => 'Over 2.5 Goals', 'selection_name' => 'Over 2.5', 'decimal_odds' => '1.65'],
+    ]);
+    (new AnalyzeBettingSlip)->execute($slip);
+
+    $this->actingAs($slip->user)
+        ->get(route('analyze.report', $slip))
+        ->assertOk()
+        ->assertSee('Print / Save as PDF')
+        ->assertSeeHtml('onclick="window.print()"')
+        ->assertSeeHtml('data-print-expand');
+
+    $unavailableSlip = readySlipForReport([
+        ['sport' => 'Tennis', 'event_name' => 'Djokovic vs Alcaraz', 'market_name' => 'Match Winner', 'selection_name' => 'Djokovic', 'decimal_odds' => '1.40'],
+    ]);
+    (new AnalyzeBettingSlip)->execute($unavailableSlip);
+
+    $this->actingAs($unavailableSlip->user)
+        ->get(route('analyze.report', $unavailableSlip))
+        ->assertOk()
+        ->assertDontSee('Print / Save as PDF');
+});
+
 test('a report is forbidden to a user who does not own the slip', function () {
     $slip = readySlipForReport([
         ['event_name' => 'Arsenal vs Chelsea', 'market_name' => 'Match Result', 'selection_name' => 'Arsenal', 'decimal_odds' => '1.90'],
@@ -120,16 +152,26 @@ test('guests are redirected to login', function () {
     $this->get(route('analyze.report', $slip))->assertRedirect(route('login'));
 });
 
-test('the Analyze action on a Ready slip creates the analysis and redirects to its report', function () {
+test('the processing workspace analyzes a Ready slip and redirects to its report', function () {
+    // Real analysis now runs via the streamed analyze.processing.run
+    // endpoint (AnalysisProcessingController), not a synchronous Livewire
+    // method — matches the pattern in Analysis/AnalysisProcessingTest.php.
     $user = User::factory()->create();
     $slip = BettingSlip::factory()->for($user)->create();
     $slip->legs()->create(reportLegAttributes());
     $slip->markReady();
 
-    Livewire::actingAs($user)
-        ->test('betting-slips.index')
-        ->call('analyzeSlip', $slip->id)
-        ->assertRedirect(route('analyze.report', $slip->fresh()));
+    $content = $this->actingAs($user)
+        ->post(route('analyze.processing.run', $slip))
+        ->assertOk()
+        ->streamedContent();
+
+    $events = collect(explode("\n", trim($content)))
+        ->filter()
+        ->map(fn (string $line) => json_decode($line, true, flags: JSON_THROW_ON_ERROR));
+
+    expect($events->last())
+        ->toMatchArray(['type' => 'complete', 'report_url' => route('analyze.report', $slip->fresh())]);
 
     expect($slip->fresh()->status->value)->toBe('analysed');
     expect($slip->fresh()->analysis)->not->toBeNull();

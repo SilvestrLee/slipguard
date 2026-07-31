@@ -80,4 +80,9 @@ class SlipAnalysis extends Model
     {
         return $this->hasMany(LegAnalysis::class)->orderBy('display_order');
     }
+
+    public function journalEntries(): HasMany
+    {
+        return $this->hasMany(JournalEntry::class)->latest();
+    }
 }

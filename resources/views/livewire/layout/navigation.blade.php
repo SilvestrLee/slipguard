@@ -14,11 +14,62 @@ new class extends Component
 
         $this->redirect('/', navigate: true);
     }
+
+    /**
+     * Command palette quick-navigation targets — SlipGuard's own real,
+     * named routes (not a generic list), per the founder's own instruction
+     * to personalise the OddStorm-inspired search modal's contents.
+     */
+    public function paletteItems(): array
+    {
+        return [
+            ['label' => __('Dashboard'), 'description' => __('Your overview and recent activity'), 'url' => route('dashboard')],
+            ['label' => __('Analyze a Slip'), 'description' => __("Check a slip's structural risk before you place it"), 'url' => route('analyze.create')],
+            ['label' => __('History'), 'description' => __('Everything SlipGuard has already analysed for you'), 'url' => route('history')],
+            ['label' => __('Journal'), 'description' => __('What you decided and what you learned'), 'url' => route('journal')],
+            ['label' => __('Planning History'), 'description' => __('Your past accumulator planning sessions'), 'url' => route('planner.history')],
+            ['label' => __('SlipGuard Labs'), 'description' => __("What's new and what's coming next"), 'url' => route('labs')],
+            ['label' => __('Profile'), 'description' => __('Your account details'), 'url' => route('profile')],
+            ['label' => __('Settings'), 'description' => __('Preferences and account settings'), 'url' => route('settings')],
+            ['label' => __('Help'), 'description' => __('Get help using SlipGuard'), 'url' => route('help')],
+        ];
+    }
 }; ?>
 
 <nav
     x-data="{
         open: false,
+        {{-- Founder direct instruction (2026-07-28): the logo now maps to the active theme here too, reusing the exact isDark + slipguard-theme-changed pattern already built for the public header and the guest auth layout — not a new mechanism. --}}
+        isDark: window.SlipGuardTheme?.isDark()
+            ?? (document.documentElement.getAttribute('data-theme') === 'dark'
+                || (document.documentElement.getAttribute('data-theme') === null
+                    && window.matchMedia('(prefers-color-scheme: dark)').matches)),
+        {{--
+            Founder direct instruction (2026-07-28): "the header in the
+            portal needs to be sticky and behave like it does on the front
+            facing website... the logo icon [should] keep rotating as the
+            user scrolls... only stop when the user stops scrolling... when
+            the user starts scrolling back to the top, it should scroll in
+            the reverse direction." This directly overrides
+            `MOTION_SYSTEM.md`'s prior "never on authenticated screens"
+            scope for the Signature Motion rotation — the exact same
+            formula/mechanism already built and verified for the public
+            header (`public-nav.blade.php`), reused here rather than
+            reinvented: rotation is a pure function of absolute scroll
+            position, so "reverses when scrolling back up" and "stops the
+            instant scrolling stops" both fall out of that formula for
+            free, with no separate direction-tracking state needed.
+        --}}
+        condensed: false,
+        rotation: 0,
+        reduceMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+        updateFromScroll() {
+            this.condensed = window.scrollY > 40;
+            if (this.reduceMotion) { return; }
+            const maxRotationScroll = 400;
+            const maxDegrees = 18;
+            this.rotation = Math.max(0, Math.min(window.scrollY, maxRotationScroll)) / maxRotationScroll * maxDegrees;
+        },
         openDrawer() {
             this.open = true;
             document.body.classList.add('overflow-hidden');
@@ -52,16 +103,51 @@ new class extends Component
             }
         },
     }"
+    x-init="
+        window.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'command-palette' }));
+            }
+        });
+        updateFromScroll();
+        let handleScroll = () => updateFromScroll();
+        if (window.__slipguardHeaderScroll) { window.removeEventListener('scroll', window.__slipguardHeaderScroll); }
+        window.__slipguardHeaderScroll = handleScroll;
+        window.addEventListener('scroll', handleScroll, { passive: true });
+    "
+    x-on:slipguard-theme-changed.window="isDark = $event.detail.dark"
     @keydown.escape.window="closeDrawer()"
     @keydown.tab.window="trapFocus($event)"
-    class="bg-white border-b border-gray-200"
+    :class="condensed ? 'shadow-elevation-1' : ''"
+    class="print:hidden sticky top-0 z-40 border-b border-neutral-200/70 backdrop-blur-md bg-surface-page/70 transition-[box-shadow] duration-standard ease-in-out"
 >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    {{-- U-16.1 (Phase 10): was raw `max-w-7xl` — the exact same 1280px value as `container-marketing`, expressed as a second, older class. One container width, one class. --}}
+    <div class="container-marketing mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate aria-label="SlipGuard dashboard">
-                        <img src="{{ asset('brand/slipguard-logo-light-transparent.svg') }}" alt="" aria-hidden="true" class="h-8 w-auto shrink-0">
+                    {{--
+                        Founder direct instruction (2026-07-28): the portal
+                        header now matches the public header's own
+                        icon/wordmark split so the rotation has something
+                        to rotate independently of the static "SlipGuard"
+                        text — reusing the same accent icon assets
+                        (`slipguard-icon-accent(-dark).svg`), not the navy
+                        full lockup previously used here. This knowingly
+                        reintroduces the colour mismatch already disclosed
+                        and accepted when the public header adopted the
+                        purple/white accent icon — the footer and other
+                        remaining navy instances are unchanged, out of
+                        scope for this header-only motion.
+                    --}}
+                    <a href="{{ route('dashboard') }}" wire:navigate aria-label="SlipGuard dashboard" class="flex items-center gap-2.5">
+                        <img src="{{ asset('brand/slipguard-icon-accent.svg') }}"
+                             alt=""
+                             aria-hidden="true"
+                             :style="reduceMotion ? '' : `transform: rotate(${rotation}deg)`"
+                             class="h-8 w-auto shrink-0">
+                        <span class="text-xl font-semibold tracking-tight text-neutral-900">{{ __('SlipGuard') }}</span>
                     </a>
                 </div>
 
@@ -78,20 +164,46 @@ new class extends Component
                     <x-nav-link :href="route('journal')" :active="request()->routeIs('journal')" wire:navigate>
                         {{ __('Journal') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('planner.history')" :active="request()->routeIs('planner.history')" wire:navigate>
+                        {{ __('Planning History') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('labs')" :active="request()->routeIs('labs')" wire:navigate>
+                        {{ __('SlipGuard Labs') }}
+                    </x-nav-link>
                 </div>
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6 sm:gap-2">
+                <x-theme-toggle />
+
+                {{--
+                    Founder direct instruction (2026-07-28): "the header is
+                    missing two features: search icon and language
+                    selection," then "[image of OddStorm's search modal]
+                    ... personalise the result to slipguard," then "make the
+                    search and language feature sitewide." Search evolved
+                    from a "coming soon" dropdown into a real command-palette
+                    quick-navigation modal (`<x-command-palette>`,
+                    `paletteItems()` above) once the reference screenshot was
+                    supplied — see that component's own comment for what was
+                    and wasn't adopted from the reference. Both this and
+                    `<x-language-selector>` are shared components, also used
+                    by the public header and the guest auth layout, so all
+                    three headers behave identically.
+                --}}
+                <x-search-trigger-button />
+                <x-language-selector />
+
                 <!-- Notifications placeholder -->
                 <x-dropdown align="right" width="60">
                     <x-slot name="trigger">
-                        <button class="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none transition ease-in-out duration-150" aria-label="{{ __('Notifications') }}">
+                        <button class="p-2 rounded-md text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 focus:outline-none transition ease-in-out duration-150" aria-label="{{ __('Notifications') }}">
                             <x-heroicon-o-bell class="h-5 w-5" />
                         </button>
                     </x-slot>
 
                     <x-slot name="content">
-                        <div class="px-4 py-3 text-sm text-gray-500">
+                        <div class="px-4 py-3 text-sm text-neutral-500">
                             {{ __("You're all caught up. No new notifications.") }}
                         </div>
                     </x-slot>
@@ -100,7 +212,7 @@ new class extends Component
                 <!-- User menu -->
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-neutral-500 bg-neutral-50 hover:text-neutral-700 focus:outline-none transition ease-in-out duration-150">
                             <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
 
                             <x-heroicon-o-chevron-down class="ms-1 h-4 w-4" />
@@ -132,7 +244,7 @@ new class extends Component
             <div class="-me-2 flex items-center sm:hidden">
                 <button x-ref="menuTrigger" @click="openDrawer()"
                         :aria-expanded="open.toString()" aria-controls="mobile-drawer"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out" aria-label="{{ __('Toggle navigation') }}">
+                        class="inline-flex items-center justify-center p-2 rounded-md text-neutral-400 hover:text-neutral-500 hover:bg-neutral-100 focus:outline-none focus:bg-neutral-100 focus:text-neutral-500 transition duration-150 ease-in-out" aria-label="{{ __('Toggle navigation') }}">
                     <x-heroicon-o-bars-3 class="h-6 w-6" />
                 </button>
             </div>
@@ -149,16 +261,28 @@ new class extends Component
     <div id="mobile-drawer" x-ref="drawer" x-show="open" x-cloak
          x-transition:enter="transition-transform duration-300 ease-out" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
          x-transition:leave="transition-transform duration-300 ease-in" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
-         class="fixed inset-y-0 right-0 z-50 w-full max-w-xs bg-white shadow-xl flex flex-col sm:hidden"
+         class="fixed inset-y-0 right-0 z-50 w-full max-w-xs bg-surface-page shadow-elevation-3 border-l-2 border-neutral-300 flex flex-col sm:hidden"
          role="navigation" aria-label="{{ __('Main menu') }}"
          style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);">
 
         <div class="flex items-center justify-between h-16 px-4 border-b border-neutral-200 shrink-0">
-            <img src="{{ asset('brand/slipguard-logo-light-transparent.svg') }}" alt="SlipGuard" class="h-8 w-auto shrink-0">
-            <button x-ref="drawerClose" @click="closeDrawer()" aria-label="{{ __('Close menu') }}"
-                    class="inline-flex items-center justify-center p-2 rounded-md text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
-                <x-heroicon-o-x-mark class="h-6 w-6" />
-            </button>
+            <div class="flex items-center gap-2.5">
+                <img src="{{ asset('brand/slipguard-icon-accent.svg') }}"
+                     alt=""
+                     aria-hidden="true"
+                     :style="reduceMotion ? '' : `transform: rotate(${rotation}deg)`"
+                     class="h-8 w-auto shrink-0">
+                <span class="text-lg font-semibold tracking-tight text-neutral-900">{{ __('SlipGuard') }}</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <x-search-trigger-button />
+                <x-language-selector />
+                <x-theme-toggle />
+                <button x-ref="drawerClose" @click="closeDrawer()" aria-label="{{ __('Close menu') }}"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                    <x-heroicon-o-x-mark class="h-6 w-6" />
+                </button>
+            </div>
         </div>
 
         <div class="flex-1 overflow-y-auto py-4">
@@ -168,6 +292,8 @@ new class extends Component
                     ['route' => 'analyze', 'label' => __('Analyze Slip')],
                     ['route' => 'history', 'label' => __('History')],
                     ['route' => 'journal', 'label' => __('Journal')],
+                    ['route' => 'planner.history', 'label' => __('Planning History')],
+                    ['route' => 'labs', 'label' => __('SlipGuard Labs')],
                 ] as $item)
                     @php $isActive = request()->routeIs($item['route']); @endphp
                     <a href="{{ route($item['route']) }}" wire:navigate @click="selectDestination()"
@@ -212,4 +338,6 @@ new class extends Component
             </a>
         </div>
     </div>
+
+    <x-command-palette :items="$this->paletteItems()" />
 </nav>

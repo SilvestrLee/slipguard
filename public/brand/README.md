@@ -1,43 +1,27 @@
-# SlipGuard Site Logo Assets
+# SlipGuard Brand Assets
 
-These assets have transparent backgrounds and preserve the supplied logo artwork.
-
-## Recommended use
-
-### Light backgrounds
-Use:
-- `slipguard-logo-light-transparent.svg`
-- `slipguard-icon-light-transparent.svg`
-
-### Dark backgrounds
-Use:
-- `slipguard-logo-dark-transparent.svg`
-- `slipguard-icon-dark-transparent.svg`
+`slipguard-icon-accent.svg` is the approved logo icon and the single
+source used across light and dark themes.
 
 ## HTML examples
 
 ```html
 <img
-  src="/brand/slipguard-logo-light-transparent.svg"
-  alt="SlipGuard"
-  width="240"
+  src="/brand/slipguard-icon-accent.svg"
+  alt=""
+  aria-hidden="true"
+  width="40"
   height="auto"
 />
 ```
 
-```html
-<img
-  src="/brand/slipguard-logo-dark-transparent.svg"
-  alt="SlipGuard"
-  width="240"
-  height="auto"
-/>
-```
+Render the `SlipGuard` wordmark as adjacent accessible text where a
+full brand lockup is needed.
 
 ## Important
 
 - Do not recolour, stretch, skew, crop, trace, re-type, or redraw the logo.
 - Preserve aspect ratio.
-- Use the light logo on light surfaces and the dark logo on dark surfaces.
-- The SVG files embed transparent PNG artwork to preserve the approved appearance exactly.
+- Use the same approved icon on light and dark surfaces.
+- The SVG embeds a display-optimised, lossless WebP rendition of the supplied artwork.
 - For true editable vector paths, the original Illustrator/Figma/SVG master artwork is required.

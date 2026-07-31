@@ -2,14 +2,42 @@
 
 | Field | Value |
 |---|---|
-| Version | 1.0 |
-| Status | Approved |
+| Version | 1.2 |
+| Status | Approved — **superseded in part by `U-13.0` (`PO-U13.0-001`), 2026-07-27; recomposed `U-15.2` (`PO-U15.2-001`), 2026-07-27; two sections replaced `U-15.3` (`PO-U15.3-001`), 2026-07-28** |
 | Applies To | SlipGuard MVP |
 | Owner | Product Office |
-| Last Updated | 2026-07-24 |
+| Last Updated | 2026-07-27 |
 | Related Documents | [Design Language](DESIGN_LANGUAGE.md), [Component Principles](COMPONENT_PRINCIPLES.md), [Visual Inspiration](VISUAL_INSPIRATION.md), [Trust Signals](TRUST_SIGNALS.md) |
 
 ---
+
+**Amendment, recorded explicitly (`U-13.0`, `docs/00-governance/DECISION_LOG.md`):** this document's original premise — a single homepage teaching every capability in one scroll — is superseded by the public site's new multi-page information architecture. §2 Problem and §3 How SlipGuard Works' **full explanation** lives on `/analyse`, §4's **full example report** lives on `/reports`, and §6 Journal is not a public marketing section (Journal remains an authenticated-only capability, listed in the Product Capabilities section below). The section-by-section detail below is retained as the **historical record of what each moved section originally said** — still the source of truth for that copy's exact wording, now hosted on its new page.
+
+**Second amendment, recorded explicitly (`U-15.2`, `docs/00-governance/DECISION_LOG.md`):** `U-13.0`'s "introduction only" homepage read as flat and under-narrated in practice — a hero, a static capability list, one dark proof band, then a same-weight exit. This amendment does not reverse `U-13.0`'s core decision (the *full* Problem/How-it-works/Example-Report explanations still live on their dedicated pages, not duplicated here) — it recomposes the introduction itself into a genuine narrative arc, each section brief (one to three sentences, never the dedicated page's full explanation verbatim) and visually distinct from its neighbours:
+
+```
+Hero
+  ↓
+Problem (brief — full version on /analyse)
+  ↓
+Solution (brief)
+  ↓
+Proof (the Intelligence Credibility metrics — unchanged content)
+  ↓
+How It Works (brief 3-step — full version on /analyse)
+  ↓
+Product Capabilities (deep-links to /analyse, /reports, /planner, Dashboard, Journal, History)
+  ↓
+Trust (deterministic engine, methodology, real reports, release notes, rule set — links out, no badges/seals)
+  ↓
+CTA
+```
+
+- **No two adjacent sections share the same background treatment or vertical rhythm** — this is the primary deliverable of this amendment, not a decorative afterthought: Hero (`gradient-hero`), Problem (`surface-page`, tightest spacing), Solution (`surface-soft` band), Proof (`surface-inverse`/`gradient-inverse`, unchanged), How It Works (`surface-page`, bordered top/bottom), Product Capabilities (`surface-soft`), Trust (`surface-page`, bordered top), CTA (`surface-soft`, bordered top).
+- **CTAs are progressive, never repeated verbatim**: Hero — primary "Analyse Your Slip" (routes to registration for guests, to slip entry for customers) + secondary "See Example Report" (→ `/reports`, pulls proof forward rather than making the visitor wait for it). Solution — a single secondary "See how it works" (→ `/analyse`). Product Capabilities — each card is its own destination link (no separate button). Trust — Methodology/Release Notes text links. Closing CTA — the one remaining primary action + a soft "View pricing" text link, never a second primary-styled button (`COMPONENT_PRINCIPLES.md`'s Buttons: "exactly one primary... per screen").
+- **No fabricated testimonials or social proof.** A generic SaaS "Proof" step conventionally uses customer testimonials/logos; SlipGuard has none to show honestly at this stage of the product's life, and inventing any would violate `TRUST_SIGNALS.md` and `docs/09-compliance/PRODUCT_GUARDRAILS.md` outright. Proof here is evidentiary instead: the sample report itself (Hero) and the Intelligence Credibility Section's own verified, constitutional facts (deterministic, explainable, test-covered) — proof of how the system behaves, not proof that other people used it.
+- **The report preview is treated as a piece of software, not a floating marketing card**: a slim title-bar strip (`SlipGuard — Risk Report`, a small icon, no traffic-light window-chrome cliché) sits above the same metric content that was already there, at one elevation step higher than a standard card, reinforcing "this is what the real product looks like," not an illustration of it.
+- Cross-Section Rules below are otherwise unchanged (one CTA style per instance, no urgency/scarcity, `MOTION_SYSTEM.md`'s one-reveal-per-section budget).
 
 The narrative flow of the public homepage, section by section. This is **not** a design spec — no layout, colour, or component decisions here (see `COMPONENT_PRINCIPLES.md` and `DESIGN_TOKENS.md` for those). This document exists so that whoever eventually builds the page — Claude or a human — tells the same story in the same order for the same reasons.
 

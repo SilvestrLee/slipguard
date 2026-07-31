@@ -2,13 +2,71 @@
 @plugin "@tailwindcss/forms";
 
 /*
+ * U-16.2 — `x-cloak` is an Alpine.js convention, not a built-in CSS
+ * behaviour: Alpine only *removes* the attribute once it initialises: it
+ * never hides the element for you. Without this rule, every `x-cloak`
+ * usage in the app (the theme toggle's moon icon, the mobile nav
+ * drawer, Report's expandable panels, Planner's modals) is briefly
+ * visible on every full page load before Alpine finishes booting — a
+ * real flash-of-unstyled-content bug, verified directly (grep found
+ * four files using `x-cloak`, zero CSS rules defining it anywhere).
+ */
+[x-cloak] {
+    display: none !important;
+}
+
+/*
+ * U-12.0 (SlipGuard Design Language System) — surface, elevation, and
+ * gradient tokens added below the existing colour/radius/motion tokens.
+ * `docs/05-ux/DESIGN_TOKENS.md`'s prior "No gradients. Flat colour only"
+ * rule is superseded by `PO-U12.0-001` §13's explicit approval of a
+ * restrained, theme-aware gradient system — recorded as a constitutional
+ * amendment (`docs/00-governance/DECISION_LOG.md`), not a silent change.
+ * Risk/quality/labs band colours themselves remain flat, ungradiented —
+ * gradients are a surface/atmosphere treatment only, never applied to a
+ * risk-meaning-bearing colour (`COMPONENT_PRINCIPLES.md`'s Risk
+ * Indicators still require a flat colour + icon + label, unchanged).
+ */
+
+/*
  * Design tokens — docs/05-ux/DESIGN_TOKENS.md is the source of truth.
  * Colours are defined as CSS custom properties overridden under a dark-mode
  * media query, then aliased into Tailwind's @theme so every `bg-neutral-50`,
  * `text-risk-high`, etc. utility resolves to the correct value automatically
  * — no `dark:` variant needed per usage site (ACCESSIBILITY.md: respect
  * `prefers-color-scheme` by default, implemented once at the token level).
+ *
+ * U-11.3 §7 — manual override: `<html data-theme="light|dark">` (stamped
+ * by an inline, pre-render script — resources/views/layouts/*.blade.php —
+ * reading a `localStorage` preference before first paint, avoiding a
+ * flash of the wrong theme) takes precedence over `prefers-color-scheme`
+ * in both directions. No attribute at all means "follow system
+ * preference," unchanged from before this override existed.
  */
+
+/*
+ * Explicit safelist for dynamically-built class names — Tailwind v4's
+ * build-time scanner only generates a utility class it can find as a
+ * complete literal string in a scanned file; it cannot resolve PHP
+ * interpolation like `text-risk-{{ $token }}` (dashboard.blade.php,
+ * report.blade.php's risk-band badges) or `text-labs-{{ $token }}-strong`
+ * (labs/index.blade.php's status badges). Without this block none of those
+ * classes are emitted at all — confirmed directly (U-13.4 UX review,
+ * 2026-07-26): the compiled CSS contained zero `.text-risk-*` rules,
+ * meaning the Risk Indicator ("the single most important component in the
+ * product," COMPONENT_PRINCIPLES.md) has been rendering colourless since
+ * it shipped. `@source inline(...)` is Tailwind v4's own mechanism for
+ * exactly this situation — list every literal class the app constructs
+ * dynamically so the scanner generates it regardless of interpolation.
+ * Keep this list in sync with DESIGN_TOKENS.md's risk/quality/labs token
+ * names — a new status/band value needs a new entry here too.
+ */
+@source inline("{text,bg,border}-risk-{low,moderate,high,very-high}");
+@source inline("{bg,border}-risk-{low,moderate,high,very-high}/{10,30}");
+@source inline("{text,bg,border}-quality-{strong,good,limited,insufficient}");
+@source inline("{bg,border}-quality-{strong,good,limited,insufficient}/{10,30}");
+@source inline("text-labs-{research,planned,designing,development,beta,released}-strong");
+@source inline("{bg,border}-labs-{research,planned,designing,development,beta,released}/{10,30}");
 
 :root {
     --neutral-50: #f8fafc;
@@ -23,8 +81,16 @@
     --neutral-900: #0f172a;
     --neutral-950: #020617;
 
-    --accent: #2563eb;
-    --accent-strong: #1d4ed8;
+    /* U-08.1 (`PO-U08.1-AC-001` §13) — Rich Indigo replaces the prior restrained blue
+       as SlipGuard's principal accent family, in both themes. Values corroborated via
+       UI UX Pro Max's colour domain (indigo-500/600 pairing appears repeatedly across
+       its design-system/SaaS references) rather than picked freehand. `--alert-info`
+       deliberately keeps its own prior blue value, unchanged — §13's own "semantic
+       caution" applies: info alerts are a distinct meaning from brand identity, and
+       collapsing the two would make an info alert and a plain accent-coloured link
+       indistinguishable. */
+    --accent: #6366f1;
+    --accent-strong: #4f46e5;
 
     --risk-low: #059669;
     --risk-low-strong: #047857;
@@ -38,24 +104,119 @@
     --quality-good: #0284c7;
     --quality-limited: #6366f1;
     --quality-insufficient: #64748b;
+
+    --labs-research: #7c3aed;
+    --labs-research-strong: #6d28d9;
+    --labs-planned: #0284c7;
+    --labs-planned-strong: #0369a1;
+    --labs-designing: #c026d3;
+    --labs-designing-strong: #a21caf;
+    --labs-development: #4f46e5;
+    --labs-development-strong: #4338ca;
+    --labs-beta: #0d9488;
+    --labs-beta-strong: #0f766e;
+    --labs-released: #16a34a;
+    --labs-released-strong: #15803d;
+
+    /* U-12.0 surface hierarchy — page/soft alias the existing neutral scale (see @theme below); card is a genuinely distinct tier, giving cards a gentle lift off the page instead of matching it exactly. */
+    --surface-card: #ffffff;
+    --surface-section: rgb(248 250 252 / 0.82);
+    --surface-record: rgb(255 255 255 / 0.96);
+    --surface-primary: rgb(255 255 255 / 0.92);
+    --surface-public-atmosphere: rgb(248 250 252 / 0.62);
+    --gradient-public-quiet: linear-gradient(180deg, rgb(255 255 255 / 0.96) 0%, rgb(241 245 249 / 0.98) 52%, rgb(226 232 240 / 0.96) 100%);
+    --public-section-edge: rgb(203 213 225 / 0.58);
+    --border-structural: #cbd5e1;
+    --border-internal: rgb(203 213 225 / 0.72);
+    --edge-highlight: rgb(255 255 255 / 0.82);
+
+    /* U-12.0 alert tokens — distinct from risk/quality bands (never reused for risk meaning); fixes a real pre-existing gap: ad hoc bg-red-50/bg-green-50-style flash messages never had a dark-mode value. */
+    --alert-success: #16a34a;
+    --alert-success-strong: #15803d;
+    --alert-error: #dc2626;
+    --alert-error-strong: #b91c1c;
+    --alert-caution: #ca8a04;
+    --alert-caution-strong: #a16207;
+    --alert-info: #2563eb;
+    --alert-info-strong: #1d4ed8;
+
+    /* U-12.0 §12.2 confidence tokens — reserved, no current consumer. Exists for
+       U-11.5A's future OCR/PDF extraction confidence display; that capability is
+       approved (PROJECT.md's MVP Non-Goals) but not yet implemented (pending
+       Architecture/Parser/Compliance Office review, DECISION_LOG.md). Defined
+       now, per the commission's own instruction, so a future sprint has a token
+       to reuse rather than inventing one ad hoc. */
+    --confidence-high: #0f766e;
+    --confidence-medium: #b45309;
+    --confidence-low: #b91c1c;
+
+    /* Founder direct instruction (2026-07-27): no shadows anywhere on the site — elevation
+       is now communicated by a contrasting border line instead (see COMPONENT_PRINCIPLES.md's
+       Elevation note and each component's own border-weight scale). The `shadow-elevation-*`
+       utility classes remain in markup site-wide rather than being mechanically stripped from
+       every one of the ~40 call sites — with the value below `none`, they resolve to nothing
+       and cost nothing; every location that relied on shadow alone (no border) for contrast
+       had an explicit border added directly at that call site instead. */
+    --shadow-1: none;
+    --shadow-2: none;
+    --shadow-3: none;
+
+    /* U-12.0 gradients — restrained, low-noise atmosphere only; never applied to risk/quality/labs band colours.
+       `PO-U16.2-CR-001` §8/§9: strengthened from f1f5f9 (neutral-100) to e2e8f0 (neutral-200) as the
+       second stop — still two adjacent, fully neutral shades from the same scale, but the prior pairing
+       was perceptible only with opaque section overrides removed AND close scrutiny; this remains
+       "restrained atmosphere," not colour, but is now meant to read in a normal screenshot per §9's
+       explicit acceptance standard. */
+    --gradient-page: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    --gradient-hero: radial-gradient(120% 120% at 50% -10%, rgb(79 70 229 / 0.08) 0%, rgb(79 70 229 / 0) 60%);
+    --gradient-inverse: radial-gradient(120% 120% at 50% -20%, rgb(129 140 248 / 0.16) 0%, rgb(27 28 32 / 0) 60%);
+
+    /* Founder direct instruction (2026-07-27): every CTA section site-wide uses a bold accent-colour
+       gradient background so it visibly stands out (a deliberate departure from the atmosphere-only
+       philosophy above — this one is meant to be seen, not felt). Constant across both themes, like
+       `--surface-inverse`/`--gradient-inverse` already are — not redefined in either dark block below.
+       This is a real accessibility decision, not an oversight: dark mode's `--accent-strong` (now
+       #818cf8, indigo-400) is tuned for light text/icons against a dark page, and white text on top
+       of it would fail contrast; indigo-500/700 (deep, saturated shades — "Rich Indigo," `U-08.1`
+       §13) were chosen here instead because white text against them comfortably clears 4.5:1 in
+       both themes, consistently, rather than only in one. Updated from blue to indigo alongside
+       every other accent-derived token, `U-08.1` §13. */
+    --gradient-cta: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+    --gradient-dashboard-feature: linear-gradient(145deg, #6366f1 0%, #4f46e5 48%, #3730a3 100%);
+
+    /* Founder direct instruction (2026-07-27): gradients for button backgrounds — references the
+       theme-reactive `--accent`/`--accent-strong` variables directly, so it adapts automatically per
+       theme exactly like every other themed value, with no separate dark-mode override needed. */
+    --gradient-button: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+
+    /* U-12.0 §12.2 inverse surface — deliberately constant across themes (never redefined in either dark block below), matching the Intelligence Section's existing precedent of staying dark regardless of site theme.
+       U-08.1 §12: updated from navy to the same smoked-graphite tone as the new dark-theme foundation — otherwise the always-dark Proof section would sit as a mismatched navy island inside an app that no longer uses navy as its dark identity anywhere else. */
+    --surface-inverse: #1b1c20;
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
-        --neutral-50: #0f172a;
-        --neutral-100: #1e293b;
-        --neutral-200: #334155;
-        --neutral-300: #475569;
-        --neutral-400: #64748b;
-        --neutral-500: #94a3b8;
-        --neutral-600: #cbd5e1;
-        --neutral-700: #e2e8f0;
-        --neutral-800: #f1f5f9;
-        --neutral-900: #f8fafc;
+    :root:not([data-theme="light"]) {
+        /* U-08.1 (`PO-U08.1-AC-001` §12) — smoked graphite replaces the prior blue-tinted
+           slate-inverted scale as the dark-theme foundation, deliberately avoiding "generic
+           dark navy." Anchored on the memo's own directional values (#1B1C20/#141518,
+           used directly below for --gradient-page's two stops) and extended into a full,
+           evenly-stepped warm-neutral scale — genuinely desaturated graphite, not a navy
+           with the blue turned down. Light theme's neutral scale is intentionally
+           untouched (already a low-saturation slate, not the thing §12 was about). */
+        --neutral-50: #1b1c20;
+        --neutral-100: #232428;
+        --neutral-200: #2e2f34;
+        --neutral-300: #3c3d42;
+        --neutral-400: #55565b;
+        --neutral-500: #85868b;
+        --neutral-600: #b3b4b8;
+        --neutral-700: #d3d4d6;
+        --neutral-800: #e8e8ea;
+        --neutral-900: #f6f6f7;
         --neutral-950: #ffffff;
 
-        --accent: #60a5fa;
-        --accent-strong: #60a5fa;
+        --accent: #818cf8;
+        --accent-strong: #818cf8;
 
         --risk-low: #34d399;
         --risk-low-strong: #34d399;
@@ -69,7 +230,132 @@
         --quality-good: #38bdf8;
         --quality-limited: #a5b4fc;
         --quality-insufficient: #94a3b8;
+
+        --labs-research: #c4b5fd;
+        --labs-research-strong: #c4b5fd;
+        --labs-planned: #7dd3fc;
+        --labs-planned-strong: #7dd3fc;
+        --labs-designing: #f0abfc;
+        --labs-designing-strong: #f0abfc;
+        --labs-development: #a5b4fc;
+        --labs-development-strong: #a5b4fc;
+        --labs-beta: #5eead4;
+        --labs-beta-strong: #5eead4;
+        --labs-released: #86efac;
+        --labs-released-strong: #86efac;
+
+        --surface-card: #232428;
+        --surface-section: rgb(35 36 40 / 0.82);
+        --surface-record: rgb(46 47 52 / 0.94);
+        --surface-primary: rgb(35 36 40 / 0.94);
+        --border-structural: #3c3d42;
+        --border-internal: rgb(60 61 66 / 0.72);
+        --edge-highlight: rgb(255 255 255 / 0.06);
+        --shadow-1: none;
+        --shadow-2: none;
+        --shadow-3: none;
+        --gradient-page: linear-gradient(180deg, #1b1c20 0%, #141518 100%);
+        --gradient-hero: radial-gradient(120% 120% at 50% -10%, rgb(129 140 248 / 0.10) 0%, rgb(129 140 248 / 0) 60%);
+        --gradient-dashboard-feature: linear-gradient(145deg, #4338ca 0%, #3730a3 52%, #27245f 100%);
+        /* --gradient-cta deliberately NOT redefined here — constant across both themes, like --surface-inverse. */
+
+        --alert-success: #4ade80;
+        --alert-success-strong: #4ade80;
+        --alert-error: #f87171;
+        --alert-error-strong: #f87171;
+        --alert-caution: #fbbf24;
+        --alert-caution-strong: #fbbf24;
+        --alert-info: #60a5fa;
+        --alert-info-strong: #60a5fa;
     }
+}
+
+/*
+ * U-11.3 §7 — explicit dark override, forced regardless of system
+ * preference. Same values as the media-query block above, kept in sync
+ * deliberately (not derived) so the two selectors stay independently
+ * readable — this is the one token block a future colour change must
+ * remember to update twice.
+ */
+:root[data-theme="dark"] {
+    /* U-08.1 §12 — same smoked-graphite scale as the media-query block above.
+       Caught and fixed a real bug here: an earlier `replace_all` edit updated
+       the media-query block but silently missed this one (its text differed
+       just enough — no leading `:not([data-theme="light"])` nesting — to not
+       match the same search string), leaving the old navy active whenever a
+       user *explicitly* selected dark (this exact selector, not the
+       prefers-color-scheme one) — verified via `getComputedStyle` showing
+       `--neutral-50` still `#0f172a` after an explicit dark-mode toggle,
+       despite the gradient and `--surface-inverse` tokens correctly reading
+       the new graphite values. This is exactly the failure mode the comment
+       immediately above already warned about. */
+    --neutral-50: #1b1c20;
+    --neutral-100: #232428;
+    --neutral-200: #2e2f34;
+    --neutral-300: #3c3d42;
+    --neutral-400: #55565b;
+    --neutral-500: #85868b;
+    --neutral-600: #b3b4b8;
+    --neutral-700: #d3d4d6;
+    --neutral-800: #e8e8ea;
+    --neutral-900: #f6f6f7;
+    --neutral-950: #ffffff;
+
+    --accent: #818cf8;
+    --accent-strong: #818cf8;
+
+    --risk-low: #34d399;
+    --risk-low-strong: #34d399;
+    --risk-moderate: #fbbf24;
+    --risk-moderate-strong: #fbbf24;
+    --risk-high: #fb923c;
+    --risk-high-strong: #fb923c;
+    --risk-very-high: #f87171;
+
+    --quality-strong: #2dd4bf;
+    --quality-good: #38bdf8;
+    --quality-limited: #a5b4fc;
+    --quality-insufficient: #94a3b8;
+
+    --labs-research: #c4b5fd;
+    --labs-research-strong: #c4b5fd;
+    --labs-planned: #7dd3fc;
+    --labs-planned-strong: #7dd3fc;
+    --labs-designing: #f0abfc;
+    --labs-designing-strong: #f0abfc;
+    --labs-development: #a5b4fc;
+    --labs-development-strong: #a5b4fc;
+    --labs-beta: #5eead4;
+    --labs-beta-strong: #5eead4;
+    --labs-released: #86efac;
+    --labs-released-strong: #86efac;
+
+    --surface-card: #232428;
+    --surface-section: rgb(35 36 40 / 0.82);
+    --surface-record: rgb(46 47 52 / 0.94);
+    --surface-primary: rgb(35 36 40 / 0.94);
+    --surface-public-atmosphere: rgb(27 28 32 / 0.58);
+    --gradient-public-quiet: linear-gradient(180deg, rgb(35 36 40 / 0.98) 0%, rgb(27 28 32 / 0.99) 52%, rgb(20 21 24 / 0.98) 100%);
+    --public-section-edge: rgb(60 61 66 / 0.56);
+    --border-structural: #3c3d42;
+    --border-internal: rgb(60 61 66 / 0.72);
+    --edge-highlight: rgb(255 255 255 / 0.06);
+    --shadow-1: none;
+    --shadow-2: none;
+    --shadow-3: none;
+    --gradient-page: linear-gradient(180deg, #1b1c20 0%, #141518 100%);
+    --gradient-hero: radial-gradient(120% 120% at 50% -10%, rgb(129 140 248 / 0.10) 0%, rgb(129 140 248 / 0) 60%);
+    --gradient-dashboard-feature: linear-gradient(145deg, #4338ca 0%, #3730a3 52%, #27245f 100%);
+    /* --gradient-cta deliberately NOT redefined here — constant across both themes, like --surface-inverse. */
+
+    --alert-success: #4ade80;
+    --alert-success-strong: #4ade80;
+    --alert-error: #f87171;
+    --alert-error-strong: #f87171;
+    --alert-caution: #fbbf24;
+    --alert-caution-strong: #fbbf24;
+    --alert-info: #60a5fa;
+    --alert-info-strong: #60a5fa;
 }
 
 @theme {
@@ -104,6 +390,49 @@
     --color-quality-limited: var(--quality-limited);
     --color-quality-insufficient: var(--quality-insufficient);
 
+    --color-labs-research: var(--labs-research);
+    --color-labs-research-strong: var(--labs-research-strong);
+    --color-labs-planned: var(--labs-planned);
+    --color-labs-planned-strong: var(--labs-planned-strong);
+    --color-labs-designing: var(--labs-designing);
+    --color-labs-designing-strong: var(--labs-designing-strong);
+    --color-labs-development: var(--labs-development);
+    --color-labs-development-strong: var(--labs-development-strong);
+    --color-labs-beta: var(--labs-beta);
+    --color-labs-beta-strong: var(--labs-beta-strong);
+    --color-labs-released: var(--labs-released);
+    --color-labs-released-strong: var(--labs-released-strong);
+
+    /* U-12.0 surface hierarchy (DESIGN_TOKENS.md's Surfaces section) */
+    --color-surface-page: var(--neutral-50);
+    --color-surface-soft: var(--neutral-100);
+    --color-surface-card: var(--surface-card);
+    --color-surface-section: var(--surface-section);
+    --color-surface-record: var(--surface-record);
+    --color-surface-primary: var(--surface-primary);
+    --color-surface-inverse: var(--surface-inverse);
+
+    --color-alert-success: var(--alert-success);
+    --color-alert-success-strong: var(--alert-success-strong);
+    --color-alert-error: var(--alert-error);
+    --color-alert-error-strong: var(--alert-error-strong);
+    --color-alert-caution: var(--alert-caution);
+    --color-alert-caution-strong: var(--alert-caution-strong);
+    --color-alert-info: var(--alert-info);
+    --color-alert-info-strong: var(--alert-info-strong);
+
+    /* U-12.0 elevation shadows */
+    --shadow-elevation-1: var(--shadow-1);
+    --shadow-elevation-2: var(--shadow-2);
+    --shadow-elevation-3: var(--shadow-3);
+
+    /* U-12.0 gradients — restrained atmosphere only, never applied to risk/quality/labs colours */
+    --background-image-gradient-page: var(--gradient-page);
+    --background-image-gradient-hero: var(--gradient-hero);
+    --background-image-gradient-inverse: var(--gradient-inverse);
+    --background-image-gradient-cta: var(--gradient-cta);
+    --background-image-gradient-button: var(--gradient-button);
+
     /* Radius scale — DESIGN_TOKENS.md (overrides Tailwind's slightly different defaults) */
     --radius-sm: 0.25rem;
     --radius-md: 0.5rem;
@@ -122,6 +451,193 @@
 }
 
 /*
+ * U-12.0 completion pass (PO-U12.0-CP-002) — semantic container hierarchy.
+ * Replaces every screen's ad hoc `max-w-Nxl` outer content wrapper with one
+ * of four named, documented widths (DESIGN_TOKENS.md's Container Widths
+ * section). Defined via Tailwind v4's `@utility` at-rule so the class name
+ * is exactly `container-reading` etc. — not derived from the `max-w-*`
+ * scale, since the commission specifically named these four classes.
+ * Deliberately controls only `max-width`; `mx-auto` and responsive
+ * horizontal padding stay as separate utility classes at each usage site,
+ * unchanged from before this pass, so no existing responsive padding
+ * behaviour is altered.
+ */
+@utility container-reading {
+    max-width: 45rem;
+}
+@utility container-standard {
+    max-width: 60rem;
+}
+@utility container-analytics {
+    max-width: 75rem;
+}
+@utility container-marketing {
+    max-width: 80rem;
+}
+
+/*
+ * U-12.1-S10 — page-level workspace language. These utilities establish a
+ * single spacing and typography rhythm inside the Sprint 9 shell without
+ * changing its navigation, header, or scroll architecture.
+ */
+@utility workspace-page {
+    padding-block: 2rem 3rem;
+}
+@utility workspace-gutter {
+    padding-inline: 1rem;
+}
+@utility workspace-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+@utility workspace-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+@utility workspace-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+@utility workspace-card-padding {
+    padding: 1.25rem;
+}
+@utility workspace-title {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--neutral-900);
+}
+@utility workspace-section-title {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--neutral-600);
+}
+@utility workspace-card-title {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+    color: var(--neutral-900);
+}
+@utility workspace-metadata {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--neutral-500);
+}
+@utility workspace-helper {
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+    color: var(--neutral-600);
+}
+
+.workspace-section-panel {
+    border: 1px solid var(--border-structural);
+    border-top-color: color-mix(in srgb, var(--border-structural) 72%, var(--edge-highlight));
+    border-radius: 0.75rem;
+    background: var(--surface-section);
+    padding: 1.25rem;
+}
+
+.workspace-primary-card {
+    border: 1px solid var(--border-structural);
+    border-top-color: color-mix(in srgb, var(--border-structural) 62%, var(--edge-highlight));
+    background: var(--surface-primary);
+}
+
+.dashboard-metric-strip > :nth-child(1) {
+    background: color-mix(in srgb, var(--accent) 6%, var(--surface-primary));
+}
+
+.dashboard-metric-strip > :nth-child(2) {
+    background: color-mix(in srgb, var(--accent) 9%, var(--surface-primary));
+}
+
+.dashboard-metric-strip > :nth-child(3) {
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface-primary));
+}
+
+.dashboard-metric-strip > :nth-child(4) {
+    background: color-mix(in srgb, var(--accent) 15%, var(--surface-primary));
+}
+
+.workspace-record-surface {
+    border-color: var(--border-internal);
+    background: var(--surface-record);
+}
+
+.workspace-structural-border {
+    border-color: var(--border-structural);
+}
+
+.workspace-internal-border {
+    border-color: var(--border-internal);
+}
+
+/*
+ * PW-03 — public-page visual rhythm. Atmosphere beats deliberately reveal
+ * the fixed parallax composition; quiet beats fully mask it with their own
+ * neutral, multi-stop tonal field. The quiet treatment is intentionally not
+ * a flat fill, and its restrained inset edges establish a section beginning
+ * and ending without introducing a decorative border or changing layout.
+ */
+.public-section-atmosphere {
+    background-color: var(--surface-public-atmosphere);
+}
+
+.public-hero-atmosphere {
+    /*
+     * Public inner-page heroes use the homepage hero as their canonical
+     * reference. Keep the fixed atmosphere fully visible here; the shared
+     * bg-gradient-hero radial treatment provides the only hero-specific
+     * tonal veil.
+     */
+    background-color: transparent;
+}
+
+.public-section-quiet {
+    position: relative;
+    background-image: var(--gradient-public-quiet);
+}
+
+.public-section-quiet::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-block: 1px solid var(--public-section-edge);
+    pointer-events: none;
+}
+
+@media (min-width: 640px) {
+    .workspace-page {
+        padding-block: 2.25rem 3.5rem;
+    }
+    .workspace-gutter {
+        padding-inline: 1.5rem;
+    }
+    .workspace-card-padding {
+        padding: 1.5rem;
+    }
+    .workspace-section-panel {
+        padding: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .workspace-gutter {
+        padding-inline: 2rem;
+    }
+    .workspace-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+        gap: 2rem;
+    }
+}
+
+/*
  * Reduced motion — MOTION_SYSTEM.md's Reduced Motion Accessibility,
  * implemented once so no component has to remember it individually.
  */
@@ -134,4 +650,169 @@
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+/*
+ * U-08.1 (`PO-U08.1-AC-001` §14/§15) — fixed atmospheric background layer.
+ * Three to five large, heavily blurred indigo forms, fixed behind
+ * scrolling public-page content, non-interactive, theme-aware intensity
+ * (dark: richer/stronger; light: much lower opacity, per §16). PW-03 adds
+ * restrained scroll-linked translate3d depth through the shared controller
+ * in app.js. The layer remains fixed and GPU-composited; only transforms
+ * change, batched to one requestAnimationFrame per actual scroll frame.
+ * There are no timers, idle movement, pointer response, easing, or inertia.
+ * `pointer-events: none` throughout — §15's explicit requirement.
+ * Scoped to `.atmosphere`, shared across the public, guest, Labs, and
+ * authenticated layouts. Only layers carrying data-atmosphere-depth move.
+ *
+ * A real layering bug found and fixed while wiring this up: the content
+ * wrapper it sits behind still carries its own opaque `bg-gradient-page`
+ * fill (the pre-existing shell background from `U-16.0`/`U-16.1`) — with
+ * `.atmosphere` merely `z-index: 0` behind that wrapper, the wrapper's
+ * own opaque paint would sit between the fixed shapes and every section,
+ * hiding the atmosphere completely regardless of any section's own
+ * translucency. Resolved by moving the page's base background (still
+ * `--gradient-page`, unchanged) onto `.atmosphere` itself and removing it
+ * from the content wrapper in the layout files — the wrapper is now
+ * transparent, so translucent sections (`bg-surface-page/80` etc., from
+ * `U-16.2`) genuinely reveal the base gradient *and* the indigo glows
+ * beneath them, not a second opaque layer in between.
+ */
+.atmosphere {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background-image: var(--gradient-page);
+}
+.atmosphere > span {
+    position: absolute;
+    display: block;
+    border-radius: 9999px;
+    filter: blur(90px);
+    background: var(--accent-strong);
+    opacity: 0.16; /* founder feedback (2026-07-28): 0.05 read as too dim, raised */
+    transform: translate3d(0, var(--atmosphere-shift, 0px), 0);
+    will-change: transform;
+}
+:root[data-theme="dark"] .atmosphere > span {
+    opacity: 0.28; /* founder feedback (2026-07-28): 0.12 read as too dim, raised */
+    filter: blur(110px);
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .atmosphere > span {
+        opacity: 0.28;
+        filter: blur(110px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .atmosphere > span {
+        transform: none !important;
+        will-change: auto;
+    }
+}
+
+/*
+ * U-08.1 (`PO-U08.1-AC-001` §11) — premium light sweep. A rare, slow,
+ * diagonal, low-contrast shimmer for a small, named set of high-value
+ * surfaces only (COMPONENT_PRINCIPLES.md's Reports/Hero/Card principles
+ * are unchanged — this is applied via an explicit opt-in class, never a
+ * default). Technique corroborated by UI UX Pro Max's `gsap` domain (a
+ * `background-position` sweep reads as more premium/mechanical than
+ * opacity pulsing) but implemented in plain CSS, not GSAP — no animation
+ * dependency introduced for this alone (`U-08.1` §10 / `U-14.3`'s own
+ * precedent). Long dwell (~87% of the cycle at rest) before one slow
+ * sweep, not a continuous back-and-forth. The shared reduced-motion rule
+ * above already collapses this to a single near-instant, imperceptible
+ * pass — satisfying §11's "must pause or disable under reduced-motion."
+ */
+.light-sweep {
+    position: relative;
+    overflow: hidden;
+}
+.light-sweep::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(75deg, transparent 42%, rgb(255 255 255 / 0.05) 50%, transparent 58%);
+    background-size: 250% 250%;
+    background-position: -40% -40%;
+    animation: light-sweep-move 16s ease-in-out infinite;
+}
+:root[data-theme="dark"] .light-sweep::after {
+    background-image: linear-gradient(75deg, transparent 42%, rgb(255 255 255 / 0.08) 50%, transparent 58%);
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .light-sweep::after {
+        background-image: linear-gradient(75deg, transparent 42%, rgb(255 255 255 / 0.08) 50%, transparent 58%);
+    }
+}
+@keyframes light-sweep-move {
+    0%, 87% { background-position: -40% -40%; }
+    100% { background-position: 140% 140%; }
+}
+
+/*
+ * `PO-U15.4R-001` §15/§16/§18 — dark theme's dashboard screenshot blends
+ * too closely into the surrounding Hero background (found by the founder
+ * directly, not assumed) — fixed with a soft Rich Indigo glow behind the
+ * frame (a wrapping div, not the frame itself, since the frame's own
+ * `.light-sweep`-required `overflow: hidden` would clip a `::before` glow
+ * positioned on the same element) and a lighter border in dark mode only.
+ * Light theme keeps its existing crisper separation unchanged (§16).
+ */
+.hero-dashboard-glow {
+    position: relative;
+}
+.hero-dashboard-glow::before {
+    content: "";
+    position: absolute;
+    inset: -2.5rem;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(60% 60% at 50% 35%, var(--accent-strong) 0%, transparent 70%);
+    filter: blur(70px);
+    opacity: 0;
+    pointer-events: none;
+}
+.hero-dashboard-frame {
+    border-color: var(--neutral-300);
+}
+:root[data-theme="dark"] .hero-dashboard-glow::before { opacity: 0.35; }
+:root[data-theme="dark"] .hero-dashboard-frame { border-color: var(--neutral-400); }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .hero-dashboard-glow::before { opacity: 0.35; }
+    :root:not([data-theme="light"]) .hero-dashboard-frame { border-color: var(--neutral-400); }
+}
+
+/*
+ * `PO-U15.4-001` §11/§12/§35 — theme-aware Hero dashboard screenshot swap,
+ * pure CSS rather than JS/Alpine. The two `<img>` elements are both always
+ * present in the DOM; only `opacity` (and `display` for the one truly
+ * hidden from assistive tech) is toggled by the same `[data-theme]`
+ * attribute / `prefers-color-scheme` pair every other themed token in this
+ * file already keys off — since `theme-init-script` sets `data-theme`
+ * before first paint, there is no flash of the wrong-theme screenshot to
+ * prevent in the first place, unlike a JS-swapped `src` (the header
+ * icon's own approach), which necessarily has a brief pre-hydration
+ * window. The opacity crossfade is a plain CSS transition, automatically
+ * collapsed to near-instant by the existing sitewide reduced-motion rule
+ * — no separate handling needed.
+ */
+.hero-dashboard-image {
+    transition: opacity 220ms ease-out;
+}
+.hero-dashboard-image--dark {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+}
+:root[data-theme="dark"] .hero-dashboard-image--light { opacity: 0; }
+:root[data-theme="dark"] .hero-dashboard-image--dark { opacity: 1; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .hero-dashboard-image--light { opacity: 0; }
+    :root:not([data-theme="light"]) .hero-dashboard-image--dark { opacity: 1; }
 }

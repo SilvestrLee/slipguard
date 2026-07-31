@@ -11,6 +11,7 @@ use App\Models\BettingSlip;
 use App\Models\LegAnalysis;
 use App\Models\SlipAnalysis;
 use Brick\Math\BigDecimal;
+use Closure;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -30,18 +31,59 @@ class AnalyzeBettingSlip
         private readonly CalculateStructuralRisk $calculate = new CalculateStructuralRisk,
     ) {}
 
-    public function execute(BettingSlip $bettingSlip): SlipAnalysis
+    /**
+     * @param  null|Closure(string, array<string, mixed>): void  $progress
+     */
+    public function execute(BettingSlip $bettingSlip, ?Closure $progress = null): SlipAnalysis
     {
+        $this->notify($progress, 'request_received', [
+            'selections_received' => $bettingSlip->legs->count(),
+            'competitions_recorded' => $bettingSlip->legs
+                ->pluck('competition')
+                ->filter(fn ($competition) => filled($competition))
+                ->unique()
+                ->count(),
+            'markets_recorded' => $bettingSlip->legs
+                ->pluck('market_name')
+                ->filter(fn ($market) => filled($market))
+                ->unique()
+                ->count(),
+        ]);
+
+        $this->notify($progress, 'eligibility_validation_started');
         $eligibility = $bettingSlip->analysisEligibility();
 
         if (! $eligibility->eligible) {
             throw new BettingSlipNotAnalysableException($eligibility);
         }
 
+        $this->notify($progress, 'selections_validated', [
+            'selections_validated' => $bettingSlip->legs->count(),
+        ]);
+        $this->notify($progress, 'normalization_started');
         $normalizedSlip = $this->normalize->execute($bettingSlip);
-        $result = $this->calculate->calculate($normalizedSlip);
+        $this->notify($progress, 'normalization_complete', [
+            'market_types_recognized' => collect($normalizedSlip->legs)
+                ->pluck('market.marketFamily')
+                ->filter()
+                ->unique(fn ($family) => $family->value)
+                ->count(),
+            'normalization_limitations' => collect($normalizedSlip->legs)
+                ->filter(fn ($leg) => ! in_array($leg->market->status->value, ['complete'], true))
+                ->count(),
+        ]);
 
-        return DB::transaction(function () use ($bettingSlip, $normalizedSlip, $result) {
+        $this->notify($progress, 'structural_evaluation_started');
+        $result = $this->calculate->calculate($normalizedSlip);
+        $this->notify($progress, 'structural_evaluation_complete', [
+            'structural_factors_evaluated' => count($result->factorResults),
+            'rule_set_version' => $result->ruleSetVersion,
+            'report_availability' => $result->availability->value,
+            'factors_not_evaluated' => count($result->factorsNotEvaluated),
+        ]);
+        $this->notify($progress, 'report_construction_started');
+
+        $slipAnalysis = DB::transaction(function () use ($bettingSlip, $normalizedSlip, $result, $progress) {
             $slipAnalysis = new SlipAnalysis;
             $slipAnalysis->user_id = $bettingSlip->user_id;
             $slipAnalysis->fill([
@@ -62,6 +104,8 @@ class AnalyzeBettingSlip
                 'input_schema_version' => $result->inputSchemaVersion,
                 'market_taxonomy_version' => $result->marketTaxonomyVersion,
             ]);
+
+            $this->notify($progress, 'persistence_started');
             $slipAnalysis->save();
 
             foreach ($normalizedSlip->legs as $leg) {
@@ -85,6 +129,22 @@ class AnalyzeBettingSlip
 
             return $slipAnalysis->fresh('legAnalyses');
         });
+
+        $this->notify($progress, 'analysis_complete', [
+            'analysis_id' => $slipAnalysis->id,
+            'report_availability' => $slipAnalysis->availability->value,
+        ]);
+
+        return $slipAnalysis;
+    }
+
+    /**
+     * @param  null|Closure(string, array<string, mixed>): void  $progress
+     * @param  array<string, mixed>  $facts
+     */
+    private function notify(?Closure $progress, string $event, array $facts = []): void
+    {
+        $progress?->__invoke($event, $facts);
     }
 
     /**

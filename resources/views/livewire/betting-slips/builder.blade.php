@@ -2,6 +2,8 @@
 
 use App\Actions\BettingSlip\SaveBettingSlip;
 use App\Domain\BettingSlip\BettingSlipValidationRules;
+use App\Domain\Planner\PlannerSessionStatus;
+use App\Exceptions\BettingSlipLockedByPlannerException;
 use App\Exceptions\InvalidBettingSlipTransitionException;
 use App\Models\BettingSlip;
 use Illuminate\Support\Facades\Auth;
@@ -155,6 +157,19 @@ new #[Layout('layouts.app')] class extends Component
             session()->flash('status', __('Slip returned to draft — you can edit it again.'));
         } catch (InvalidBettingSlipTransitionException) {
             session()->flash('error', __('This slip can no longer be returned to draft.'));
+        } catch (BettingSlipLockedByPlannerException) {
+            // U-06.4 Frame L-02: PD-008's hard lock made customer-visible, with a way forward rather than a dead end.
+            $openSession = $this->bettingSlip->plannerSessions()
+                ->whereNotIn('status', [PlannerSessionStatus::Exported->value, PlannerSessionStatus::Abandoned->value])
+                ->first();
+
+            session()->flash('error', __('This slip is currently part of an open planning session. Finish or abandon that session to edit it directly.'));
+
+            if ($openSession) {
+                $this->redirect(route('planner.session', $openSession), navigate: true);
+
+                return;
+            }
         }
 
         $this->redirect(route('analyze.edit', $this->bettingSlip), navigate: true);
@@ -176,35 +191,31 @@ new #[Layout('layouts.app')] class extends Component
 }; ?>
 
 <div class="py-10">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div class="container-analytics mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800">
+            <h2 class="font-semibold text-xl text-neutral-800">
                 {{ $bettingSlip ? __('Edit Slip') : __('New Slip') }}
             </h2>
-            <a href="{{ route('analyze') }}" wire:navigate class="text-sm font-medium text-gray-600 hover:text-gray-900">
+            <a href="{{ route('analyze') }}" wire:navigate class="text-sm font-medium text-neutral-600 hover:text-neutral-900">
                 {{ __('Back to Slips') }}
             </a>
         </div>
 
         @if (session('status'))
-            <div class="rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
-                {{ session('status') }}
-            </div>
+            <x-alert variant="success">{{ session('status') }}</x-alert>
         @endif
 
         @if (session('error'))
-            <div class="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                {{ session('error') }}
-            </div>
+            <x-alert variant="error">{{ session('error') }}</x-alert>
         @endif
 
         @if ($bettingSlip)
             <div class="rounded-md border px-4 py-3 text-sm flex items-center justify-between gap-4
-                @if ($bettingSlip->status->value === 'draft') bg-gray-50 border-gray-200 text-gray-600
-                @elseif ($bettingSlip->status->value === 'ready') bg-amber-50 border-amber-200 text-amber-800
-                @elseif ($bettingSlip->status->value === 'analysed') bg-blue-50 border-blue-200 text-blue-800
-                @else bg-gray-100 border-gray-200 text-gray-500 @endif">
+                @if ($bettingSlip->status->value === 'draft') bg-neutral-50 border-neutral-200 text-neutral-600
+                @elseif ($bettingSlip->status->value === 'ready') bg-alert-caution/10 border-alert-caution/30 text-alert-caution-strong
+                @elseif ($bettingSlip->status->value === 'analysed') bg-alert-info/10 border-alert-info/30 text-alert-info-strong
+                @else bg-neutral-100 border-neutral-200 text-neutral-500 @endif">
                 <div>
                     <span class="font-semibold">{{ $bettingSlip->status->label() }}.</span>
                     @if ($bettingSlip->status->value === 'draft')
@@ -221,13 +232,13 @@ new #[Layout('layouts.app')] class extends Component
                 <div class="flex items-center gap-3 shrink-0">
                     @if ($bettingSlip->status->value === 'draft')
                         <button type="button" wire:click="markReady" wire:loading.attr="disabled"
-                                class="text-sm font-medium text-gray-700 hover:text-gray-900">
+                                class="text-sm font-medium text-neutral-700 hover:text-neutral-900">
                             {{ __('Mark as Ready') }}
                         </button>
                     @endif
                     @if ($bettingSlip->status->value === 'ready')
                         <button type="button" wire:click="returnToDraft" wire:loading.attr="disabled"
-                                class="text-sm font-medium text-gray-700 hover:text-gray-900">
+                                class="text-sm font-medium text-neutral-700 hover:text-neutral-900">
                             {{ __('Return to Draft') }}
                         </button>
                     @endif
@@ -241,17 +252,31 @@ new #[Layout('layouts.app')] class extends Component
             </div>
         @endif
 
+        {{--
+            Bounded-scope Screenshot Upload (2026-07-28): when this slip
+            came from Screenshot Upload, its stored image sits beside the
+            same manual entry form every other intake method already uses
+            — no separate review screen, no OCR performed on it. Served
+            only through the ownership-checked `analyze.screenshot` route,
+            never a public URL.
+        --}}
+        @if ($bettingSlip?->source_screenshot_path)
+            <x-card>
+                <p class="text-sm font-semibold text-neutral-900">{{ __('Your uploaded screenshot') }}</p>
+                <p class="mt-1 text-xs text-neutral-500">{{ __("SlipGuard can't read this automatically yet — transcribe the selections you see into the form below.") }}</p>
+                <img src="{{ route('analyze.screenshot', $bettingSlip) }}" alt="{{ __('Uploaded betting slip screenshot') }}" class="mt-4 max-h-[32rem] w-auto rounded-md border border-neutral-300">
+            </x-card>
+        @endif
+
         <form wire:submit="save" class="space-y-6">
-            <div class="bg-white border border-gray-200 rounded-lg p-6">
+            <x-card>
                 <x-input-label for="name" :value="__('Slip name (optional)')" />
                 <x-text-input wire:model="name" id="name" name="name" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. Saturday accumulator') }}" :disabled="$this->readOnly()" />
                 <x-input-error class="mt-2" :messages="$errors->get('name')" />
-            </div>
+            </x-card>
 
             @if ($errors->any())
-                <div class="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                    {{ __('Please fix the errors below before saving.') }}
-                </div>
+                <x-alert variant="error">{{ __('Please fix the errors below before saving.') }}</x-alert>
             @endif
 
             @error('legs')
@@ -260,15 +285,15 @@ new #[Layout('layouts.app')] class extends Component
 
             <div class="space-y-4">
                 @foreach ($legs as $index => $leg)
-                    <div wire:key="leg-{{ $index }}" class="bg-white border border-gray-200 rounded-lg p-5">
+                    <x-card wire:key="leg-{{ $index }}" class="p-5">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-sm font-semibold text-gray-700">{{ __('Leg :number', ['number' => $index + 1]) }}</h3>
+                            <h3 class="text-sm font-semibold text-neutral-700">{{ __('Leg :number', ['number' => $index + 1]) }}</h3>
                             @unless ($this->readOnly())
                                 <div class="flex items-center gap-3">
-                                    <button type="button" wire:click="moveLegUp({{ $index }})" class="text-gray-400 hover:text-gray-700 disabled:opacity-30" @disabled($index === 0) aria-label="{{ __('Move leg up') }}">
+                                    <button type="button" wire:click="moveLegUp({{ $index }})" class="text-neutral-400 hover:text-neutral-700 disabled:opacity-30" @disabled($index === 0) aria-label="{{ __('Move leg up') }}">
                                         <x-heroicon-o-chevron-up class="h-4 w-4" />
                                     </button>
-                                    <button type="button" wire:click="moveLegDown({{ $index }})" class="text-gray-400 hover:text-gray-700 disabled:opacity-30" @disabled($index === count($legs) - 1) aria-label="{{ __('Move leg down') }}">
+                                    <button type="button" wire:click="moveLegDown({{ $index }})" class="text-neutral-400 hover:text-neutral-700 disabled:opacity-30" @disabled($index === count($legs) - 1) aria-label="{{ __('Move leg down') }}">
                                         <x-heroicon-o-chevron-down class="h-4 w-4" />
                                     </button>
                                     <button type="button" wire:click="removeLeg({{ $index }})" class="text-sm font-medium text-red-600 hover:text-red-800">
@@ -315,7 +340,7 @@ new #[Layout('layouts.app')] class extends Component
                                 <x-input-error class="mt-2" :messages="$errors->get('legs.'.$index.'.decimal_odds')" />
                             </div>
                         </div>
-                    </div>
+                    </x-card>
                 @endforeach
             </div>
 
@@ -323,11 +348,11 @@ new #[Layout('layouts.app')] class extends Component
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <button type="button" wire:click="addLeg" wire:loading.attr="disabled"
-                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition disabled:opacity-50"
+                                class="inline-flex items-center px-4 py-2 bg-neutral-50 border border-neutral-300 rounded-md font-semibold text-sm text-neutral-700 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition disabled:opacity-50"
                                 @disabled(count($legs) >= $this->maxLegs())>
                             {{ __('Add Leg') }}
                         </button>
-                        <span class="text-sm text-gray-500">
+                        <span class="text-sm text-neutral-500">
                             {{ __(':count of :max legs', ['count' => count($legs), 'max' => $this->maxLegs()]) }}
                         </span>
                     </div>
