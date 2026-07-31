@@ -700,6 +700,35 @@
     opacity: 0.28; /* founder feedback (2026-07-28): 0.12 read as too dim, raised */
     filter: blur(110px);
 }
+
+/*
+ * U-21 — public footer contrast fix. The footer has no explicit
+ * background (`public-footer.blade.php`'s own comments explain why: it
+ * lets the fixed `.atmosphere` layer show through). `.atmosphere` is a
+ * `position: fixed` *sibling* of the content, not a DOM ancestor, so a
+ * DOM-tree-walking contrast checker (axe-core) cannot see it and assumes
+ * a white background — its specific reported ratios were wrong in both
+ * themes, but its underlying verdict was directionally right: real
+ * pixel-sampled contrast against the *actual* rendered background
+ * (computed colour vs. a background sample taken from the real
+ * screenshot, not assumed) showed genuine WCAG AA failures for
+ * neutral-400/500 footer text in *both* themes — dark theme as low as
+ * ~1.9:1, light theme (which axe under-reported, since its assumed
+ * white happens to be close to but not exactly the true light
+ * background) at ~3.7-4.1:1, all below the 4.5:1 requirement.
+ * neutral-600 — already used by the footer's own nav links and
+ * confirmed passing in both themes (6.2:1 light / 8:1 dark against the
+ * real background) — is the one value proven safe in both, so it's
+ * applied uniformly rather than a separate per-theme value. Scoped to
+ * the footer only: neutral-400/500 are correct as they are everywhere
+ * else in the app (e.g. against the lighter `--surface-card` family) —
+ * this is specifically the one place they sit directly on the atmosphere
+ * background, the darkest/lightest extreme surface in the product.
+ */
+footer .text-neutral-400,
+footer .text-neutral-500 {
+    color: var(--neutral-600);
+}
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .atmosphere > span {
         opacity: 0.28;
