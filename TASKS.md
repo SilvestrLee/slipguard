@@ -1075,6 +1075,7 @@ Pest: 309/309 passing (unchanged count — `engine_version` added an assertion t
 - [x] Confirmed no frontend code (Blade, Livewire, Filament, Tailwind, CSS, JavaScript) was changed.
 
 ## Blocked
+- **`I-01.1` — SQLite → MySQL Migration** (`PO-I01.1-001`): not started. Neither `mysql`, `mysqld`, nor `docker` exists anywhere in this development environment (checked `/usr/local/bin`, `/opt/homebrew/bin`, Homebrew's formula list, `/Applications`) — there is no way to actually run or verify a real migration here. Founder decision, 2026-07-31: hold until the tooling is actually available (a real MySQL/Docker install, or a remote instance) rather than producing unexecuted configuration or fabricated migration evidence. Two minor citation-accuracy notes on the commission, not blockers: it names "ADR-001 — Layered Architecture" (real title: "Modular Laravel Monolith") and paraphrases ADR-002/003's real titles ("Deterministic Risk," "Constrained AI").
 - Risk Rule Set 2026.1 awaits formal Product Office / Data Science sign-off (`docs/00-governance/DECISION_LOG.md`) — does not block Customer Experience Engineering below, since the engineering foundation implementing it is certified independently (see Production Foundation, above).
 
 (E-04 Deterministic Risk Analysis is no longer a blocked/future item — its mathematics were delivered under E-06A (design) / E-06B (implementation); see the Naming notes above. Retained here only as a pointer so this list stays accurate, not re-opened.)
