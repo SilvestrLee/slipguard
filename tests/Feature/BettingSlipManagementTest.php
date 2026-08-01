@@ -36,6 +36,30 @@ test('a user can create a slip with multiple legs', function () {
     expect($slip->legs->first()->event_name)->toBe('Arsenal vs Chelsea');
 });
 
+test('manual entry uses the shared planning workspace and reports only repository-backed input facts', function () {
+    $user = User::factory()->create();
+
+    Volt::actingAs($user)
+        ->test('betting-slips.builder')
+        ->assertSee('Manual Slip Entry')
+        ->assertSee('Manual entry is a fallback')
+        ->assertSee('Slip summary')
+        ->assertSee('Manual fallback')
+        ->assertSee('0 complete')
+        ->set('legs.0', validLeg())
+        ->assertSee('1 complete')
+        ->assertSee('1.90')
+        ->assertSee('A direct multiplication of entered decimal odds, not a prediction.');
+
+    $html = $this->actingAs($user)->get(route('analyze.create'))->assertOk()->getContent();
+
+    expect($html)->toContain('workspace-grid items-start')
+        ->toContain('workspace-record-surface')
+        ->toContain('lg:sticky lg:top-24')
+        ->toContain('Step 1')
+        ->toContain('Step 2');
+});
+
 test('a user can update an existing slip and its legs are replaced', function () {
     $user = User::factory()->create();
     $slip = BettingSlip::factory()->for($user)->create();
