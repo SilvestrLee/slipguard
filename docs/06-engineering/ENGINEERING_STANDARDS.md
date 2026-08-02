@@ -12,6 +12,9 @@
 - Keep migrations reversible.
 - Add factories and tests for core entities.
 
+## Database
+MySQL 8.0+ is the standard local/staging/production database; SQLite in-memory remains the standard test database. See `docs/06-engineering/DATABASE_SETUP.md`.
+
 ## Testing
 Use Pest. Cover happy paths, validation, authorization, important edge cases, and regressions.
 
