@@ -14,11 +14,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('market_intelligence_market_quotes', function (Blueprint $table) {
+        Schema::create('market_intelligence_market_quotes', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('market_intelligence_fixture_id')
-                ->constrained()
-                ->cascadeOnDelete();
+
+            $table->unsignedBigInteger('market_intelligence_fixture_id');
+
             $table->string('canonical_market');
             $table->string('provider_market_key');
             $table->string('bookmaker_key');
@@ -29,7 +29,18 @@ return new class extends Migration
             $table->string('evidence_quality');
             $table->timestamps();
 
-            $table->index(['canonical_market', 'evidence_quality']);
+            $table->foreign(
+                'market_intelligence_fixture_id',
+                'mi_quotes_fixture_fk'
+            )
+                ->references('id')
+                ->on('market_intelligence_fixtures')
+                ->cascadeOnDelete();
+
+            $table->index(
+                ['canonical_market', 'evidence_quality'],
+                'mi_quotes_market_quality_idx'
+            );
         });
     }
 

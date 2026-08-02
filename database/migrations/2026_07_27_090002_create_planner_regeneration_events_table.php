@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('planner_regeneration_events', function (Blueprint $table) {
+        Schema::create('planner_regeneration_events', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('planner_session_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('planner_session_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
             $table->unsignedInteger('sequence_number');
             $table->string('availability');
             $table->unsignedTinyInteger('structural_score')->nullable();
@@ -21,7 +24,10 @@ return new class extends Migration
             $table->json('attributions');
             $table->timestamps();
 
-            $table->unique(['planner_session_id', 'sequence_number']);
+            $table->unique(
+                ['planner_session_id', 'sequence_number'],
+                'planner_regen_session_sequence_unique'
+            );
         });
     }
 
