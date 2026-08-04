@@ -785,6 +785,29 @@ footer .text-neutral-500 {
 }
 
 /*
+ * `PO-U19.1-001` §8 — "gentle floating... avoid exaggerated animations."
+ * A slow (10s), small (6px) vertical drift, nothing more — reduced-motion
+ * is handled globally above (`animation-duration: 0.01ms !important`), no
+ * per-component handling needed. Two offset variants so the iPhone and
+ * Android frames don't move in perfect unison.
+ */
+.device-float-a {
+    animation: device-float-a 10s ease-in-out infinite;
+}
+.device-float-b {
+    animation: device-float-b 11s ease-in-out infinite;
+    animation-delay: -3s;
+}
+@keyframes device-float-a {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+@keyframes device-float-b {
+    0%, 100% { transform: translateY(-4px); }
+    50% { transform: translateY(2px); }
+}
+
+/*
  * `PO-U15.4R-001` §15/§16/§18 — dark theme's dashboard screenshot blends
  * too closely into the surrounding Hero background (found by the founder
  * directly, not assumed) — fixed with a soft Rich Indigo glow behind the

@@ -44,31 +44,11 @@ new class extends Component
             ?? (document.documentElement.getAttribute('data-theme') === 'dark'
                 || (document.documentElement.getAttribute('data-theme') === null
                     && window.matchMedia('(prefers-color-scheme: dark)').matches)),
-        {{--
-            Founder direct instruction (2026-07-28): "the header in the
-            portal needs to be sticky and behave like it does on the front
-            facing website... the logo icon [should] keep rotating as the
-            user scrolls... only stop when the user stops scrolling... when
-            the user starts scrolling back to the top, it should scroll in
-            the reverse direction." This directly overrides
-            `MOTION_SYSTEM.md`'s prior "never on authenticated screens"
-            scope for the Signature Motion rotation — the exact same
-            formula/mechanism already built and verified for the public
-            header (`public-nav.blade.php`), reused here rather than
-            reinvented: rotation is a pure function of absolute scroll
-            position, so "reverses when scrolling back up" and "stops the
-            instant scrolling stops" both fall out of that formula for
-            free, with no separate direction-tracking state needed.
-        --}}
+        {{-- The approved product mark is static. Scroll state remains only
+            for the sticky header's restrained elevation change. --}}
         condensed: false,
-        rotation: 0,
-        reduceMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
         updateFromScroll() {
             this.condensed = window.scrollY > 40;
-            if (this.reduceMotion) { return; }
-            const maxRotationScroll = 400;
-            const maxDegrees = 18;
-            this.rotation = Math.max(0, Math.min(window.scrollY, maxRotationScroll)) / maxRotationScroll * maxDegrees;
         },
         openDrawer() {
             this.open = true;
@@ -129,10 +109,8 @@ new class extends Component
                 <div class="shrink-0 flex items-center">
                     {{--
                         Founder direct instruction (2026-07-28): the portal
-                        header now matches the public header's own
-                        icon/wordmark split so the rotation has something
-                        to rotate independently of the static "SlipGuard"
-                        text — reusing the same accent icon assets
+                        header matches the public header's static
+                        icon/wordmark split, reusing the same accent icon
                         (`slipguard-icon-accent(-dark).svg`), not the navy
                         full lockup previously used here. This knowingly
                         reintroduces the colour mismatch already disclosed
@@ -145,7 +123,6 @@ new class extends Component
                         <img src="{{ asset('brand/slipguard-icon-accent.svg') }}"
                              alt=""
                              aria-hidden="true"
-                             :style="reduceMotion ? '' : `transform: rotate(${rotation}deg)`"
                              class="h-8 w-auto shrink-0">
                         <span class="text-xl font-semibold tracking-tight text-neutral-900">{{ __('SlipGuard') }}</span>
                     </a>
@@ -270,7 +247,6 @@ new class extends Component
                 <img src="{{ asset('brand/slipguard-icon-accent.svg') }}"
                      alt=""
                      aria-hidden="true"
-                     :style="reduceMotion ? '' : `transform: rotate(${rotation}deg)`"
                      class="h-8 w-auto shrink-0">
                 <span class="text-lg font-semibold tracking-tight text-neutral-900">{{ __('SlipGuard') }}</span>
             </div>

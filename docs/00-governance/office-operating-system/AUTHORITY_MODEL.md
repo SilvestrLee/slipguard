@@ -48,22 +48,25 @@ These are descriptive — the common paths work already follows — not new proc
 
 **R**esponsible (does the work) · **A**ccountable (owns the decision, answers for it — exactly one per row) · **C**onsulted (input sought before deciding) · **I**nformed (told after deciding)
 
-| Decision Type | Product Office | Architecture Office | Engineering Office | UX Studio | Data Science Lab | Compliance Office | Parser Office |
-|---|---|---|---|---|---|---|---|
-| Product vision & scope | **A/R** | C | I | C | I | C | I |
-| Feature acceptance | **A/R** | C | C | C | C | C | C |
-| Risk mathematics / formulas / weights / thresholds | A | I | I | I | **A/R** | I | I |
-| Rule Set approval (formal acceptance) | **A** | I | I | I | **A** | I | I |
-| System architecture / layer boundaries | I | **A/R** | C | I | I | I | I |
-| External evidence-source viability, acquisition & validation contracts | I | C | C | I | C | C | **A/R** |
-| Implementation (all application code) | I | C | **A/R** | C | C | I | C |
-| UX strategy (what the experience should achieve) | **A** | I | I | R | I | I | I |
-| UX execution (how a screen/flow is built) | C | I | C | **A/R** | I | I | I |
-| Testing & quality assurance | I | C | **A/R** | I | C | I | C |
-| Security & authorization model | I | C | **A/R** | I | I | C | I |
-| Regulatory / responsible-gambling claims & copy | A | I | I | C | I | **A/R** | I |
-| Release approval | **A** | C | **R** | I | I | C | I |
-| Governance documentation (this framework, ADRs, decision log) | **A** | R (ADRs) | R (engineering docs) | I | I | R (compliance docs) | R (evidence-source docs) |
+| Decision Type | Product Office | Architecture Office | Engineering Office | UX Studio | Data Science Lab | Compliance Office | Parser Office | Operations Office |
+|---|---|---|---|---|---|---|---|---|
+| Product vision & scope | **A/R** | C | I | C | I | C | I | I |
+| Feature acceptance | **A/R** | C | C | C | C | C | C | I |
+| Risk mathematics / formulas / weights / thresholds | A | I | I | I | **A/R** | I | I | I |
+| Rule Set approval (formal acceptance) | **A** | I | I | I | **A** | I | I | I |
+| System architecture / layer boundaries | I | **A/R** | C | I | I | I | I | C |
+| External evidence-source viability, acquisition & validation contracts | I | C | C | I | C | C | **A/R** | I |
+| Implementation (all application code) | I | C | **A/R** | C | C | I | C | C |
+| UX strategy (what the experience should achieve) | **A** | I | I | R | I | I | I | I |
+| UX execution (how a screen/flow is built) | C | I | C | **A/R** | I | I | I | I |
+| Testing & quality assurance | I | C | **A/R** | I | C | I | C | C |
+| Security & authorization model (application layer) | I | C | **A/R** | I | I | C | I | C |
+| Regulatory / responsible-gambling claims & copy | A | I | I | C | I | **A/R** | I | I |
+| Release approval | **A** | C | **R** | I | I | C | I | **R** |
+| Governance documentation (this framework, ADRs, decision log) | **A** | R (ADRs) | R (engineering docs) | I | I | R (compliance docs) | R (evidence-source docs) | R (operations docs) |
+| Production infrastructure & deployment | I | C | C | I | I | I | I | **A/R** |
+| Monitoring & incident response | I | I | C | I | I | I | I | **A/R** |
+| Backup & disaster recovery | I | I | C | I | I | C | I | **A/R** |
 
 Two rows show two Accountable cells deliberately (Rule Set approval; regulatory claims) — these mirror decisions this repository already treats as requiring **joint** sign-off (e.g. `RISK_RULE_SET_2026_1.md`: "becomes Accepted only on explicit Product Office / Data Science sign-off"). Joint accountability is the one intentional exception to "exactly one Accountable office" and only applies where an existing precedent already established it.
 
@@ -78,3 +81,7 @@ Per the founder's clarification during U-02 review (`docs/00-governance/ENGINEER
 ## Notes on Compliance Office
 
 This is the first governance document to formally establish Compliance Office as a standing office (previously, `docs/09-compliance/PRODUCT_GUARDRAILS.md` existed with no explicit owner field). Compliance Office's constitution (`docs/offices/COMPLIANCE_OFFICE.md`) now owns that document jointly with Product Office, consistent with the matrix above — this is a governance formalisation of existing content, not a new compliance requirement.
+
+## Notes on Operations Office
+
+Established 2026-08-04 (`docs/00-governance/DECISION_LOG.md`, `PO-OO-RC1-AC-001`), following a governance gap `docs/product/MVP_LAUNCH_READINESS_AUDIT.md`'s Operations Audit (§9) named directly while reviewing production readiness: no standing office owned deployment, monitoring, or backup/recovery, and every item in that section was found genuinely absent, not merely unassessed. Operations Office owns whether the running system survives real usage — distinct from Engineering (whether the code is correct) and Architecture (whether the system's structure is sound). Its scope is deliberately narrow: "Security & authorization model" above stays Engineering's application-layer row (authentication, authorization, input validation); Operations Office's own security remit is infrastructure-layer only (secrets in deployed environments, SSH/admin access, credential rotation) — Consulted on the application-layer row, Accountable for none of it. See `docs/offices/OPERATIONS_OFFICE.md`.

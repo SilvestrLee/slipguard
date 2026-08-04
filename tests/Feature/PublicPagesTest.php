@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\User;
-
 /**
  * U-13.0 — Public Website Experience, Information Architecture & Premium
  * SaaS Presence. Every navigation destination is a real, independent
@@ -149,22 +147,30 @@ test('the FAQ and Release Notes pages render real, honest content', function () 
 });
 
 /**
- * U-14.3 — Signature Motion System. The rotation is scroll-position-driven
- * (never time/CSS-loop-based), bounded to MOTION_SYSTEM.md's 15-20°
- * maximum, and disabled entirely under prefers-reduced-motion — verified
- * against the actual rendered markup rather than assumed. True client-side
- * scroll/rotation behaviour can't be exercised without a browser, which
- * isn't available in this environment — stated explicitly, per U-14.3's
- * own allowance for this case.
+ * U-14.3's original scroll-linked rotation was superseded by the Static
+ * Product Mark decision (`docs/05-ux/MOTION_SYSTEM.md`, founder direct
+ * instruction, 2026-07-31 — see `TASKS.md`'s "Static Product Mark" entry):
+ * the icon and wordmark no longer spin, rotate, bounce, loop, or respond
+ * to scroll position anywhere in the product. This test now confirms that
+ * absence on the public homepage specifically, mirroring the assertion
+ * style `GlobalShellTest`'s "public and authenticated product marks remain
+ * static" already uses — not duplicated wholesale, since that test already
+ * covers both surfaces; this one stays scoped to the public page this file
+ * is about.
  */
-test('the public logo motion is scroll-linked, bounded, and disables entirely under reduced motion', function () {
+test('the public logo motion is static — no scroll-linked rotation mechanics remain', function () {
     $response = $this->get('/')->assertOk();
     $html = $response->getContent();
 
-    expect($html)->toContain('reduceMotion: window.matchMedia')
-        ->toContain('rotate(${rotation}deg)')
-        ->toContain('maxDegrees = 18')
-        ->and($html)->not->toContain('animation:')
+    // `reduceMotion: window.matchMedia(...)` is not asserted absent here —
+    // it's a genuine, still-current pattern reused by unrelated homepage
+    // features (the mobile drag-to-explore carousel, a number-counter
+    // animation, both in resources/views/pages/home.blade.php). Only the
+    // rotation-specific mechanics the old logo motion actually used are
+    // checked for absence.
+    expect($html)->not->toContain('rotate(${rotation}deg)')
+        ->not->toContain('maxDegrees = 18')
+        ->not->toContain('animation:')
         ->not->toContain('@keyframes');
 });
 
@@ -208,7 +214,7 @@ test('PW-03 preserves the public atmosphere composition while adding layered cap
 
     expect($js)->toContain("atmosphere.dataset.atmosphereScroll === 'page'")
         ->toContain('window.requestAnimationFrame')
-        ->toContain("prefers-reduced-motion: reduce")
+        ->toContain('prefers-reduced-motion: reduce')
         ->not->toContain('mousemove');
     expect($css)->toContain('transform: none !important');
 });
@@ -240,10 +246,10 @@ test('PW-03 gives public pages an alternating atmosphere and tonal section rhyth
         ->toContain('border-block: 1px solid var(--public-section-edge)');
 });
 
-test('MOTION_SYSTEM.md documents the approved logo rotation mechanics', function () {
+test('MOTION_SYSTEM.md documents the Static Product Mark decision, not obsolete rotation mechanics', function () {
     $doc = file_get_contents(base_path('docs/05-ux/MOTION_SYSTEM.md'));
 
-    expect($doc)->toContain('15°–20°')
-        ->toContain('prefers-reduced-motion')
-        ->toContain('never time-based');
+    expect($doc)->toContain('Static Product Mark')
+        ->toContain('do not spin, rotate')
+        ->toContain('prefers-reduced-motion');
 });

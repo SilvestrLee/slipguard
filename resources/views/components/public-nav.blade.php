@@ -5,27 +5,9 @@
     behaviour unchanged from U-11.3 (padding/shadow toggle past a scroll
     threshold, not a continuous scroll-linked morph — MOTION_SYSTEM.md).
 
-    U-14.3 — Signature Motion: the logo's rotation is a direct, linear
-    function of scroll position (never time-based, never a CSS keyframe
-    loop), bounded to MOTION_SYSTEM.md's 15-20° maximum, disabled
-    entirely under prefers-reduced-motion (only the load fade remains).
-
-    U-08.1 (icon/wordmark split, 2026-07-28) — supersedes U-14.3's
-    "applies to the whole lockup" note above: the founder supplied a
-    dedicated icon-only asset (`slipguard-icon-accent.svg`, purple/violet
-    — a deliberate colour choice, confirmed directly rather than assumed;
-    it does not match the navy used by the full lockup elsewhere in the
-    app — footer, auth pages, and the authenticated shell were left
-    unchanged, out of scope for this public-header-only motion). The
-    wordmark is now genuine text ("SlipGuard", Figtree, matching the
-    site's own type system) rather than part of a flattened image — no
-    separate wordmark asset exists or was needed. The rotation formula
-    itself is unchanged from U-14.3 (`rotation = clamp(scrollY, 0, 400) /
-    400 * 18`) — it was already a pure function of scroll position, so it
-    was already reversible/bidirectional by construction (scrolling up
-    already decreased the angle back toward 0 automatically); only the
-    rotation's *target element* changed, from the whole flattened image
-    to the icon alone. The text wordmark never receives a `transform`.
+    2026-07-31 — the approved icon and text wordmark are static. The
+    former Signature Motion rotation is superseded. Scroll observation
+    remains only for the restrained sticky-header condensation.
 
     U-15.2 — header reconstruction (`PO-U15.2-001`): larger logo presence,
     more generous height, wider nav-item spacing, and a proper utility
@@ -34,8 +16,6 @@
     active-nav-item treatment now matches COMPONENT_PRINCIPLES.md's
     Navigation rule exactly — "weight + a subtle background, not colour
     alone" — via a pill background, not text colour only as before.
-    Signature logo rotation (U-14.3) is untouched: only the logo's size
-    classes changed, not its Alpine motion logic.
 
     U-16.2 first pass — reset to `h-10`/`h-8` for cross-app consistency
     with every other logo instance. Superseded by the `PO-U16.2-CR-001`
@@ -81,7 +61,7 @@
     `x-init="window.addEventListener(...)"` with no teardown accumulated
     one additional `window` scroll listener per navigation, and never
     called `updateFromScroll()` immediately on mount, leaving a rebuilt
-    header showing `condensed: false`/`rotation: 0` until the next scroll
+    header showing `condensed: false` until the next scroll
     event even if the page loaded already scrolled. Alpine's `$cleanup`
     magic — the documented fix for exactly this — is not available in
     the Alpine build this project's `livewire/livewire` version bundles
@@ -94,25 +74,6 @@
     accumulation by triggering three consecutive `wire:navigate`
     transitions and confirming only one `scroll` listener produced any
     effect afterward.
-
-    2026-07-28 — a second, more serious bug in the fix directly above,
-    found only once actual rotation behaviour (not just listener count)
-    was verified: passing the bare `updateFromScroll` method reference to
-    `window.addEventListener`/`window.__slipguardHeaderScroll` loses its
-    `this` binding — when the browser later invokes it as a plain
-    callback, `this` inside the method is the `window`/event target, not
-    the Alpine component, so `this.condensed`/`this.rotation` silently
-    wrote to nothing the template reads. The listener-count fix above was
-    real and still necessary, but rotation had been completely inert the
-    entire time regardless — confirmed directly (`rotation` stayed `0` at
-    every scroll position, before and after a manual invocation of the
-    stored handler). Fixed by wrapping in a closure (`() => updateFromScroll()`)
-    before storing/attaching it, restoring `this` binding via lexical
-    scope while keeping the single-slot de-dup logic. Re-verified this
-    time against actual behaviour, not just listener bookkeeping: rotation
-    now tracks scroll position exactly (0°/4.32°/9°/18°/18° at scrollY
-    0/100/200/400/600, bounded correctly) and reverses cleanly back to 0°
-    when scrolling back to the top.
 
     2026-07-30 — the approved icon is now the single source for both
     themes. Its own dark background and indigo mark are intentionally
@@ -151,19 +112,13 @@
 <div
     x-data="{
         condensed: false,
-        rotation: 0,
         mobileMenuOpen: false,
-        reduceMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
         isDark: window.SlipGuardTheme?.isDark()
             ?? (document.documentElement.getAttribute('data-theme') === 'dark'
                 || (document.documentElement.getAttribute('data-theme') === null
                     && window.matchMedia('(prefers-color-scheme: dark)').matches)),
         updateFromScroll() {
             this.condensed = window.scrollY > 40;
-            if (this.reduceMotion) { return; }
-            const maxRotationScroll = 400; // px of scroll to reach the full bounded angle
-            const maxDegrees = 18; // within MOTION_SYSTEM.md's 15-20° maximum
-            this.rotation = Math.max(0, Math.min(window.scrollY, maxRotationScroll)) / maxRotationScroll * maxDegrees;
         },
         openMenu() {
             this.mobileMenuOpen = true;
@@ -206,6 +161,7 @@
     x-on:keydown.escape.window="closeMenu()"
     x-on:keydown.tab.window="trapMenuFocus($event)"
     x-on:resize.window="if (window.innerWidth >= 768) closeMenu(false)"
+    class="sticky top-0 z-40"
 >
 <header
     {{--
@@ -216,13 +172,13 @@
         border for edge definition, no colour tint, no iridescence.
     --}}
     :class="condensed ? 'py-2 shadow-elevation-1' : 'py-2.5'"
-    class="sticky top-0 z-40 border-b border-neutral-200/70 backdrop-blur-md bg-surface-page/70 transition-[padding,box-shadow] duration-standard ease-in-out">
+    class="border-b border-neutral-200/70 backdrop-blur-md bg-surface-page/70 transition-[padding,box-shadow] duration-standard ease-in-out">
     <div class="container-marketing mx-auto flex items-center justify-between gap-4 px-4 sm:px-6 md:gap-8 md:px-8">
         <a href="{{ route('home') }}" wire:navigate aria-label="SlipGuard home"
            x-data="{ loaded: false }" x-init="requestAnimationFrame(() => loaded = true)"
            class="shrink-0 flex items-center gap-2.5">
             {{--
-                Icon — the only element that rotates; swaps to the white variant on dark theme. Wordmark below never receives a transform.
+                Approved static icon. The wordmark below is genuine text.
                 Static `src` below is the pre-Alpine fallback (avoids a flash of a broken image before hydration) — `:src` overrides it immediately once Alpine initialises.
 
                 Founder-reported bug (2026-07-28): "the logo icon flashes enormous, covering the screen, then returns to set size" on
@@ -237,10 +193,9 @@
             <img src="{{ asset('brand/slipguard-icon-accent.svg') }}"
                  alt=""
                  aria-hidden="true"
-                 :class="`${loaded ? 'opacity-100' : 'opacity-0'} ${condensed ? 'h-8' : 'h-8 md:h-10'}`"
-                 :style="reduceMotion ? '' : `transform: rotate(${rotation}deg)`"
+                 :class="`${loaded ? 'opacity-100' : 'opacity-0'} ${condensed ? '!h-8' : 'h-8 md:h-10'}`"
                  class="h-8 w-auto shrink-0 transition-[opacity,height] duration-300 ease-out md:h-10">
-            {{-- Wordmark — genuine text, not an image; static, never rotates, never fades independently of the icon's own load fade. --}}
+            {{-- Wordmark — genuine text, not an image; static and theme-aware. --}}
             <span :class="loaded ? 'opacity-100' : 'opacity-0'"
                   class="text-lg font-semibold tracking-tight text-neutral-900 transition-opacity duration-300 ease-out md:text-xl">
                 {{ __('SlipGuard') }}

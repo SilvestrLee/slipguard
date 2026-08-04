@@ -95,6 +95,10 @@ Do not use the shared `slipguard` database for this — use a disposable databas
 
 The repository requires a working, supported PHP runtime (PHP 8.3+, per `composer.json`). On at least one development machine, the Herd-linked `php`/`php83` binaries fail at process start with a `dyld` symbol error (a broken local toolchain link, unrelated to this repository) — `/usr/local/bin/php` (Homebrew) is the working substitute there. This is a local environment workaround, not a universal project requirement; if your own `php` on `PATH` works correctly, use it as normal.
 
+## PHP memory limit
+
+A platform-default `memory_limit` of 128M is insufficient to run this application's own test suite (`PO-MVP-005` finding R-10 — two independent out-of-memory failures, Journal and History pagination). `phpunit.xml` now sets `memory_limit=1024M` for test runs specifically, so this doesn't require any local `php.ini` change to run `vendor/bin/pest`. If you run `artisan serve` or any other CLI command directly against a large dataset and hit a memory error, raise your CLI `php.ini`'s `memory_limit` (or pass `-d memory_limit=512M` per-command) — the same 512M minimum recommended for production (`docs/08-operations/PRODUCTION_OPERATIONS_BLUEPRINT.md` §O-01) is a reasonable local floor too.
+
 ## Rollback
 
 To return to SQLite:

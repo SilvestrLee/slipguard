@@ -18,6 +18,14 @@
         </include>
     </source>
     <php>
+        <!-- `PO-MVP-005` finding R-10: this environment's platform-default
+             128M memory_limit is insufficient to run this suite (two
+             independent OOM failures, Journal and History pagination) —
+             passes cleanly at 1024M. Setting it here fixes the dev/CI
+             symptom directly; production memory_limit guidance (>=512M)
+             is separately documented in
+             docs/08-operations/PRODUCTION_OPERATIONS_BLUEPRINT.md O-01. -->
+        <ini name="memory_limit" value="1024M"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>

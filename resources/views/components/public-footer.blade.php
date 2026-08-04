@@ -24,6 +24,17 @@
     visibly into both footers rather than being cut off by an opaque
     override. One rule for every footer, not two.
 --}}
+@php
+    // URLs intentionally remain null until official SlipGuard accounts are
+    // available. Supplying a verified URL here automatically promotes the
+    // corresponding item from a labelled icon to a real external link.
+    $socialProfiles = [
+        ['brand' => 'x', 'label' => 'X', 'url' => null],
+        ['brand' => 'youtube', 'label' => 'YouTube', 'url' => null],
+        ['brand' => 'linkedin', 'label' => 'LinkedIn', 'url' => null],
+    ];
+@endphp
+
 <footer class="border-t border-neutral-200">
     <div class="container-marketing mx-auto px-6 sm:px-8 py-16">
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-10">
@@ -36,6 +47,23 @@
                 <p class="mt-4 text-sm text-neutral-500 max-w-xs">
                     {{ __('An independent intelligence layer between the bettor and the bookmaker.') }}
                 </p>
+                <div class="mt-5 flex items-center gap-2" aria-label="{{ __('SlipGuard social media') }}">
+                    @foreach ($socialProfiles as $profile)
+                        @if ($profile['url'])
+                            <a href="{{ $profile['url'] }}" target="_blank" rel="noopener noreferrer"
+                               class="inline-flex size-10 items-center justify-center rounded-lg border border-neutral-300 text-neutral-500 transition-colors hover:border-neutral-400 hover:bg-surface-soft hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                               aria-label="{{ __($profile['label']) }}">
+                                <x-social-icon :brand="$profile['brand']" />
+                            </a>
+                        @else
+                            <span class="inline-flex size-10 items-center justify-center rounded-lg border border-neutral-200 text-neutral-400"
+                                  role="img" aria-label="{{ __($profile['label'].' account link coming soon') }}"
+                                  title="{{ __($profile['label'].' account link will be added when available') }}">
+                                <x-social-icon :brand="$profile['brand']" />
+                            </span>
+                        @endif
+                    @endforeach
+                </div>
             </div>
 
             <div>
@@ -77,6 +105,12 @@
             </div>
             <p class="text-xs text-neutral-400 max-w-sm">
                 {{ __('SlipGuard evaluates decision risk. It does not predict outcomes. Sport remains uncertain, and the final decision is always yours.') }}
+            </p>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-neutral-100">
+            <p class="text-xs text-neutral-400 max-w-2xl">
+                {{ __('SlipGuard is intended for users aged 18 and over. If gambling stops being enjoyable or starts affecting your wellbeing, confidential support is available — search for a responsible gambling helpline in your region.') }}
             </p>
         </div>
     </div>

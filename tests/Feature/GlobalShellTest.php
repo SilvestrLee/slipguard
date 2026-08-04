@@ -71,6 +71,16 @@ test('the authenticated footer is one shared implementation, identical on Dashbo
         ->and($labsFooter)->toContain($needle);
 });
 
+test('the public footer shows restrained social destinations without fabricating unavailable account links', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->toContain('SlipGuard social media')
+        ->toContain('X account link coming soon')
+        ->toContain('YouTube account link coming soon')
+        ->toContain('LinkedIn account link coming soon')
+        ->not->toContain('href="#"');
+});
+
 test('header and footer chrome use container-marketing, not a second raw max-w-7xl class', function () {
     $user = User::factory()->create();
 
@@ -115,18 +125,20 @@ test('[x-cloak] has a corresponding CSS rule, so cloaked elements are actually h
         ->toContain('display: none !important');
 });
 
-test('the public header retains motion while the authenticated shell uses a stable compact sidebar brand', function () {
+test('public and authenticated product marks remain static', function () {
     $this->get('/')
         ->assertOk()
         ->assertSee('slipguard-icon-accent.svg', false)
         ->assertSee('SlipGuard')
-        // the wordmark is a <span>, not part of the rotating <img> — it must never carry the transform binding.
-        ->assertSee(':style="reduceMotion', false);
+        ->assertDontSee('transform: rotate(', false)
+        ->assertDontSee('rotation: 0', false);
 
     $user = User::factory()->create();
     $authNav = $this->actingAs($user)->get(route('dashboard'))->getContent();
     expect($authNav)->toContain('slipguard-icon-accent.svg')
         ->toContain('Risk intelligence')
+        ->not->toContain('transform: rotate(')
+        ->not->toContain('rotation: 0')
         ->not->toContain('window.__slipguardHeaderScroll');
 });
 
@@ -135,7 +147,7 @@ test('the public header retains motion while the authenticated shell uses a stab
  * covering the screen, then returns to set size" on every page load. Root
  * cause: the icon SVG's own root element declares an intrinsic
  * `width="721" height="848"`, and the only height constraint on the
- * public header's rotating `<img>` was an Alpine `:class` binding
+ * public header's icon `<img>` was an Alpine `:class` binding
  * (`condensed ? 'h-8' : 'h-10'`) — inert until Alpine hydrates, so the
  * browser rendered the image at its native ~721x848px size for a brief
  * pre-hydration window before snapping down. Fixed by giving the static
@@ -144,7 +156,9 @@ test('the public header retains motion while the authenticated shell uses a stab
 test('the public header icon has a static height class, not only an Alpine-bound one, so it never renders at its native SVG size before hydration', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
-    expect($html)->toContain('class="h-8 w-auto shrink-0 transition-[opacity,height] duration-300 ease-out md:h-10"');
+    expect($html)
+        ->toContain('class="h-8 w-auto shrink-0 transition-[opacity,height] duration-300 ease-out md:h-10"')
+        ->toContain("condensed ? '!h-8' : 'h-8 md:h-10'");
 });
 
 /**
@@ -183,6 +197,7 @@ test('every public CTA section uses the bold accent-gradient background, in both
 test('the public header uses a translucent, blurred (glassmorphism) surface rather than a solid background', function () {
     $this->get('/')
         ->assertOk()
+        ->assertSee('class="sticky top-0 z-40"', false)
         ->assertSee('backdrop-blur-md', false)
         ->assertSee('bg-surface-page/70', false);
 });
@@ -280,11 +295,12 @@ test('the public homepage renders the fixed atmospheric layer and the premium li
         ->assertSee('light-sweep bg-gradient-cta', false); // closing CTA
 });
 
-test('MOTION_SYSTEM.md no longer calls the brand icon a "shield glyph"', function () {
+test('MOTION_SYSTEM.md records the static product mark without obsolete terminology', function () {
     $doc = file_get_contents(base_path('docs/05-ux/MOTION_SYSTEM.md'));
 
     expect($doc)->not->toContain('shield glyph')
-        ->toContain('SlipGuard brand icon')
+        ->toContain('Static Product Mark')
+        ->toContain('do not spin, rotate')
         ->toContain('Fixed Atmospheric Layer')
         ->toContain('Premium Light Sweep');
 });
