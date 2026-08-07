@@ -68,7 +68,7 @@ new class extends Component
                         <input id="mobile-waitlist-email" type="email" wire:model="email" required
                                placeholder="{{ __('you@example.com') }}"
                                class="block w-full rounded-md border-neutral-300 shadow-sm focus:border-accent focus:ring-accent text-sm">
-                        @error('email') <p class="mt-1 text-xs text-red-600" role="alert">{{ $message }}</p> @enderror
+                        @error('email') <p class="mt-1 text-xs text-alert-error" role="alert">{{ $message }}</p> @enderror
                     </div>
                 @endunless
 

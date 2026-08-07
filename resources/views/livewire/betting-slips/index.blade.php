@@ -195,7 +195,7 @@ new #[Layout('layouts.app')] class extends Component
                                 <button type="button"
                                         x-data=""
                                         x-on:click="$dispatch('open-modal', 'confirm-slip-deletion-{{ $bettingSlip->id }}')"
-                                        class="text-sm font-medium text-red-600 hover:text-red-800">
+                                        class="text-sm font-medium text-alert-error hover:text-alert-error-strong">
                                     {{ __('Delete') }}
                                 </button>
                             @elseif ($bettingSlip->status === BettingSlipStatus::Analysed)

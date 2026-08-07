@@ -620,7 +620,7 @@ new #[Layout('layouts.app')] class extends Component
                                                 {{ __('Keep this selection') }}
                                             </button>
                                             @if ($plannerSession->selections->count() > 1)
-                                                <button type="button" wire:click="removeSelection({{ $primarySelection->id }})" class="text-sm font-medium text-red-600 hover:text-red-800">
+                                                <button type="button" wire:click="removeSelection({{ $primarySelection->id }})" class="text-sm font-medium text-alert-error hover:text-alert-error-strong">
                                                     {{ __('Remove') }}
                                                 </button>
                                             @endif
@@ -654,7 +654,7 @@ new #[Layout('layouts.app')] class extends Component
                                                         {{ $locked ? __('Kept') : __('Keep this selection') }}
                                                     </button>
                                                     @if (! $locked && $plannerSession->selections->count() > 1)
-                                                        <button type="button" wire:click="removeSelection({{ $selection->id }})" class="text-xs font-medium text-red-600 hover:text-red-800">
+                                                        <button type="button" wire:click="removeSelection({{ $selection->id }})" class="text-xs font-medium text-alert-error hover:text-alert-error-strong">
                                                             {{ __('Remove') }}
                                                         </button>
                                                     @endif
@@ -846,7 +846,7 @@ new #[Layout('layouts.app')] class extends Component
                         </x-secondary-button>
                     @endif
                     <button type="button" x-data="" x-on:click="$dispatch('open-modal', 'abandon-planner-session')"
-                            class="inline-flex items-center justify-center h-12 px-6 text-sm font-medium text-red-600 hover:text-red-800">
+                            class="inline-flex items-center justify-center h-12 px-6 text-sm font-medium text-alert-error hover:text-alert-error-strong">
                         {{ __('Abandon this session') }}
                     </button>
                 </section>
