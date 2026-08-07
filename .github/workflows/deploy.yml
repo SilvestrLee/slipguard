@@ -1,0 +1,74 @@
+# OP-02 (RC1 Operations Programme) — CI + deploy pipeline.
+#
+# Prepared, execution-ready — not run in this pass (no GitHub Actions
+# runner exists in this environment, and the SSH secrets below are not
+# configured anywhere). Wires ops/deploy.sh into a real CI/CD pipeline:
+# tests must pass before any deploy is even attempted; deploy only runs on
+# a real push to main, over SSH to the production server this workflow
+# does not provision (that's ops/provision-server.sh's job, run once by
+# hand).
+#
+# Required repository secrets (none of these exist yet):
+#   SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, SLIPGUARD_REPO_URL, SLIPGUARD_APP_URL
+
+name: Test and Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, curl, zip, bcmath, intl, gd, sqlite3
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Copy .env.example
+        run: cp .env.example .env
+
+      - name: Generate application key
+        run: php -d memory_limit=1024M artisan key:generate
+
+      - name: Run Pint (style check)
+        run: vendor/bin/pint --test
+
+      - name: Run the full test suite
+        run: php -d memory_limit=1024M vendor/bin/pest
+
+      - name: Check for whitespace/formatting issues
+        run: git diff --check
+
+  deploy:
+    name: Deploy to production
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            SLIPGUARD_REPO_URL="${{ secrets.SLIPGUARD_REPO_URL }}" \
+            SLIPGUARD_APP_URL="${{ secrets.SLIPGUARD_APP_URL }}" \
+            bash /var/www/slipguard/current/ops/deploy.sh main
