@@ -30,6 +30,36 @@ Only components the product currently needs are defined here. Add a new componen
 - **Usage rules:** exactly one primary (filled, accent-coloured) button per screen or per card. Every other action is secondary (outline) or tertiary (text-only).
 - **Anti-patterns:** two primary-styled buttons competing on one screen; a button whose label doesn't state the action ("Submit," "OK") instead of the actual outcome ("Save slip," "Mark as ready").
 
+## Segmented Radio
+
+**Purpose:** a small (2–3), mutually exclusive, single-tap choice — e.g. Yes/No, Over/Under. Added `U-19.1` (`PO-UX-001` UX refinement pass, founder direct instruction naming this control type explicitly), replacing a `<select>` for exactly the cases where a dropdown's extra tap-to-open cost outweighs its benefit.
+
+**Implemented as `<x-segmented-radio>`** — real `<input type="radio">` elements (native keyboard navigation and screen-reader semantics for free), visually styled via the sr-only + `peer-checked` pattern. No new JS.
+
+- **Spacing:** `p-1` container padding, `gap-1` between options, each option a minimum 44×44px touch target (`ACCESSIBILITY.md`).
+- **Radius:** `radius-md`, matching Buttons.
+- **Elevation:** none.
+- **Interaction:** tap/click or arrow-key navigation (native radio behaviour); selected option shown with the accent fill, matching Buttons' primary treatment.
+- **Accessibility:** `role="radiogroup"` on the container; the underlying radios remain in the accessibility tree (`sr-only`, not `display:none` or `hidden`).
+- **Responsive:** options stretch evenly (`flex-1`) — no horizontal scroll at any width.
+- **Usage rules:** 2–3 options only. More than that, use a `<select>` instead — this is not a segmented-control replacement for every dropdown, only ones this small.
+- **Anti-patterns:** using this for a choice with more than 3 options, where cramped touch targets or wrapping would result.
+
+## Number Stepper
+
+**Purpose:** a small, bounded numeric value entered faster by tapping than by bringing up a mobile keyboard — e.g. a goals line, a scoreline digit. Added `U-19.1`, same provenance as Segmented Radio above.
+
+**Implemented as `<x-number-stepper>`** — decrement/increment buttons flanking a still-directly-editable text input; typing remains available for any value the buttons don't reach quickly.
+
+- **Spacing:** `gap-2` between decrement button, input, and increment button.
+- **Radius:** `radius-md`.
+- **Elevation:** none.
+- **Interaction:** each button is a 44×44px tap target; the increment step is domain-appropriate (e.g. a Total Goals line steps in whole increments between the half-integer values every real over/under line uses, never landing on a value nobody would bet on) — deliberately no drag-to-adjust and no animated digit-roll, per `MOTION_SYSTEM.md`'s restraint on motion that doesn't confirm/guide/clarify.
+- **Accessibility:** each button carries its own `aria-label` ("Decrease"/"Increase"); the input itself carries a descriptive `aria-label`, not just a visual label from context.
+- **Responsive:** fixed, compact width — sits comfortably inline with other controls at every breakpoint.
+- **Usage rules:** only for small, bounded ranges. Never a replacement for a normal numeric input where the value can be arbitrarily large or has no natural "step."
+- **Anti-patterns:** a stepper with no directly-editable input (forces many taps to reach a distant value); a step size that produces nonsensical intermediate values for the field's real domain.
+
 ## Cards
 
 **Purpose:** group one coherent unit of content (a slip summary, a journal entry, an analysis result) as a single visually distinct surface.
