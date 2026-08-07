@@ -22,7 +22,7 @@ test('the mobile drawer surfaces every real primary and utility destination, wit
     $response->assertSeeInOrder([
         'Dashboard',
         'Analyse Slip',
-        'Build Accumulator',
+        'Build an Accumulator',
         'Analysis History',
         'Journal',
         'Planning History',

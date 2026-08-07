@@ -461,7 +461,7 @@
                     ['label' => __('Normalisation'), 'icon' => 'squares-2x2', 'explanation' => __('Different market and competition names become one consistent structure.')],
                     ['label' => __('Deterministic Rules'), 'icon' => 'cog-6-tooth', 'explanation' => __('The same input and rule set always produce the same analysis.')],
                     ['label' => __('Explainability'), 'icon' => 'chat-bubble-left-right', 'explanation' => __('Every finding is translated into plain language.')],
-                    ['label' => __('Risk Report'), 'icon' => 'shield-check', 'explanation' => __('You receive the structural score, weakest leg and why it matters.')],
+                    ['label' => __('Risk Report'), 'icon' => 'shield-check', 'explanation' => __('You receive the structural score, the main contributing factor, and why it matters.')],
                 ] as $i => $stage)
                     <div class="flex sm:flex-col items-center gap-4 sm:gap-0">
                         <div data-reveal style="transition-delay: {{ $i * 90 }}ms"
@@ -572,7 +572,7 @@
                 <div class="p-6 sm:p-7 space-y-6">
                     <div>
                         <p class="text-xs font-semibold text-accent-strong">{{ __('01 · Enter your slip') }}</p>
-                        <p class="mt-1 text-sm text-neutral-600">{{ __('Add the selections you\'re considering — manually, for now.') }}</p>
+                        <p class="mt-1 text-sm text-neutral-600">{{ __('Add the selections you\'re considering — type them in, paste copied text, or upload a PDF or screenshot.') }}</p>
                         <p class="mt-2 text-sm text-neutral-900">{{ __('Chelsea — Win · Arsenal — Win · Over 2.5 Goals · Both Teams to Score · Draw No Bet') }}</p>
                     </div>
 
@@ -650,6 +650,7 @@
             {{-- Remaining capabilities named, not linked — every one of these lives behind sign-in, and a homepage card that silently redirects a guest to login is a worse experience than an honest, unlinked mention (unchanged reasoning from the original capability strip, U-11.3 §6). --}}
             <ul class="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
                 @foreach ([
+                    __('Build an Accumulator'),
                     __('Decision Journal'),
                     __('Planning History'),
                     __('Weakest-Leg Explanation'),

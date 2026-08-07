@@ -7,7 +7,7 @@
         request()->routeIs('analyze.processing') => __('Analysing Slip'),
         request()->routeIs('analyze.report') => __('Risk Report'),
         request()->routeIs('analyze') => __('Analyse Slip'),
-        request()->routeIs('builder') => __('Build Accumulator'),
+        request()->routeIs('builder') => __('Build an Accumulator'),
         request()->routeIs('history') => __('Analysis History'),
         request()->routeIs('journal.create') => __('New Journal Entry'),
         request()->routeIs('journal.edit') => __('Edit Journal Entry'),

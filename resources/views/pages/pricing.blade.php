@@ -30,7 +30,7 @@
                 <x-card variant="elevated">
                     <p class="text-xs font-semibold text-accent-strong uppercase tracking-wide">{{ __('Available now') }}</p>
                     <h3 class="mt-2 text-xl font-semibold text-neutral-900">{{ __('Free') }}</h3>
-                    <p class="mt-2 text-sm text-neutral-600">{{ __('Manual slip entry, structural risk analysis, the Planner, Journal, and History — everything SlipGuard does today.') }}</p>
+                    <p class="mt-2 text-sm text-neutral-600">{{ __('Multiple ways to add a slip, structural risk analysis, the Planner, Build an Accumulator, Journal, and History — everything SlipGuard does today.') }}</p>
                     @auth
                         <a href="{{ route('analyze.create') }}" wire:navigate class="mt-5 inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-accent-strong rounded-md hover:bg-accent">
                             {{ __('Analyze a slip') }}

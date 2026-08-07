@@ -44,7 +44,7 @@
                 <div class="text-center">
                     <div class="mx-auto flex items-center justify-center size-10 rounded-full bg-accent-strong text-white text-sm font-semibold">1</div>
                     <h3 class="mt-4 text-base font-semibold text-neutral-900">{{ __('Enter your slip') }}</h3>
-                    <p class="mt-2 text-sm text-neutral-600">{{ __('Add the selections you\'re considering — no statistical knowledge required.') }}</p>
+                    <p class="mt-2 text-sm text-neutral-600">{{ __('Type them in, paste copied text, or upload a PDF or screenshot — no statistical knowledge required.') }}</p>
                 </div>
                 <div class="text-center">
                     <div class="mx-auto flex items-center justify-center size-10 rounded-full bg-accent-strong text-white text-sm font-semibold">2</div>

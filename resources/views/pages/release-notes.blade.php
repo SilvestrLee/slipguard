@@ -11,6 +11,46 @@
 @php
 $releases = [
     [
+        'version' => '2026.9',
+        'date' => '4 Aug 2026',
+        'area' => __('Legal'),
+        'summary' => __('Published real Terms of Service and Privacy Policy pages, replacing the placeholder stubs.'),
+        'why_it_matters' => __('You can read exactly what SlipGuard does with your information and where it stands, in plain terms — not a placeholder promising it later.'),
+        'technical' => __('Content checked against actual application behaviour before publishing; a small number of clauses are still marked as pending qualified legal review.'),
+    ],
+    [
+        'version' => '2026.8',
+        'date' => '4 Aug 2026',
+        'area' => __('Slip Intake'),
+        'summary' => __('Manual slip entry got faster: Sport and Market are now simple choices instead of typing, and the form only shows the fields that apply to your selection.'),
+        'why_it_matters' => __('Less typing, fewer mistakes, and a shorter form for slips that don\'t need every field.'),
+        'technical' => __('Guided controls for Sport, Market and, where the market supports it, Selection; progressive disclosure; a Duplicate Previous Leg action for repetitive accumulators.'),
+    ],
+    [
+        'version' => '2026.7',
+        'date' => '29 Jul 2026',
+        'area' => __('Dashboard & Planner'),
+        'summary' => __('The Dashboard now surfaces the single piece of unfinished work most worth returning to. The Planner gained a fuller workspace summary and a real session timeline.'),
+        'why_it_matters' => __('Less hunting for what you were doing, and a clearer record of what changed and why across a planning session.'),
+        'technical' => __('Continue Working and Needs Your Attention sections read from your existing slips and Planner sessions; the Session Timeline is derived entirely from persisted revision data, not a new tracking system.'),
+    ],
+    [
+        'version' => '2026.6',
+        'date' => '29 Jul 2026',
+        'area' => __('Build an Accumulator'),
+        'summary' => __('Added Build an Accumulator — deterministic help discovering eligible selections across markets, which you review and choose from before anything is evaluated.'),
+        'why_it_matters' => __('SlipGuard finds and ranks eligible opportunities; you always pick the outcome. It never chooses a side for you.'),
+        'technical' => __('A new construction engine checks eligibility and cross-bookmaker odds, then evaluates whole-slip structural risk only after your own choices are made.'),
+    ],
+    [
+        'version' => '2026.5',
+        'date' => '28 Jul 2026',
+        'area' => __('Slip Intake'),
+        'summary' => __('Added three more ways to add a slip: paste copied text, upload a PDF, or upload a screenshot — alongside manual entry.'),
+        'why_it_matters' => __('Typing every selection by hand is no longer the only option.'),
+        'technical' => __('Paste Text and PDF Upload run through a deterministic text parser and land on the same review screen as manual entry; Screenshot Upload stores the image privately for you to transcribe beside it — no OCR.'),
+    ],
+    [
         'version' => '2026.4',
         'date' => '27 Jul 2026',
         'area' => __('Public Website'),

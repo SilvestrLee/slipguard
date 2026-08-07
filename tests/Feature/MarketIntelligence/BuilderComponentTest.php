@@ -104,12 +104,12 @@ test('the authenticated navigation keeps the Builder visible and labels it as a 
     config(['slipguard-market-intelligence.enabled' => false]);
     $this->actingAs($user)->get(route('analyze'))
         ->assertOk()
-        ->assertSee('Build Accumulator')
+        ->assertSee('Build an Accumulator')
         ->assertSee('Preview');
 
     config(['slipguard-market-intelligence.enabled' => true]);
     $response = $this->actingAs($user)->get(route('analyze'))->assertOk();
-    $response->assertSee('Build Accumulator');
+    $response->assertSee('Build an Accumulator');
 });
 
 test('the live Builder exposes accessible staged candidate evaluation feedback', function () {

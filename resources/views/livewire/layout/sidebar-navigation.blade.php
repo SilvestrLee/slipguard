@@ -17,7 +17,7 @@ new class extends Component
         return [
             ['label' => __('Dashboard'), 'description' => __('Your overview and recent activity'), 'url' => route('dashboard')],
             ['label' => __('Analyse a Slip'), 'description' => __("Review a slip's structural risk"), 'url' => route('analyze.intake')],
-            ['label' => __('Build Accumulator'), 'description' => __('Explore deterministic accumulator planning'), 'url' => route('builder')],
+            ['label' => __('Build an Accumulator'), 'description' => __('Discover eligible selections and build a new accumulator'), 'url' => route('builder')],
             ['label' => __('Analysis History'), 'description' => __('Open completed structural risk reports'), 'url' => route('history')],
             ['label' => __('Journal'), 'description' => __('Review decisions and reflections'), 'url' => route('journal')],
             ['label' => __('Planning History'), 'description' => __('Resume or review planning sessions'), 'url' => route('planner.history')],
@@ -33,7 +33,7 @@ new class extends Component
     $primaryItems = [
         ['route' => 'dashboard', 'matches' => ['dashboard'], 'label' => __('Dashboard'), 'icon' => 'heroicon-o-squares-2x2'],
         ['route' => 'analyze.intake', 'matches' => ['analyze', 'analyze.*'], 'label' => __('Analyse Slip'), 'icon' => 'heroicon-o-document-magnifying-glass'],
-        ['route' => 'builder', 'matches' => ['builder'], 'label' => __('Build Accumulator'), 'icon' => 'heroicon-o-circle-stack', 'preview' => ! config('slipguard-market-intelligence.enabled')],
+        ['route' => 'builder', 'matches' => ['builder'], 'label' => __('Build an Accumulator'), 'icon' => 'heroicon-o-circle-stack', 'preview' => ! config('slipguard-market-intelligence.enabled')],
         ['route' => 'history', 'matches' => ['history'], 'label' => __('Analysis History'), 'icon' => 'heroicon-o-clock'],
         ['route' => 'journal', 'matches' => ['journal', 'journal.*'], 'label' => __('Journal'), 'icon' => 'heroicon-o-book-open'],
         ['route' => 'planner.history', 'matches' => ['planner.*'], 'label' => __('Planning History'), 'icon' => 'heroicon-o-arrow-path-rounded-square'],

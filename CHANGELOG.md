@@ -28,6 +28,12 @@
 - Enabled `RefreshDatabase` for the Pest feature suite.
 - Duplicate bootstrap-era documentation (`docs/01-foundation/`, `02-product/`, `03-architecture/`, `04-intelligence/`, `06-delivery/`, `07-decisions/`) archived, unmodified, to `docs/_legacy-bootstrap/` and marked superseded by SGOS v1.0.
 
+### Fixed
+- Public navigation transitions no longer shift the header or theme controls between routes. The sticky header now keeps fixed padding and logo geometry while scroll state changes elevation only, and a stable scrollbar gutter prevents horizontal movement between short and tall pages.
+- Light theme no longer flashes a dark background during `wire:navigate` transitions. A root-theme attribute guard preserves the saved explicit preference while Livewire morphs the incoming document, before the post-navigation synchronizer runs.
+- The light/dark toggle no longer jumps to its default position on every navigation. Its thumb position and icon colours now derive directly from the pre-paint root theme, remaining visually correct while Alpine rebinds the reconstructed control.
+- Added regression coverage for stable navigation geometry, pre-paint toggle state, and Livewire theme-attribute preservation; the focused shell/theme/public-page suite passes 55 tests with 461 assertions.
+
 ## SGOS v1.0 Final Stabilization
 
 ### Added
@@ -1911,3 +1917,20 @@ Full regression: 511/511 passing.
 - Browser verification — no browser access in this execution environment; verified via a real, seeded, end-to-end component test suite instead (discovery → outcome selection → evaluation → acceptance → real Planner session).
 
 7 new Pest tests. Full regression: 603/603 passing.
+
+## `PO-U21-001` — Repository-Wide Product Content Reconciliation
+
+**Status:** Delivered. Reconciliation only — no UI/UX redesign, per the directive's own explicit non-scope.
+
+### Fixed
+- `resources/views/pages/home.blade.php`, `pages/analyse.blade.php`, `pages/pricing.blade.php` — the "manually, for now" / "no statistical knowledge required" intake copy was stale since Paste Text/PDF/Screenshot upload shipped (see "Bounded-scope Slip Intake," above); corrected to name the real intake methods. `home.blade.php`'s "How SlipGuard Thinks" pipeline copy claimed the Risk Report shows "the weakest leg" — the base Risk Report this pipeline describes actually surfaces the Main Contributing Factor (a risk-factor concept, `resources/views/livewire/betting-slips/report.blade.php`), not a per-leg ranking; the separate weakest-leg ranking engine (`RankLegsByStructuralWeakness`, `U-06.2A`/`E-06D.1`) is real but wired into the Planner, not the base Risk Report. Corrected to "the main contributing factor" to match what this specific pipeline actually produces. `pricing.blade.php`'s Free-tier description listed features without Build an Accumulator, which had since shipped under MVP.
+- Capability B's post-rename label ("Build an Accumulator," set at `PO-U17-IMP2-001` above) had not propagated everywhere: `resources/views/livewire/layout/sidebar-navigation.blade.php` (command palette entry and primary nav item both still read "Build Accumulator") and `resources/views/partials/authenticated-shell.blade.php` (mobile header title) corrected to match; `home.blade.php`'s unlinked-capabilities list gained the missing "Build an Accumulator" entry.
+- `resources/views/pages/release-notes.blade.php` — five shipped milestones had no release-notes entry at all (v2026.5 Bounded-scope Slip Intake, v2026.6 Build an Accumulator, v2026.7 Dashboard/Planner evolution, v2026.8 Manual Intake guided controls, v2026.9 real Terms/Privacy pages) — added, each with a real "why it matters"/"technical" pair checked against the corresponding delivery's own CHANGELOG entry, not invented.
+
+### Changed
+- `tests/Feature/MobileNavigationDrawerTest.php`, `tests/Feature/MarketIntelligence/BuilderComponentTest.php` — assertions updated to expect "Build an Accumulator" instead of the stale label.
+
+### Not Done
+- Broader `docs/01-product/` staleness beyond what this pass's own scope covered (later named explicitly and partially addressed under `PO-U23-001A`, below) was out of this reconciliation's page-content focus.
+
+2 existing Pest tests updated for the corrected label (`MobileNavigationDrawerTest`, `BuilderComponentTest`). Full regression: 603/603 passing (no net test count change — content/copy corrections only).
