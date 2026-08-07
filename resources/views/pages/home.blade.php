@@ -110,7 +110,7 @@
                             <span class="bg-gradient-button bg-clip-text text-transparent">{{ __('before you place it.') }}</span>
                         </h1>
                         <p class="mt-5 text-base sm:text-lg text-neutral-600 max-w-lg">
-                            {{ __("SlipGuard analyzes the structure of a betting slip and explains where its unnecessary risk comes from — which leg contributes most and why. It does not predict who wins.") }}
+                            {{ __("SlipGuard analyzes the structure of a betting slip and explains what's driving its risk, in plain language. It does not predict who wins.") }}
                         </p>
                     </div>
 
@@ -616,7 +616,7 @@
                     <span class="inline-flex items-center justify-center size-10 rounded-full bg-accent-strong/10 text-accent-strong">
                         <x-heroicon-o-magnifying-glass class="size-5" aria-hidden="true" />
                     </span>
-                    <h3 class="mt-4 text-base font-semibold text-neutral-900">{{ __('Analyse') }}</h3>
+                    <h3 class="mt-4 text-base font-semibold text-neutral-900">{{ __("See what's driving your risk") }}</h3>
                     <p class="mt-1 text-sm text-neutral-600">{{ __('How the structural risk engine works, and why it never predicts.') }}</p>
                     <span class="mt-4 inline-flex items-center text-sm font-semibold text-accent-strong">
                         {{ __('Learn more') }}
@@ -627,8 +627,8 @@
                     <span class="inline-flex items-center justify-center size-10 rounded-full bg-accent-strong/10 text-accent-strong">
                         <x-heroicon-o-document-text class="size-5" aria-hidden="true" />
                     </span>
-                    <h3 class="mt-4 text-base font-semibold text-neutral-900">{{ __('Reports') }}</h3>
-                    <p class="mt-1 text-sm text-neutral-600">{{ __('A full example of what SlipGuard actually shows you.') }}</p>
+                    <h3 class="mt-4 text-base font-semibold text-neutral-900">{{ __("See what you'll actually get") }}</h3>
+                    <p class="mt-1 text-sm text-neutral-600">{{ __('A full, real example — the same report every customer receives.') }}</p>
                     <span class="mt-4 inline-flex items-center text-sm font-semibold text-accent-strong">
                         {{ __('Learn more') }}
                         <x-heroicon-o-arrow-right class="ms-1.5 size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
@@ -638,7 +638,7 @@
                     <span class="inline-flex items-center justify-center size-10 rounded-full bg-accent-strong/10 text-accent-strong">
                         <x-heroicon-o-clock class="size-5" aria-hidden="true" />
                     </span>
-                    <h3 class="mt-4 text-base font-semibold text-neutral-900">{{ __('Planner') }}</h3>
+                    <h3 class="mt-4 text-base font-semibold text-neutral-900">{{ __('Stay in control while you plan') }}</h3>
                     <p class="mt-1 text-sm text-neutral-600">{{ __('Deterministic help building an accumulator you already control.') }}</p>
                     <span class="mt-4 inline-flex items-center text-sm font-semibold text-accent-strong">
                         {{ __('Learn more') }}
@@ -671,6 +671,9 @@
                 <h2 id="trust-heading" class="mt-3 text-2xl sm:text-3xl font-semibold text-neutral-900">
                     {{ __('Trust that comes from what you can check, not what we claim.') }}
                 </h2>
+                <p class="mt-4 text-sm text-neutral-600">
+                    {{ __('SlipGuard is independent — no bookmaker partnership or commercial incentive ever influences an analysis.') }}
+                </p>
             </div>
             <div class="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto text-center">
                 <div>

@@ -28,6 +28,7 @@ Each of the following is a legitimate, reserved trust signal — used consistent
 - **Normalization status.** When a leg's market or sport couldn't be fully classified, that is shown, not silently absorbed into a generic result.
 - **Supported sports / unsupported sports.** Stated plainly wherever relevant (builder, unavailable-analysis states, methodology) — SlipGuard is specific and upfront about scope rather than vague about coverage.
 - **Limited analysis messaging / Unavailable analysis messaging.** Always specific to the actual gate that fired (`EMPTY_STATES.md`), never a single generic "reduced accuracy" message covering multiple different causes.
+- **Operator independence** (added `PO-RC1-007`, 2026-08-07 — Product Office directive commissioned homepage trust messaging naming this mechanism; it was real and already Locked but had never been added to this list or stated on the homepage). Stated plainly wherever the Trust section appears: no affiliate agreement, bookmaker partnership, or commercial incentive ever biases a calculation, classification, or recommendation (`ADR-012`, `CLAUDE.md`'s Locked Decisions). This is a standing product boundary, not a claim invented for marketing — it is checkable the same way every other mechanism in this list is: nothing in the codebase reads a bookmaker identity, promotional flag, or affiliate relationship anywhere in the Risk Engine, Planner, or Builder.
 
 ## Forbidden Language
 

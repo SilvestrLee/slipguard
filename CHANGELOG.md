@@ -1934,3 +1934,16 @@ Full regression: 511/511 passing.
 - Broader `docs/01-product/` staleness beyond what this pass's own scope covered (later named explicitly and partially addressed under `PO-U23-001A`, below) was out of this reconciliation's page-content focus.
 
 2 existing Pest tests updated for the corrected label (`MobileNavigationDrawerTest`, `BuilderComponentTest`). Full regression: 603/603 passing (no net test count change — content/copy corrections only).
+## `PO-RC1-007` — Homepage Reconciliation & Limited Experience Polish
+
+**Status:** Delivered. A bounded content/clarity pass, explicitly not a homepage redesign — deferred items named in the directive (further hero iteration, additional sections, new components) were not touched.
+
+### Changed
+- `resources/views/pages/home.blade.php` — hero supporting copy tightened (removed a run-on clause, led with the plain-language outcome: "explains what's driving its risk, in plain language"). The three capability cards below the fold rewritten from feature labels to outcome-led headings ("Analyse" → "See what's driving your risk"; "Reports" → "See what you'll actually get"; "Planner" → "Stay in control while you plan"), per the Mandatory Specialist Design Capability Invocation's outcome-over-feature guidance (UI UX Pro Max consulted; 21st.dev's card-copy patterns reviewed and not adopted — none fit a Blade/Livewire, non-React implementation without drifting toward decorative SaaS patterns `HUMAN_DESIGNED_EXPERIENCE_STANDARD.md` rejects). A new sentence added to the Trust section stating SlipGuard's operator independence in plain language.
+- `docs/05-ux/TRUST_SIGNALS.md` — "Operator independence" added as a named Trust Mechanism (Gap Rule compliance: the mechanism was already real and Locked via `ADR-012`, but had never been documented in this list or stated on the homepage before this directive commissioned it).
+
+### Not Done
+- A dashboard-preview caption change was drafted, then reverted after viewing `public/images/homepage/slipguard-dashboard-demo-{light,dark}.png` directly and finding the screenshot itself predates the Dashboard redesign and the Capability B naming fix — changing only the caption would have made it describe the image less accurately, not more. Flagged rather than silently shipped; the screenshot itself needs recapturing, which is outside a copy-only commission.
+- No new Pest coverage — this pass changed marketing copy and one documentation list, not behaviour; verified by direct content review against `TRUST_SIGNALS.md`, `ADR-012`, and the real screenshot file rather than automated assertions.
+
+Full regression: 603/603 passing (unchanged — no test-observable behaviour changed).
