@@ -25,13 +25,19 @@
     override. One rule for every footer, not two.
 --}}
 @php
-    // URLs intentionally remain null until official SlipGuard accounts are
-    // available. Supplying a verified URL here automatically promotes the
-    // corresponding item from a labelled icon to a real external link.
+    // `PO-U22-001` — confirmed handle (Product Office, direct instruction):
+    // every SlipGuard social account uses the username "slipguardhq".
+    // Supplying a verified URL here automatically promotes the
+    // corresponding item from a labelled icon to a real external link —
+    // the mechanism this comment originally described, now used.
     $socialProfiles = [
-        ['brand' => 'x', 'label' => 'X', 'url' => null],
-        ['brand' => 'youtube', 'label' => 'YouTube', 'url' => null],
-        ['brand' => 'linkedin', 'label' => 'LinkedIn', 'url' => null],
+        ['brand' => 'x', 'label' => 'X', 'url' => 'https://x.com/slipguardhq'],
+        ['brand' => 'youtube', 'label' => 'YouTube', 'url' => 'https://youtube.com/@slipguardhq'],
+        ['brand' => 'linkedin', 'label' => 'LinkedIn', 'url' => 'https://linkedin.com/company/slipguardhq'],
+        ['brand' => 'instagram', 'label' => 'Instagram', 'url' => 'https://instagram.com/slipguardhq'],
+        ['brand' => 'facebook', 'label' => 'Facebook', 'url' => 'https://facebook.com/slipguardhq'],
+        ['brand' => 'tiktok', 'label' => 'TikTok', 'url' => 'https://tiktok.com/@slipguardhq'],
+        ['brand' => 'threads', 'label' => 'Threads', 'url' => 'https://threads.net/@slipguardhq'],
     ];
 @endphp
 

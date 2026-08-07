@@ -3,10 +3,11 @@
 /**
  * U-13.0 — Public Website Experience, Information Architecture & Premium
  * SaaS Presence. Every navigation destination is a real, independent
- * route (never a same-page anchor), all guest-accessible. Pricing and
- * Contact are honest stubs — no fabricated pricing model (see
+ * route (never a same-page anchor), all guest-accessible. Pricing
+ * remains an honest stub — no fabricated pricing model (see
  * public-coming-soon.blade.php's own comment). Privacy and Terms became
- * real, Compliance-Office-drafted content under `PO-CO-002`.
+ * real, Compliance-Office-drafted content under `PO-CO-002`; Contact
+ * became a real page under `PO-U22-001`.
  */
 test('every public page is guest-accessible and renders the shared public navigation', function () {
     foreach (['home', 'analyse', 'planner.public', 'reports', 'about', 'pricing', 'contact', 'privacy', 'terms', 'faq', 'release-notes', 'labs'] as $routeName) {
@@ -105,7 +106,7 @@ test('the About page states the ADR-012 constitutional boundaries', function () 
         ->assertSee('Take a side');
 });
 
-test('Pricing honestly communicates availability without inventing numbers; Contact remains an honest stub', function () {
+test('Pricing honestly communicates availability without inventing numbers', function () {
     $pricingResponse = $this->get(route('pricing'))
         ->assertOk()
         ->assertSee('Free')
@@ -119,8 +120,19 @@ test('Pricing honestly communicates availability without inventing numbers; Cont
     // from the JS template-literal `${rotation}` the U-14.3 logo motion legitimately
     // renders on every public page, which is not currency and must not false-positive.
     expect(preg_match('/\$\d/', $pricingResponse->getContent()))->toBe(0);
+});
 
-    $this->get(route('contact'))->assertOk()->assertSee('Contact is on the way.');
+/**
+ * `PO-U22-001` — Contact is now a real page, not the honest stub the two
+ * tests above used to cover. See `tests/Feature/ContactPageTest.php` for
+ * the page's own full coverage (form validation, persistence, honest
+ * placeholder handling, social links).
+ */
+test('Contact is a real page, not the honest stub', function () {
+    $this->get(route('contact'))
+        ->assertOk()
+        ->assertSee("Let's talk.")
+        ->assertDontSee('Contact is on the way.');
 });
 
 /**

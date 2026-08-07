@@ -18,11 +18,12 @@ Route::get('/health', function () {
 
 /*
  * U-13.0 — public multi-page information architecture. Every navigation
- * item is an independent route, never a same-page anchor. Pricing and
- * Contact remain honest stubs — see public-coming-soon.blade.php. Privacy
- * and Terms became real pages under `PO-CO-002` — no commercial/legal
- * content is fabricated in the process (see each page's own
- * placeholder-handling note).
+ * item is an independent route, never a same-page anchor. Pricing
+ * remains an honest stub (no pricing model has been approved) — see
+ * public-coming-soon.blade.php. Privacy and Terms became real pages under
+ * `PO-CO-002`; Contact became a real page under `PO-U22-001` — neither
+ * fabricates commercial/legal/business content in the process (see each
+ * page's own placeholder-handling note).
  */
 Route::view('/analyse', 'pages.analyse')->name('analyse');
 Route::view('/planner', 'pages.planner')->name('planner.public');
@@ -31,10 +32,16 @@ Route::view('/about', 'pages.about')->name('about');
 Route::view('/faq', 'pages.faq')->name('faq');
 Route::view('/release-notes', 'pages.release-notes')->name('release-notes');
 Route::view('/pricing', 'pages.pricing')->name('pricing');
-Route::view('/contact', 'pages.public-coming-soon', [
-    'title' => 'Contact',
-    'description' => __("A dedicated contact page hasn't been built yet."),
-])->name('contact');
+// `PO-U22-001` — real Contact page, replacing the honest stub. Guest-
+// accessible like `labs.index` below, not gated behind the `auth` group,
+// since a Volt component (the form needs real validation) is required.
+// Component name is `contact`, not `pages.contact`: `resources/views/pages`
+// is mounted as its own Volt root (`VoltServiceProvider`), exactly like
+// `resources/views/livewire` is for `labs.index` — a `pages.` prefix
+// here would resolve to the nonexistent `pages/pages/contact.blade.php`
+// (found the hard way: a genuine `ComponentNotFoundException` on first
+// request, this mount point apparently never previously exercised).
+Volt::route('contact', 'contact')->name('contact');
 // `CO-MVP-001`/`PO-CO-002` — real Compliance-Office-drafted content,
 // replacing the honest stub. Specific clauses still require qualified
 // legal counsel review before this can be treated as final — marked

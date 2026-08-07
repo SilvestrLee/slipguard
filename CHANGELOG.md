@@ -1947,3 +1947,29 @@ Full regression: 511/511 passing.
 - No new Pest coverage — this pass changed marketing copy and one documentation list, not behaviour; verified by direct content review against `TRUST_SIGNALS.md`, `ADR-012`, and the real screenshot file rather than automated assertions.
 
 Full regression: 603/603 passing (unchanged — no test-observable behaviour changed).
+## `PO-U22-001` — Contact Page Completion
+
+**Status:** Delivered.
+
+### Added
+- `resources/views/pages/contact.blade.php` — a full Volt component replacing the honest "Contact is on the way" stub: hero, three contact-option cards (General Enquiries, Technical Support, Billing), a validated contact form, a grouped Office & Hours section with an explicit placeholder notice pending real business details, a styled map placeholder, an FAQ (every answer checked against real current product behaviour before writing it), Support Expectations (response-time ranges), Social Links, and a Security Notice, closing with a footer CTA.
+- `app/Models/ContactMessage.php`, `database/migrations/2026_08_07_000001_create_contact_messages_table.php` (`full_name`, `email`, `subject`, `category`, `message`), `database/factories/ContactMessageFactory.php`.
+- `App\Domain\Contact\ContactMessageCategory` enum (General Enquiry / Technical Support / Billing / Partnership / Feedback / Bug Report / Other).
+- `App\Actions\Contact\SubmitContactMessage` — persists the validated submission. No Mailable exists anywhere in this codebase (`MAIL_MAILER=log`) and provisioning email notification was not part of this directive's scope, so this action persists only — an honest limitation, not a silent gap; closed by `PO-U22-001A`'s Filament triage resource (below).
+- Real official brand SVG path data for Instagram, Facebook, TikTok, and Threads added to `resources/views/components/social-icon.blade.php` (Simple Icons project, MIT-licensed, fetched directly rather than hand-drawn, to avoid shipping an inaccurate glyph).
+- `resources/views/components/public-footer.blade.php` — all seven social profile URLs populated (`x`, `youtube`, `linkedin`, `instagram`, `facebook`, `tiktok`, `threads`), each confirmed real by Product Office under this directive, username `slipguardhq` on every platform. Previously all three then-existing entries carried `url: null` pending confirmation.
+- `tests/Feature/ContactPageTest.php` (6 tests): guest accessibility and placeholder-honesty, FAQ accuracy, all seven social links render live, valid-submission persistence, required-field/invalid-email rejection, category restricted to the documented enum values.
+
+### Fixed
+- `Volt::route('contact', 'pages.contact')` 500'd with `ComponentNotFoundException` — `resources/views/pages` is mounted as its own Volt root by `VoltServiceProvider` (the same way `resources/views/livewire` is), so a `pages.` prefix resolved to the nonexistent `pages/pages/contact.blade.php`. Fixed to `Volt::route('contact', 'contact')`.
+
+### Removed
+- `resources/views/pages/public-coming-soon.blade.php` — deleted once Contact (this directive), Privacy, and Terms (`PO-CO-002`, tracked separately) all stopped using it, leaving it fully orphaned.
+
+### Changed
+- `tests/Feature/PublicPagesTest.php` — the combined stub test ("Pricing honestly communicates availability... Contact, Privacy, and Terms remain honest stubs") was split: Pricing's own assertion stands alone (Pricing itself remains a stub — no pricing model is approved yet); a new "Contact is a real page, not the honest stub" test replaces this directive's share of the removed assertion. (Privacy/Terms' own real-page assertions in the same file belong to the separately-tracked `PO-CO-002`/`CO-MVP-001`, not this directive.)
+
+### Not Done
+- Real business details (registered office, phone line, company registration) remain an explicit, visibly-marked placeholder pending Product Office confirmation — not fabricated. Email notification on new submissions was not built (see `SubmitContactMessage`, above) — closed operationally by `PO-U22-001A`'s Filament resource instead of a Mailable.
+
+7 new Pest tests (6 in `ContactPageTest.php`, 1 in `PublicPagesTest.php`) + 1 existing `PublicPagesTest.php` test narrowed to its remaining Pricing-only scope. Full regression: 610/610 passing (up from 603).
