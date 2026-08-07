@@ -21,7 +21,17 @@ final readonly class ParsedLeg
     ) {}
 
     /**
-     * @return array{sport: string, competition: string, event_name: string, market_name: string, selection_name: string, decimal_odds: string}
+     * `PO-U23-001` — a real, pre-existing bug fixed alongside the
+     * conversational builder: `betting_slip_legs.decimal_odds` is a
+     * non-nullable decimal column, and `''` (this class's own "not
+     * detected" value) was never a valid one — every insert with
+     * undetected odds crashed with a raw SQL error before this fix. `''`
+     * → `null` here, matching the column's new nullable definition
+     * (`2026_08_07_000002_make_decimal_odds_nullable_on_betting_slip_legs_table`);
+     * `BettingSlipValidationRules::legIsComplete()` already treats a
+     * missing value as incomplete, unchanged.
+     *
+     * @return array{sport: string, competition: string, event_name: string, market_name: string, selection_name: string, decimal_odds: string|null}
      */
     public function toLegAttributes(): array
     {
@@ -31,7 +41,7 @@ final readonly class ParsedLeg
             'event_name' => $this->eventName,
             'market_name' => $this->marketName,
             'selection_name' => $this->selectionName,
-            'decimal_odds' => $this->decimalOdds,
+            'decimal_odds' => $this->decimalOdds !== '' ? $this->decimalOdds : null,
         ];
     }
 }

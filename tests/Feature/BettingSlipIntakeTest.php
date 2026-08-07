@@ -158,6 +158,27 @@ test('pasted text is parsed into a draft slip and the customer is sent to the bu
     expect($bettingSlip->legs[1]->event_name)->toBe('Arsenal vs Tottenham');
 });
 
+test('pasted text with no detectable odds creates a draft slip instead of crashing — a real bug fixed alongside PO-U23-001', function () {
+    // `betting_slip_legs.decimal_odds` used to be non-nullable; ParseSlipText's
+    // own "not detected" value ('') was never a valid decimal, so this exact
+    // input crashed with a raw SQLSTATE error before the column was made
+    // nullable. The customer completes the odds themselves in the Builder,
+    // same as every other incomplete field this parser already leaves blank.
+    $user = User::factory()->create();
+
+    Volt::actingAs($user)
+        ->test('betting-slips.intake')
+        ->call('selectMethod', 'paste')
+        ->set('pastedText', 'Just some notes about a slip with no vs pattern or odds at all')
+        ->call('submitPastedText')
+        ->assertRedirect();
+
+    $bettingSlip = BettingSlip::where('user_id', $user->id)->firstOrFail();
+
+    expect($bettingSlip->legs)->toHaveCount(1)
+        ->and($bettingSlip->legs[0]->decimal_odds)->toBeNull();
+});
+
 test('pasted text with an empty value fails validation rather than creating an empty slip', function () {
     $user = User::factory()->create();
 

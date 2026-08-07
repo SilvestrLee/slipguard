@@ -7,7 +7,6 @@ use App\Domain\Risk\Results\RiskBand;
 use App\Domain\Risk\Taxonomy\MarketFamily;
 use App\Models\SlipAnalysis;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
@@ -225,6 +224,16 @@ new #[Layout('layouts.app')] class extends Component
                 </span>
             </a>
         </section>
+
+        {{--
+            `PO-U23-001` — the conversational entry layer for Capability B
+            (§3.1/§4): a third accumulator-building method alongside the
+            Guided and Manual Builders above, not a replacement for either.
+            Own module, own component — kept out of the two-column hero
+            grid above so it reads as a distinct capability, not a variant
+            of the existing intake card.
+        --}}
+        <livewire:accumulator-conversation.composer />
 
         <section aria-label="{{ __('Account activity summary') }}">
             <dl class="dashboard-metric-strip workspace-primary-card grid grid-cols-2 overflow-hidden rounded-xl sm:grid-cols-4">

@@ -106,6 +106,38 @@ new #[Layout('layouts.app')] class extends Component
 
     public bool $hasRegenerated = false;
 
+    public ?string $conversationalSummary = null;
+
+    /**
+     * `PO-U23-001` §15/§16 — the one piece of orchestration glue for the
+     * conversational-builder hand-off: applies a session-flashed brief
+     * seed (set by `accumulator-conversation.composer`, never trusted
+     * beyond what this component's own existing `planningRules()`
+     * validates a moment later) onto the same public properties the
+     * manual planning-brief form already binds to, then runs the
+     * completely unmodified `findCandidate()` so the customer lands
+     * directly on discovered candidates instead of re-seeing the form.
+     * A normal page visit with nothing flashed behaves exactly as before
+     * this method existed.
+     */
+    public function mount(): void
+    {
+        $seed = session('conversational_planning_brief');
+
+        if (! is_array($seed)) {
+            return;
+        }
+
+        $this->conversationalSummary = session('conversational_summary');
+        $this->competitions = $seed['competitions'] ?? $this->competitions;
+        $this->windowDays = $seed['windowDays'] ?? $this->windowDays;
+        $this->legCount = $seed['legCount'] ?? $this->legCount;
+        $this->markets = $seed['markets'] ?? $this->markets;
+        $this->riskCeiling = $seed['riskCeiling'] ?? $this->riskCeiling;
+
+        $this->findCandidate();
+    }
+
     public function capabilityEnabled(): bool
     {
         return (bool) config('slipguard-market-intelligence.enabled');
@@ -1054,6 +1086,12 @@ new #[Layout('layouts.app')] class extends Component
         @if ($discovered && $evaluationOutcome === null)
             <div class="workspace-grid items-start">
             <div class="space-y-4">
+                @if ($conversationalSummary)
+                    {{-- `PO-U23-001` §15 — "Clearly indicate that SlipGuard has created a first draft." --}}
+                    <x-alert variant="success" role="status">
+                        {{ __('Your first draft is ready.') }} {{ $conversationalSummary }}
+                    </x-alert>
+                @endif
                 <p class="text-sm text-neutral-600">
                     {{ trans_choice(':made of :total selection made|:made of :total selections made', $selectionsTotal, ['made' => $selectionsMade, 'total' => $selectionsTotal]) }}
                 </p>
