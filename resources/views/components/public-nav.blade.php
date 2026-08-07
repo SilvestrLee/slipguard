@@ -1,13 +1,20 @@
 {{--
     U-13.0 — public site navigation. Every item is an independent route
     destination, never a same-page anchor (the commission's explicit
-    rejection of #anchor-style nav). Restrained two-state sticky
-    behaviour unchanged from U-11.3 (padding/shadow toggle past a scroll
-    threshold, not a continuous scroll-linked morph — MOTION_SYSTEM.md).
+    rejection of #anchor-style nav). The sticky header keeps fixed
+    geometry; scrolling changes elevation only.
 
     2026-07-31 — the approved icon and text wordmark are static. The
     former Signature Motion rotation is superseded. Scroll observation
-    remains only for the restrained sticky-header condensation.
+    remains only for the restrained sticky-header shadow.
+
+    2026-08-07 navigation-stability pass — the historical condensed
+    dimensions described below are superseded. Because `wire:navigate`
+    rebuilds this component, changing its padding and logo height after
+    Alpine hydration caused a visible jump on every route transition.
+    The expanded geometry is now permanent; only shadow changes after
+    the scroll threshold. `scrollbar-gutter: stable` in app.css also
+    prevents horizontal movement between short and tall pages.
 
     U-15.2 — header reconstruction (`PO-U15.2-001`): larger logo presence,
     more generous height, wider nav-item spacing, and a proper utility
@@ -111,14 +118,14 @@
 @endphp
 <div
     x-data="{
-        condensed: false,
+        scrolled: false,
         mobileMenuOpen: false,
         isDark: window.SlipGuardTheme?.isDark()
             ?? (document.documentElement.getAttribute('data-theme') === 'dark'
                 || (document.documentElement.getAttribute('data-theme') === null
                     && window.matchMedia('(prefers-color-scheme: dark)').matches)),
         updateFromScroll() {
-            this.condensed = window.scrollY > 40;
+            this.scrolled = window.scrollY > 40;
         },
         openMenu() {
             this.mobileMenuOpen = true;
@@ -167,12 +174,12 @@
     {{--
         Founder direct instruction (2026-07-27): glassmorphism for the
         header — a frosted, translucent surface at all times (not only
-        once condensed), rather than the prior solid background. Kept
+        after scrolling), rather than the prior solid background. Kept
         restrained: a single blur + translucency treatment, a hairline
         border for edge definition, no colour tint, no iridescence.
     --}}
-    :class="condensed ? 'py-2 shadow-elevation-1' : 'py-2.5'"
-    class="border-b border-neutral-200/70 backdrop-blur-md bg-surface-page/70 transition-[padding,box-shadow] duration-standard ease-in-out">
+    :class="scrolled ? 'shadow-elevation-1' : ''"
+    class="border-b border-neutral-200/70 bg-surface-page/70 py-2.5 backdrop-blur-md transition-shadow duration-standard ease-in-out">
     <div class="container-marketing mx-auto flex items-center justify-between gap-4 px-4 sm:px-6 md:gap-8 md:px-8">
         <a href="{{ route('home') }}" wire:navigate aria-label="SlipGuard home"
            x-data="{ loaded: false }" x-init="requestAnimationFrame(() => loaded = true)"
@@ -186,15 +193,15 @@
                 root element, and the ONLY height constraint on this `<img>` was the Alpine `:class` binding below (`h-8`/`h-10`) — which
                 doesn't apply until Alpine hydrates. In the brief pre-hydration window, the browser has nothing but the static `class`
                 list to size the image by, and that list had no height at all, so it rendered at its native ~721×848px size before
-                snapping down once Alpine ran. Fixed by adding `h-10` (the un-condensed default, matching a fresh page load's initial
+                snapping down once Alpine ran. Fixed by adding `h-10` (the stable default, matching a fresh page load's initial
                 scroll state) to the static class list itself — the `:class` binding still overrides it correctly once Alpine initialises
-                and the header condenses on scroll; this only fixes the sizing during the window before that binding exists.
+                and the header initializes; this only fixes the sizing during the window before that binding exists.
             --}}
             <img src="{{ asset('brand/slipguard-icon-accent.svg') }}"
                  alt=""
                  aria-hidden="true"
-                 :class="`${loaded ? 'opacity-100' : 'opacity-0'} ${condensed ? '!h-8' : 'h-8 md:h-10'}`"
-                 class="h-8 w-auto shrink-0 transition-[opacity,height] duration-300 ease-out md:h-10">
+                 :class="loaded ? 'opacity-100' : 'opacity-0'"
+                 class="h-8 w-auto shrink-0 transition-opacity duration-300 ease-out md:h-10">
             {{-- Wordmark — genuine text, not an image; static and theme-aware. --}}
             <span :class="loaded ? 'opacity-100' : 'opacity-0'"
                   class="text-lg font-semibold tracking-tight text-neutral-900 transition-opacity duration-300 ease-out md:text-xl">

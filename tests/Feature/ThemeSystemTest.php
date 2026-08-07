@@ -58,6 +58,8 @@ test('theme initialization and runtime storage access degrade safely', function 
         ->toContain('window.SlipGuardTheme = slipGuardTheme')
         ->toContain("window.addEventListener('storage'")
         ->toContain("systemPreference.addEventListener('change'")
+        ->toContain('new MutationObserver')
+        ->toContain("attributeFilter: ['data-theme']")
         ->toContain('window.localStorage.getItem(storageKey)')
         ->toContain('window.localStorage.setItem(storageKey, theme)')
         ->toContain('catch (error)');

@@ -1,5 +1,15 @@
 # SlipGuard Tasks
 
+## U-20.2 — Theme Desync on Livewire Auth Redirects — 2026-08-06
+
+**Status:** Fixed and verified.
+
+- [x] Root cause found via live browser verification during `PO-U20.1-001`/`PO-U20.1-002`'s QA programme: `wire:navigate` (used by every Livewire redirect, including the Register/Login/Logout success actions) morphs `<html>` against the target page's raw server-rendered markup, which never carries a `data-theme` attribute — the morph clears it, and `theme-init-script`'s pre-paint `<script>` tag does not re-execute on a morph to restore it. `localStorage['slipguard-theme']` was never lost; only its application to the new page's DOM was. Reproduced 4× directly (Register→Dashboard, sidebar nav within that session, Logout→homepage, Login→Dashboard), each showing `data-theme: null` despite the stored preference correctly reading `dark`.
+- [x] Fixed in `resources/js/app.js`: `window.SlipGuardTheme.synchronize()` is now called on every `livewire:navigated` firing, the same event `initScrollReveal`/`initAtmosphereParallax` already re-run on for the identical "doesn't survive a morph" reason. No change to the storage model, event model, or pre-paint script.
+- [x] Re-verified live: fresh browser session, explicit dark preference set, real Login submission — `data-theme` now correctly resolves `dark` immediately on landing at `/dashboard`, matching the stored preference (previously `null`). Screenshot confirms consistent dark rendering.
+- [x] Full regression: 716 tests, 709 passed, 7 intentional skips, 0 failures; `git diff --check` clean; production build clean.
+- [ ] Mobile-viewport and full-accessibility verification (Route/Component/Mobile/Accessibility sweep from `PO-U20.1-002`) remain outstanding — not re-attempted this pass, tooling-limited last time, not related to this fix.
+
 ## Public Sticky Header Restoration — 2026-07-31
 
 **Status:** Implemented and browser-verified.

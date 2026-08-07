@@ -27,6 +27,18 @@ test('the public navigation uses real routes for every destination, never a same
         ->assertDontSee('href="#pricing"', false);
 });
 
+test('the public navigation keeps stable geometry across page transitions', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+    $css = file_get_contents(resource_path('css/app.css'));
+
+    expect($html)->toContain("scrolled ? 'shadow-elevation-1' : ''")
+        ->toContain('class="border-b border-neutral-200/70 bg-surface-page/70 py-2.5')
+        ->not->toContain("condensed ? 'py-2 shadow-elevation-1' : 'py-2.5'")
+        ->not->toContain("condensed ? '!h-8' : 'h-8 md:h-10'");
+
+    expect($css)->toContain('scrollbar-gutter: stable;');
+});
+
 test('U-14.2: primary navigation is trimmed to Home, Analyse, Planner, Reports, Pricing — About and Labs moved to the footer only', function () {
     $response = $this->get('/');
 

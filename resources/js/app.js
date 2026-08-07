@@ -81,6 +81,51 @@ const slipGuardTheme = (() => {
 
 window.SlipGuardTheme = slipGuardTheme;
 
+/* Livewire morphs the incoming document element before `livewire:navigated`.
+ * Preserve an explicit preference during that morph so removing/replacing
+ * `data-theme` can never reach a paint and expose the system colour scheme. */
+const themeAttributeGuard = new MutationObserver(() => {
+    let stored = null;
+
+    try {
+        stored = window.localStorage.getItem('slipguard-theme');
+    } catch (error) {
+        return;
+    }
+
+    if ((stored === 'light' || stored === 'dark')
+        && document.documentElement.getAttribute('data-theme') !== stored) {
+        document.documentElement.setAttribute('data-theme', stored);
+    }
+});
+
+themeAttributeGuard.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme'],
+});
+
+/**
+ * U-20.2 — real root cause found via live browser verification, not
+ * theorised: a `wire:navigate` transition (used by every Livewire redirect,
+ * including the register/login/logout success actions) morphs `<html>`
+ * against the target page's raw server-rendered markup, which never
+ * carries a `data-theme` attribute (that attribute is applied by this
+ * script, client-side, after the fact). The morph reconciles `<html>`'s
+ * attributes to match the incoming markup — clearing `data-theme` — and,
+ * like any other inline `<script>` in a morphed page, `theme-init-script`'s
+ * pre-paint tag does not re-execute to restore it. The net effect,
+ * confirmed directly: a customer who prefers dark mode landed on a fully
+ * light-rendered Dashboard immediately after registering, logging in, or
+ * logging out, with `localStorage['slipguard-theme']` still correctly
+ * reading `dark` the entire time — the stored preference was never lost,
+ * only its application to the new page's DOM. Re-synchronizing here, on
+ * every `livewire:navigated` firing (the same event `initScrollReveal`/
+ * `initAtmosphereParallax` above already re-run on, for the identical
+ * "this doesn't survive a morph" reason), closes the gap without touching
+ * the storage model, the event model, or the pre-paint script at all.
+ */
+document.addEventListener('livewire:navigated', () => slipGuardTheme.synchronize());
+
 /**
  * Founder direct instruction (2026-07-28): "fade-in-up motions as a user
  * scrolls down the site, sitewide." Extracted from a `<script>` block that

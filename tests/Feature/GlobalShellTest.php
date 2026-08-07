@@ -13,11 +13,13 @@ test('U-16.2 CR-001: the theme toggle is a genuine switch (role, aria-checked, t
         ->assertOk()
         ->assertSee('role="switch"', false)
         ->assertSee(':aria-checked="effectiveIsDark.toString()"', false)
-        // the sliding indicator and both icons' colour-swap bindings are always present in the DOM —
-        // selection is shown by the indicator's position, not by adding/removing an icon from the page.
-        ->assertSee("effectiveIsDark ? 'translate-x-[24px]' : 'translate-x-0'", false)
-        ->assertSee("effectiveIsDark ? 'text-neutral-400' : 'text-accent-strong'", false)
-        ->assertSee("effectiveIsDark ? 'text-accent-strong' : 'text-neutral-400'", false);
+        // The indicator and both icons are always present. Their visual state
+        // comes from the pre-paint root theme, so navigation cannot reset them
+        // while Alpine rebinds the reconstructed switch.
+        ->assertSee('data-theme-toggle', false)
+        ->assertSee('theme-toggle-thumb', false)
+        ->assertSee('theme-toggle-sun', false)
+        ->assertSee('theme-toggle-moon', false);
 });
 
 test('Sprint 9 uses a fixed authenticated sidebar and a right workspace with a sticky contextual header', function () {
@@ -71,14 +73,24 @@ test('the authenticated footer is one shared implementation, identical on Dashbo
         ->and($labsFooter)->toContain($needle);
 });
 
-test('the public footer shows restrained social destinations without fabricating unavailable account links', function () {
+/**
+ * `PO-U22-001` — the founder confirmed the real handle (username
+ * "slipguardhq" on every platform), so the footer's own promotion
+ * mechanism (a verified URL turns a disabled icon into a real link,
+ * `public-footer.blade.php`'s own comment) is now exercised for real
+ * instead of staying null. Supersedes this test's own prior "coming
+ * soon, no fabricated link" assertion, which described the honest
+ * placeholder state before the handle was confirmed.
+ */
+test('the public footer links every social icon to the real, confirmed slipguardhq profile', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
     expect($html)->toContain('SlipGuard social media')
-        ->toContain('X account link coming soon')
-        ->toContain('YouTube account link coming soon')
-        ->toContain('LinkedIn account link coming soon')
-        ->not->toContain('href="#"');
+        ->toContain('href="https://x.com/slipguardhq"')
+        ->toContain('href="https://youtube.com/@slipguardhq"')
+        ->toContain('href="https://linkedin.com/company/slipguardhq"')
+        ->not->toContain('href="#"')
+        ->not->toContain('account link coming soon');
 });
 
 test('header and footer chrome use container-marketing, not a second raw max-w-7xl class', function () {
@@ -147,18 +159,18 @@ test('public and authenticated product marks remain static', function () {
  * covering the screen, then returns to set size" on every page load. Root
  * cause: the icon SVG's own root element declares an intrinsic
  * `width="721" height="848"`, and the only height constraint on the
- * public header's icon `<img>` was an Alpine `:class` binding
- * (`condensed ? 'h-8' : 'h-10'`) — inert until Alpine hydrates, so the
+ * public header's icon `<img>` was an Alpine `:class` binding — inert until Alpine hydrates, so the
  * browser rendered the image at its native ~721x848px size for a brief
  * pre-hydration window before snapping down. Fixed by giving the static
- * `class` list its own `h-10` fallback (the un-condensed default).
+ * `class` list its own responsive height. The header no longer changes
+ * logo height on scroll, which also keeps navigation geometry stable.
  */
 test('the public header icon has a static height class, not only an Alpine-bound one, so it never renders at its native SVG size before hydration', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
     expect($html)
-        ->toContain('class="h-8 w-auto shrink-0 transition-[opacity,height] duration-300 ease-out md:h-10"')
-        ->toContain("condensed ? '!h-8' : 'h-8 md:h-10'");
+        ->toContain('class="h-8 w-auto shrink-0 transition-opacity duration-300 ease-out md:h-10"')
+        ->not->toContain("condensed ? '!h-8' : 'h-8 md:h-10'");
 });
 
 /**
@@ -371,7 +383,7 @@ test('the authenticated atmosphere uses restrained scroll-linked depth and disab
         ->toContain('data-workspace-scroll');
     expect($js)->toContain('initAtmosphereParallax')
         ->toContain('requestAnimationFrame')
-        ->toContain("prefers-reduced-motion: reduce")
+        ->toContain('prefers-reduced-motion: reduce')
         ->toContain('--atmosphere-shift');
     expect($css)->toContain('transform: translate3d(0, var(--atmosphere-shift, 0px), 0)')
         ->toContain('.atmosphere > span')

@@ -15,6 +15,53 @@
     display: none !important;
 }
 
+/* Keep centered public-shell geometry stable when navigating between a
+   short page and a page tall enough to need a vertical scrollbar. */
+html {
+    scrollbar-gutter: stable;
+}
+
+/* Theme-switch visuals are derived directly from the pre-paint root theme.
+   They therefore remain correct while Livewire replaces and Alpine rebinds
+   the control during navigation. */
+.theme-toggle-thumb {
+    transform: translateX(0);
+}
+
+.theme-toggle-sun {
+    color: var(--accent-strong);
+}
+
+.theme-toggle-moon {
+    color: var(--neutral-400);
+}
+
+:root[data-theme="dark"] .theme-toggle-thumb {
+    transform: translateX(24px);
+}
+
+:root[data-theme="dark"] .theme-toggle-sun {
+    color: var(--neutral-400);
+}
+
+:root[data-theme="dark"] .theme-toggle-moon {
+    color: var(--accent-strong);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-toggle-thumb {
+        transform: translateX(24px);
+    }
+
+    :root:not([data-theme="light"]) .theme-toggle-sun {
+        color: var(--neutral-400);
+    }
+
+    :root:not([data-theme="light"]) .theme-toggle-moon {
+        color: var(--accent-strong);
+    }
+}
+
 /*
  * U-12.0 (SlipGuard Design Language System) — surface, elevation, and
  * gradient tokens added below the existing colour/radius/motion tokens.
@@ -248,6 +295,19 @@
         --surface-section: rgb(35 36 40 / 0.82);
         --surface-record: rgb(46 47 52 / 0.94);
         --surface-primary: rgb(35 36 40 / 0.94);
+        /* PO-U20.1-002 Phase 1 — these three were missing from this block only
+           (present in the `:root[data-theme="dark"]` override below the whole
+           time), the exact "must remember to update twice" failure this file's
+           own comment above already warns about. A visitor relying on system
+           dark preference alone — the default for anyone who has never touched
+           the toggle — resolved these three to their light values while every
+           other token here correctly resolved dark, producing alternating
+           light/dark `.public-section-quiet`/`.public-section-atmosphere`
+           bands down every public page. Values copied verbatim from the
+           override block; no new colour introduced. */
+        --surface-public-atmosphere: rgb(27 28 32 / 0.58);
+        --gradient-public-quiet: linear-gradient(180deg, rgb(35 36 40 / 0.98) 0%, rgb(27 28 32 / 0.99) 52%, rgb(20 21 24 / 0.98) 100%);
+        --public-section-edge: rgb(60 61 66 / 0.56);
         --border-structural: #3c3d42;
         --border-internal: rgb(60 61 66 / 0.72);
         --edge-highlight: rgb(255 255 255 / 0.06);

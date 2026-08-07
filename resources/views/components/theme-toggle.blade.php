@@ -23,6 +23,7 @@
     a sliding two-state control) rather than `aria-pressed`.
 --}}
 <button type="button"
+        data-theme-toggle
         x-data="{
             effectiveIsDark: window.SlipGuardTheme?.isDark()
                 ?? (document.documentElement.getAttribute('data-theme') === 'dark'
@@ -46,14 +47,13 @@
         {{ $attributes->merge(['class' => 'relative inline-flex shrink-0 items-center h-8 w-14 rounded-full border border-neutral-300 bg-neutral-100 hover:bg-neutral-200 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent transition-[background-color,transform] duration-instant']) }}>
     {{-- The sliding indicator — restrained transform-only motion, 200ms, no bounce/overshoot (MOTION_SYSTEM.md). --}}
     <span aria-hidden="true"
-          class="pointer-events-none absolute inset-y-1 left-1 size-6 rounded-full bg-surface-card shadow-elevation-1 border border-neutral-300 transition-transform duration-200 ease-out"
-          :class="effectiveIsDark ? 'translate-x-[24px]' : 'translate-x-0'"></span>
+          class="theme-toggle-thumb pointer-events-none absolute inset-y-1 left-1 size-6 rounded-full bg-surface-card shadow-elevation-1 border border-neutral-300 transition-transform duration-200 ease-out"></span>
 
     {{-- Both icons are always present — the track itself is the affordance; the indicator shows which is selected. --}}
     <span class="relative z-10 flex w-1/2 items-center justify-center">
-        <x-heroicon-o-sun class="size-4 transition-colors duration-instant" x-bind:class="effectiveIsDark ? 'text-neutral-400' : 'text-accent-strong'" aria-hidden="true" />
+        <x-heroicon-o-sun class="theme-toggle-sun size-4 transition-colors duration-instant" aria-hidden="true" />
     </span>
     <span class="relative z-10 flex w-1/2 items-center justify-center">
-        <x-heroicon-o-moon class="size-4 transition-colors duration-instant" x-bind:class="effectiveIsDark ? 'text-accent-strong' : 'text-neutral-400'" aria-hidden="true" />
+        <x-heroicon-o-moon class="theme-toggle-moon size-4 transition-colors duration-instant" aria-hidden="true" />
     </span>
 </button>
