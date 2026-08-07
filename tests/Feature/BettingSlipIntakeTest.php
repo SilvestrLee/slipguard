@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\BettingSlip\BettingSlipStatus;
 use App\Models\BettingSlip;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -119,7 +120,7 @@ test('the betting slips index New Slip button routes to the intake shell', funct
 
 test('ready slips enter a dedicated truthful processing workspace without fake progress', function () {
     $user = User::factory()->create();
-    $slip = BettingSlip::factory()->for($user)->create(['status' => \App\Domain\BettingSlip\BettingSlipStatus::Ready]);
+    $slip = BettingSlip::factory()->for($user)->create(['status' => BettingSlipStatus::Ready]);
 
     $this->actingAs($user)->get(route('analyze'))
         ->assertOk()
