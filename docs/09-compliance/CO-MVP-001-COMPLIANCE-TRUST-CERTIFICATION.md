@@ -6,7 +6,7 @@
 | Type | **Governance and product compliance certification — not a legal opinion.** Identifies what must exist before launch and what requires jurisdiction-specific legal review; does not itself author binding legal documents. |
 | Owner | Compliance Office (`docs/offices/COMPLIANCE_OFFICE.md`, established `G-02`, jointly owns `docs/09-compliance/PRODUCT_GUARDRAILS.md` with Product Office) |
 | Grounding | Builds on `docs/product/MVP_LAUNCH_READINESS_AUDIT.md`'s Compliance findings (`R-01a`, `R-01b`, `R-02`) and the already-existing `docs/09-compliance/PRODUCT-COMPLIANCE-OPERATING-MODEL.md` (adopted `PO-PD011-001`, 2026-07-29) rather than re-deriving either. |
-| Status | Delivered. Awaiting Product Office review. |
+| Status | Delivered and reviewed. **`PO-CO-002`** (2026-08-04) subsequently commissioned implementation of the remaining blockers — see `docs/09-compliance/CO-005-LEGAL-REVIEW-REGISTER.md` for the completed Terms of Service, Privacy Policy, Responsible Gambling/age-statement verification, and final register. Updated recommendation: **CERTIFIED WITH CONDITIONS** (external legal review, launch-market naming, real support channel). |
 
 ---
 
@@ -147,8 +147,8 @@ Either path is compatible with this certification; leaving the question unanswer
 
 | ID | Risk | Severity | Owner | Blocking? | Mitigation | Recommended completion stage |
 |---|---|---|---|---|---|---|
-| CO-01 | Terms of Service is a stub | Critical | Compliance/Legal | **Yes, before any real launch** | Commission real content `⚠` | Before RC1 |
-| CO-02 | Privacy Policy is a stub | Critical | Compliance/Legal | **Yes** | Commission real content `⚠` | Before RC1 |
+| CO-01 | ✅ **Resolved, `PO-CO-002`, 2026-08-04** — real Terms of Service now live at `/terms`, replacing the stub | Critical → Closed | Compliance Office (drafted); qualified legal counsel (final sign-off, `⚠` outstanding) | No longer blocking for RC1 content; legal sign-off remains a genuinely external condition | See `docs/09-compliance/CO-005-LEGAL-REVIEW-REGISTER.md` | Content: done. Legal sign-off: before public launch |
+| CO-02 | ✅ **Resolved, `PO-CO-002`, 2026-08-04** — real Privacy Policy now live at `/privacy`, replacing the stub | Critical → Closed | Compliance Office (drafted); qualified legal counsel (final sign-off, `⚠` outstanding) | No longer blocking for RC1 content; legal sign-off remains a genuinely external condition | See `docs/09-compliance/CO-005-LEGAL-REVIEW-REGISTER.md` | Content: done. Legal sign-off: before public launch |
 | CO-03 | No Responsible Gambling signposting exists | Major → **resolved by recommendation** | Engineering (implementation), Compliance (content) | Yes, until C-03's baseline is adopted | Adopt C-03's baseline signposting — does not require the jurisdiction question to be answered first | Before RC1 |
 | CO-04 | No age statement or age-confirmation exists | Major | Engineering + Compliance | Yes, before real launch | Add 18+ (or locally required `⚠`) statement to ToS; consider a registration-time checkbox | Before RC1 |
 | CO-05 | ~~No copyright/IP notice in the footer~~ — **corrected, `PO-RC1-002`**: a real notice already exists (`&copy; {{ now()->year }} SlipGuard`), the original finding was a search false-negative. A ToS IP clause is still recommended once real ToS content is authored. | Minor | Compliance (ToS clause) | No | Fold an IP clause into the Terms of Service content commission (`CO-01`) — no separate footer work needed | Reflected in CO-01's content, not a standalone item |

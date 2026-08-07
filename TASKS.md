@@ -171,6 +171,19 @@
 - [x] `docs/08-operations/PRODUCTION_OPERATIONS_BLUEPRINT.md` cross-referenced to the execution report; blueprint recommendations themselves unchanged, nothing redesigned.
 - [x] Full verification after every change: 687/694 executed tests passing (7 self-skip by design), 0 failures; `git diff --check` clean; production build clean; Pint clean on every touched file.
 
+### `PO-CO-002` — RC1 Compliance implementation: Terms of Service, Privacy Policy delivered (2026-08-04)
+
+**Status:** Delivered. **Recommendation: CERTIFIED WITH CONDITIONS.** `docs/09-compliance/CO-005-LEGAL-REVIEW-REGISTER.md`.
+
+- [x] **CO-01/CO-02 — real Terms of Service and Privacy Policy now live**, replacing the honest stubs: `resources/views/pages/terms.blade.php` (`/terms`), `resources/views/pages/privacy.blade.php` (`/privacy`). Accurate to real application behaviour only — every data category, feature, and boundary described was checked against real code first (account deletion references the real `delete-user-form.blade.php`; the "no third-party analytics" claim matches `PO-MVP-005`'s own independently-verified finding of zero tracking code anywhere). Jurisdiction-neutral throughout, per `PO-RC1-001`'s standing instruction. Clauses genuinely requiring external legal review (Limitation of Liability, Governing Law/Dispute Resolution, statutory data-subject rights) are visibly flagged inline, not silently presented as final.
+- [x] **CO-03/CO-04 verified**: Responsible Gambling footer wording and the age statement confirmed live and consistent across every public page by construction (single shared `<x-public-footer>` component). **One real, disclosed gap, not fixed here**: the authenticated-only Help section (`routes/web.php:79`) remains a generic content-free stub — its MVP scope is a separate, still-open Product Office decision (closure plan `PO-04`), not something Compliance Office builds unilaterally.
+- [x] **CO-05 Legal Review Register delivered**, consolidating every Compliance item into exactly one of three categories with a stated reason and owner — internally approved (14 items), requires external counsel (6 items, all genuinely jurisdiction- or licensed-counsel-dependent), intentionally deferred (7 items, each a real prior scope decision, not reopened).
+- [x] `docs/09-compliance/CO-MVP-001-COMPLIANCE-TRUST-CERTIFICATION.md` and `docs/product/RC1_LAUNCH_BLOCKER_CLOSURE_PLAN.md` updated in place — `CO-01`/`CO-02` marked closed; closure plan's Must-Complete count now 12 of 20 closed, 8 remaining (all 7 Operations items + 1 Product Office item).
+- [x] Verification: 688/695 executed tests passing (7 self-skip by design), 0 failures; `git diff --check` clean; production build clean; Pint clean on every touched file.
+- [ ] Qualified legal counsel review and final sign-off (genuinely external, not owned by this repository's Compliance Office role).
+- [ ] Product Office naming intended launch market(s), or explicitly confirming a market-agnostic launch.
+- [ ] A real support contact channel, so both documents' `[Contact]` placeholders can be completed.
+
 ## Production Foundation
 **Status:** Certified 2026-07-25 — `READY WITH OBSERVATIONS`. See `docs/engineering/PRODUCTION_FOUNDATION_CERTIFICATE.md` for the full engineering certification (governance versions, validation summary, test/performance/architecture/security/documentation summaries, outstanding debt, and the Platform Engineering → Customer Experience Engineering transition). Platform Engineering is now closed; all further work proceeds under Customer Experience Engineering (see below).
 

@@ -3,9 +3,10 @@
 /**
  * U-13.0 — Public Website Experience, Information Architecture & Premium
  * SaaS Presence. Every navigation destination is a real, independent
- * route (never a same-page anchor), all guest-accessible. Pricing,
- * Contact, Privacy, and Terms are honest stubs — no fabricated pricing
- * model or legal text (see public-coming-soon.blade.php's own comment).
+ * route (never a same-page anchor), all guest-accessible. Pricing and
+ * Contact are honest stubs — no fabricated pricing model (see
+ * public-coming-soon.blade.php's own comment). Privacy and Terms became
+ * real, Compliance-Office-drafted content under `PO-CO-002`.
  */
 test('every public page is guest-accessible and renders the shared public navigation', function () {
     foreach (['home', 'analyse', 'planner.public', 'reports', 'about', 'pricing', 'contact', 'privacy', 'terms', 'faq', 'release-notes', 'labs'] as $routeName) {
@@ -92,7 +93,7 @@ test('the About page states the ADR-012 constitutional boundaries', function () 
         ->assertSee('Take a side');
 });
 
-test('Pricing honestly communicates availability without inventing numbers; Contact, Privacy, and Terms remain honest stubs', function () {
+test('Pricing honestly communicates availability without inventing numbers; Contact remains an honest stub', function () {
     $pricingResponse = $this->get(route('pricing'))
         ->assertOk()
         ->assertSee('Free')
@@ -107,9 +108,30 @@ test('Pricing honestly communicates availability without inventing numbers; Cont
     // renders on every public page, which is not currency and must not false-positive.
     expect(preg_match('/\$\d/', $pricingResponse->getContent()))->toBe(0);
 
-    $this->get(route('privacy'))->assertOk()->assertSee('Privacy Policy is on the way.');
-    $this->get(route('terms'))->assertOk()->assertSee('Terms of Service is on the way.');
     $this->get(route('contact'))->assertOk()->assertSee('Contact is on the way.');
+});
+
+/**
+ * `CO-MVP-001`/`PO-CO-002` — Privacy and Terms are real, Compliance-Office-
+ * drafted content now, not stubs. Confirms the real boundaries (ADR-012),
+ * the real age statement, and that clauses still needing legal counsel are
+ * visibly flagged rather than silently presented as final.
+ */
+test('Privacy Policy and Terms of Service are real, accurate documents, not stubs', function () {
+    $privacy = $this->get(route('privacy'))->assertOk();
+    $privacy->assertSee('Privacy Policy')
+        ->assertDontSee('Privacy Policy is on the way.')
+        ->assertSee('session and CSRF-protection cookies')
+        ->assertSee('does not currently use any third-party analytics service')
+        ->assertSee('Requires legal review');
+
+    $terms = $this->get(route('terms'))->assertOk();
+    $terms->assertSee('Terms of Service')
+        ->assertDontSee('Terms of Service is on the way.')
+        ->assertSee('at least 18 years old')
+        ->assertSee('Clauses requiring legal review')
+        ->assertSee('does not, and will not')
+        ->assertSee('Accept deposits, hold funds, or process any payment');
 });
 
 test('the public footer is a genuine product footer with Product, Company, and Resources link columns', function () {

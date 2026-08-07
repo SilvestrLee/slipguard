@@ -18,9 +18,11 @@ Route::get('/health', function () {
 
 /*
  * U-13.0 — public multi-page information architecture. Every navigation
- * item is an independent route, never a same-page anchor. Pricing,
- * Contact, Privacy, and Terms are honest stubs, not fabricated
- * commercial/legal content — see public-coming-soon.blade.php.
+ * item is an independent route, never a same-page anchor. Pricing and
+ * Contact remain honest stubs — see public-coming-soon.blade.php. Privacy
+ * and Terms became real pages under `PO-CO-002` — no commercial/legal
+ * content is fabricated in the process (see each page's own
+ * placeholder-handling note).
  */
 Route::view('/analyse', 'pages.analyse')->name('analyse');
 Route::view('/planner', 'pages.planner')->name('planner.public');
@@ -33,14 +35,13 @@ Route::view('/contact', 'pages.public-coming-soon', [
     'title' => 'Contact',
     'description' => __("A dedicated contact page hasn't been built yet."),
 ])->name('contact');
-Route::view('/privacy', 'pages.public-coming-soon', [
-    'title' => 'Privacy Policy',
-    'description' => __('SlipGuard\'s privacy policy is being finalised ahead of public launch.'),
-])->name('privacy');
-Route::view('/terms', 'pages.public-coming-soon', [
-    'title' => 'Terms of Service',
-    'description' => __('SlipGuard\'s terms of service are being finalised ahead of public launch.'),
-])->name('terms');
+// `CO-MVP-001`/`PO-CO-002` — real Compliance-Office-drafted content,
+// replacing the honest stub. Specific clauses still require qualified
+// legal counsel review before this can be treated as final — marked
+// inline in each page and tracked in
+// docs/09-compliance/CO-005-LEGAL-REVIEW-REGISTER.md.
+Route::view('/privacy', 'pages.privacy')->name('privacy');
+Route::view('/terms', 'pages.terms')->name('terms');
 
 /*
  * U-14.2 — SlipGuard Labs is now guest-visible (read-only teaser);
