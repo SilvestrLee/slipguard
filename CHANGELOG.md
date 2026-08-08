@@ -2089,5 +2089,20 @@ Full regression: 761 tests, 754 passed, 7 pre-existing self-skipped, 0 failed.
 - Full regression: 766 tests, 759 passed, 7 pre-existing self-skipped, 0 failed, 3003 assertions. Pint clean on every file touched. Production build clean. `git diff --check` clean.
 
 ### Not Done
-- **One responsive defect found and explicitly not fixed here:** a ~28px horizontal overflow at mobile/tablet viewport widths, sourced to the Hero's own pre-existing drag-to-explore dashboard-viewport mechanism. Confirmed via a `git stash` A/B test to be present identically with every `PO-U24-001` change removed — genuinely pre-existing, not introduced by this commission. Left unfixed per this commission's own "preserve the homepage architecture exactly... do not redesign" scope (a fix would mean touching shared Hero/layout mechanics well beyond this bounded uplift) — flagged for a future, separately-scoped commission, matching this repository's own established precedent (`U-20.8`'s footer contrast finding).
+- **One responsive defect found and explicitly not fixed here:** a ~28px horizontal overflow at mobile/tablet viewport widths, sourced to the Hero's own pre-existing drag-to-explore dashboard-viewport mechanism. Confirmed via a `git stash` A/B test to be present identically with every `PO-U24-001` change removed — genuinely pre-existing, not introduced by this commission. Left unfixed per this commission's own "preserve the homepage architecture exactly... do not redesign" scope (a fix would mean touching shared Hero/layout mechanics well beyond this bounded uplift) — flagged for a future, separately-scoped commission, matching this repository's own established precedent (`U-20.8`'s footer contrast finding). **Resolved next — see `PO-RC1-010` below.**
 - Full U-21.5 "Why Trust SlipGuard" expansion, Risk Watch, External Intelligence, multi-sport expansion, OCR, bookmaker automation, new pricing architecture — none introduced, all explicitly out of scope.
+
+## `PO-RC1-010` — Hero Responsive Horizontal Overflow Correction
+
+**Status:** Delivered, Product Office accepted. Bounded defect correction only — the Hero was not redesigned.
+
+### Fixed
+- The ~28px (390px)/121px (768px) horizontal overflow flagged under `PO-U24-001` above. Root-caused via a controlled real-browser experiment, not theorised: four candidate causes were toggled individually (`<html>` given the same `overflow-x: clip` as `<body>`; `<body>`'s `overflow-y` paired to `clip`; the drag-viewport's own negative margin removed; the wrapper's `-mx-3`/`-mx-4` removed) and only the first fully closed the gap, to exactly 0px. The actual defect was never the Hero's own intentional full-bleed dashboard-viewport bleed (`-mx-3`/`-mx-4` wrapper margin, `margin-right: calc(50% - 50vw)`, both deliberate, both untouched) — it was that `<body>` carried `overflow-x-clip` but `<html>`, the real document-scrolling element whose own `scrollWidth` governs page-level horizontal scroll, did not. One-line fix: `overflow-x-clip` added to `<html>` in `layouts/public.blade.php`, matching what `<body>` already had — not a generic `overflow-x-hidden` band-aid applied without evidence.
+
+### Verified
+- 0px overflow at 390/430/768/1024/1440px, light and dark theme, confirmed via real Playwright measurement (a locally cached, mac12-compatible Chromium — the Claude-in-Chrome extension remains unavailable in this environment) — was 28/121px before the fix.
+- Verified across every public page sharing this layout, not just the homepage: `/`, `/analyse`, `/planner`, `/reports`, `/faq`, `/pricing`, `/about` — all 0px.
+- Drag-to-explore interaction confirmed still functional: a real keyboard-driven pan (`ArrowRight` on the focused viewport) moved `scrollLeft` 0 → 189, exactly as before.
+- Hero copy, CTAs, dashboard screenshot, and section order all confirmed pixel-identical before/after via real screenshot comparison — nothing else touched.
+- 1 new Pest test (asserts the static markup fact a real-browser regression would hinge on, since Pest has no layout engine to assert `scrollWidth` directly).
+- Full regression: 767 tests, 760 passed, 7 pre-existing self-skipped, 0 failed, 3006 assertions. Pint clean on both touched files. Production build clean. `git diff --check` clean.
