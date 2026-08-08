@@ -1973,3 +1973,69 @@ Full regression: 603/603 passing (unchanged — no test-observable behaviour cha
 - Real business details (registered office, phone line, company registration) remain an explicit, visibly-marked placeholder pending Product Office confirmation — not fabricated. Email notification on new submissions was not built (see `SubmitContactMessage`, above) — closed operationally by `PO-U22-001A`'s Filament resource instead of a Mailable.
 
 7 new Pest tests (6 in `ContactPageTest.php`, 1 in `PublicPagesTest.php`) + 1 existing `PublicPagesTest.php` test narrowed to its remaining Pricing-only scope. Full regression: 610/610 passing (up from 603).
+
+## `PO-U22-001A` — Contact Messages Operations Resource
+
+**Status:** Delivered. Closes `PO-U22-001`'s own disclosed gap (staff had no way to see or triage a submitted contact message beyond the database).
+
+### Added
+- `App\Domain\Contact\ContactMessageStatus` enum — New / Read / Resolved, the minimal workflow the directive itself specifies (no richer vocabulary invented).
+- `status` column on `contact_messages` (default `new`; every pre-existing row defaults to `new`, accurate since no admin resource existed to read one yet).
+- Filament `ContactMessages` resource (`app/Filament/Resources/ContactMessages/`) — list and view only, no `EditAction` (staff triage a customer's submission, never rewrite it). Opening a New message marks it Read automatically, mirroring an ordinary inbox; explicit "Mark Resolved" / "Reopen" header actions handle the rest of the workflow.
+- Gated on `is_internal` alone, not `CustomerResource`'s narrower `can_manage_customer_data` — a contact message is a general inbound enquiry, not customer analysis data, so any internal staff member may triage it. Explicitly tested as a real authorization boundary decision, not assumed.
+- 9 new Pest tests (`tests/Feature/Operations/ContactMessageResourceTest.php`): guest/customer/internal access, submission-to-triage visibility, the auto-Read transition, Mark Resolved/Reopen.
+
+### Fixed
+- A real defect found during post-commit verification (`/usr/local/bin/php artisan test`, not caught by the commit's own test run): `ContactMessage::status` was never registered in the model's `casts()` or `$fillable`. Every read hit a `TypeError` against the resource's enum-typed Filament closures (3 failing tests, all genuine 500s — the resource was unusable, not a test-only gap), and every status-change `update()` call was silently discarded by mass-assignment protection. Fixed by adding `status` to both.
+
+### Not Done
+- Email/Slack notification on new submissions remains out of scope — this directive closes the "staff can't see it" gap operationally via the Filament resource, not via a Mailable (none exists anywhere in this codebase; `MAIL_MAILER=log`).
+
+Full regression: 760 tests (753 passed, 7 pre-existing self-skipped MySQL-integration tests, 0 failed), verified directly via `/usr/local/bin/php artisan test`.
+
+## `PO-U23-001` — Conversational Entry Layer for Build an Accumulator
+
+**Status:** Delivered.
+
+### Added
+- `App\Domain\AccumulatorConversation` — a deterministic (never AI-model-authoritative) intent interpreter: `AccumulatorIntentInterpreter` (interface) / `DeterministicAccumulatorIntentInterpreter` (implementation), `RequestClass`, `ExplicitSelectionDraft`, `InterpretationResult`. Bound behind the interface in `AppServiceProvider` (Decision 1: the rest of the app depends only on the interface, never a provider SDK directly — no live AI provider is integrated anywhere in this codebase; substituting one later is a one-line binding change).
+- `App\Actions\AccumulatorConversation\CreateDraftFromExplicitSelection`.
+- `resources/views/livewire/accumulator-conversation/composer.blade.php`, mounted on the dashboard as a third, distinct accumulator-building method alongside the existing Guided and Manual Builders — its own module and component, not a variant of the existing intake card.
+- Builder hand-off: `market-intelligence/builder.blade.php` gained a `mount()` that applies a session-flashed brief seed (set by the composer, never trusted beyond what the Builder's own existing `planningRules()` validates a moment later) onto the same public properties the manual planning-brief form already binds to, then runs the completely unmodified `findCandidate()` so the customer lands directly on discovered candidates. A normal page visit with nothing flashed behaves exactly as before. A success alert ("Your first draft is ready.") surfaces the conversational summary when present.
+- 27 new Pest tests: 14 for the deterministic interpreter, 12 for the composer component, 1 regression test for the bug below.
+
+### Fixed
+- A real, pre-existing bug found alongside this commission, not introduced by it: `betting_slip_legs.decimal_odds` was a non-nullable decimal column, but `ParseSlipText`'s own "not detected" value (`''`) was never a valid decimal — every pasted-text slip with undetected odds crashed with a raw SQL error before insert. Fixed by making the column nullable (`2026_08_07_000002_make_decimal_odds_nullable_on_betting_slip_legs_table`) and mapping `''` → `null` in `ParsedLeg::toLegAttributes()`; `BettingSlipValidationRules::legIsComplete()` already treated a missing value as incomplete, unchanged.
+
+### Not Done
+- No live AI provider integrated — a deliberate Product Office decision (Decision 1), not an oversight; the interpreter/provider boundary is a swappable interface specifically so that remains a future, separately-authorized decision.
+
+Full regression: 760 tests (753 passed, 7 pre-existing self-skipped, 0 failed), verified directly via `/usr/local/bin/php artisan test`. `pint --test` clean on every file this directive touched (a one-line style fix — importing `BettingSlipStatus` instead of referencing it inline by FQCN in `tests/Feature/BettingSlipIntakeTest.php` — applied after Pint flagged it during verification; cosmetic only, no behaviour change).
+
+## `PO-U23-001A` — Feature Matrix / Gating Reconciliation with Shipped Capability B
+
+**Status:** Delivered. Documentation correction only — no code, migration, or test change.
+
+### Changed
+- `docs/01-product/FEATURE_MATRIX.md` — "Safe Accumulator Builder" corrected to its real shipped name, Build an Accumulator (Capability B, MVP-gated behind `MARKET_WIDE_PLANNER_ENABLED`); the OCR/parser row split into what actually shipped (deterministic text/PDF slip parsing via `ParseSlipText`, screenshot upload with manual transcription) versus what remains genuinely Post-MVP (real image-to-text OCR); the conversational entry layer (`PO-U23-001`, above) added as its own MVP row under the same gate.
+- `docs/01-product/FEATURE_GATING.md` — Capability B and its conversational entry layer added under Registered User (gated); "Safe Accumulator Builder" removed from Premium Candidates now that it has shipped.
+- `docs/08-operations/DELIVERY_ROADMAP.md` — U-06's 2026-07-26 "still open, not yet authorized" note on Capability B corrected in place (retained unedited for historical accuracy of that original decision): re-authorized at `PO-U08.1-001-R1`, built out as Programme U-17, included in MVP v1.0 per `PO-MVP-004`, conversational layer delivered under `PO-U23-001`.
+
+### Not Done
+- Broader MVP-scope drift beyond these three documents' Capability B/conversational-layer rows (e.g. Planner/Programme U-07 has no row in `FEATURE_MATRIX.md` at all) was flagged in the correction note itself rather than silently corrected — out of this reconciliation's narrow scope.
+
+No test-observable behaviour changed; full regression unchanged from the `PO-U23-001` figure above (documentation-only commit).
+
+## `PO-U23-002` — MVP Definition / Product Blueprint Language Correction
+
+**Status:** Delivered. Documentation correction only — no code, migration, or test change.
+
+### Changed
+- `docs/01-product/MVP_DEFINITION.md` / `docs/01-product/PRODUCT_BLUEPRINT.md` — "weakest-leg explanation"/"weakest-leg detection" corrected to "main contributing factor" in the Primary Journey and MVP Included lists: the base Analyze → Report path these documents scope shows the Main Contributing Factor (a risk-factor concept, `resources/views/livewire/betting-slips/report.blade.php`), not a per-leg ranking. The real weakest-leg ranking engine (`RankLegsByStructuralWeakness`, the Marginal Structural Contribution model, `U-06.2A`/`E-06D.1`) exists and is real — wired into the Planner and Capability B, just outside this document's base-analysis scope.
+- "Automated parsing"/"live sports data" removed from `MVP_DEFINITION.md`'s Explicitly Not Required — deterministic text/PDF slip parsing and Capability B (drawing on live fixture/market data) both ship in MVP; per-bookmaker automated parsing remains correctly excluded.
+- `PRODUCT_BLUEPRINT.md`'s Customer/Public Navigation corrected to match the real, live navigation components; "Safe Accumulator Builder"/"Screenshot upload"/"Live odds" moved out of Deferred to reflect what has actually shipped (OCR itself correctly remains deferred).
+
+### Not Done
+- N/A — narrowly scoped language correction, fully applied.
+
+No test-observable behaviour changed; full regression unchanged from the `PO-U23-001` figure above (documentation-only commit).
