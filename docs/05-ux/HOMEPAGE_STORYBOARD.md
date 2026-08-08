@@ -2,11 +2,11 @@
 
 | Field | Value |
 |---|---|
-| Version | 1.2 |
-| Status | Approved — **superseded in part by `U-13.0` (`PO-U13.0-001`), 2026-07-27; recomposed `U-15.2` (`PO-U15.2-001`), 2026-07-27; two sections replaced `U-15.3` (`PO-U15.3-001`), 2026-07-28** |
+| Version | 1.3 |
+| Status | Approved — **superseded in part by `U-13.0` (`PO-U13.0-001`), 2026-07-27; recomposed `U-15.2` (`PO-U15.2-001`), 2026-07-27; two sections replaced `U-15.3` (`PO-U15.3-001`), 2026-07-28; bounded uplift `PO-U24-001`, 2026-08-08** |
 | Applies To | SlipGuard MVP |
 | Owner | Product Office |
-| Last Updated | 2026-07-27 |
+| Last Updated | 2026-08-08 |
 | Related Documents | [Design Language](DESIGN_LANGUAGE.md), [Component Principles](COMPONENT_PRINCIPLES.md), [Visual Inspiration](VISUAL_INSPIRATION.md), [Trust Signals](TRUST_SIGNALS.md) |
 
 ---
@@ -38,6 +38,34 @@ CTA
 - **No fabricated testimonials or social proof.** A generic SaaS "Proof" step conventionally uses customer testimonials/logos; SlipGuard has none to show honestly at this stage of the product's life, and inventing any would violate `TRUST_SIGNALS.md` and `docs/09-compliance/PRODUCT_GUARDRAILS.md` outright. Proof here is evidentiary instead: the sample report itself (Hero) and the Intelligence Credibility Section's own verified, constitutional facts (deterministic, explainable, test-covered) — proof of how the system behaves, not proof that other people used it.
 - **The report preview is treated as a piece of software, not a floating marketing card**: a slim title-bar strip (`SlipGuard — Risk Report`, a small icon, no traffic-light window-chrome cliché) sits above the same metric content that was already there, at one elevation step higher than a standard card, reinforcing "this is what the real product looks like," not an illustration of it.
 - Cross-Section Rules below are otherwise unchanged (one CTA style per instance, no urgency/scarcity, `MOTION_SYSTEM.md`'s one-reveal-per-section budget).
+
+**Third amendment, recorded explicitly (`PO-U24-001`, 2026-08-08, `docs/00-governance/DECISION_LOG.md`):** a bounded uplift, not a redesign — the Product Office reviewed the `U-15.2` sequence and found it weakens after the opening sections (analysis and Build an Accumulator are named but never demonstrated) and lacks a practical-objections section before conversion. Hero and the Product Preview dashboard screenshot are explicitly protected, unchanged. Two focused feature highlights (Analyse, Build an Accumulator) are inserted between Invisible Risk and How SlipGuard Thinks — each one real product component (a Risk Report fragment; an illustrative Builder candidate card, reusing the Builder's own existing "Illustrative preview · not a live candidate" honesty convention rather than a fictional interface) plus one explanation, never a screenshot collage. A bounded FAQ (5–7 questions, reusing `report.blade.php`'s existing per-item Alpine disclosure pattern — see `COMPONENT_PRINCIPLES.md`'s new Disclosure/Accordion entry) is inserted before the closing CTA. Product Capabilities is rebalanced, not removed: its Analyse card is shortened to avoid duplicating the new highlight immediately above it, and the previously bare "Decision Journal"/"Planning History" name-only pills gain one-line descriptions instead, consolidating what were separately-listed principle-tags ("Weakest-Leg Explanation," "Customer-Controlled Decisions," "No Outcome Prediction") that duplicated the new highlight and the existing Trust/Hero/CTA copy rather than naming a distinct capability. Updated flow:
+
+```
+Hero (+ Product Preview dashboard screenshot, same section — unchanged)
+  ↓
+Invisible Risk (unchanged)
+  ↓
+Feature Highlight — Analyse (new)
+  ↓
+Feature Highlight — Build an Accumulator (new)
+  ↓
+How SlipGuard Thinks / Deterministic Process (unchanged)
+  ↓
+Proof (unchanged, same relative position)
+  ↓
+How It Works (unchanged — already accurate to current intake methods)
+  ↓
+Product Capabilities (rebalanced, not replaced)
+  ↓
+Trust (unchanged)
+  ↓
+FAQ (new)
+  ↓
+CTA (unchanged)
+```
+
+The atmosphere/quiet background alternation rule above is preserved exactly: Invisible Risk (quiet) → Analyse Highlight (atmosphere) → Build an Accumulator Highlight (quiet) → How SlipGuard Thinks (atmosphere) — the two insertions continue the existing rhythm rather than breaking it, so nothing downstream needed re-tagging. No OddStorm layout, colour, typography, or component was reproduced — `PO-U24-001` reviewed it as a content-architecture reference only (which questions a homepage should answer, in what order), never a visual template; every new section reuses `<x-card>`, `<x-badge>`, `<x-workspace.risk-badge>`, and the existing border-only elevation system (`DESIGN_TOKENS.md`: "no shadows anywhere," elevation via border-weight only).
 
 The narrative flow of the public homepage, section by section. This is **not** a design spec — no layout, colour, or component decisions here (see `COMPONENT_PRINCIPLES.md` and `DESIGN_TOKENS.md` for those). This document exists so that whoever eventually builds the page — Claude or a human — tells the same story in the same order for the same reasons.
 

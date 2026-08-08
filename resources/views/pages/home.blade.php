@@ -189,8 +189,9 @@
                     <span class="size-1.5 rounded-full bg-accent-strong" aria-hidden="true"></span>
                     <p class="text-sm font-semibold tracking-widest text-accent-strong uppercase">{{ __('Product Preview') }}</p>
                 </div>
+                {{-- `PO-U24-001` §9: leads with what's in the workspace (breadth), keeps the existing evolving-product honesty note rather than dropping it — one tightened sentence, not two. --}}
                 <p class="mt-2 text-center text-sm text-neutral-700 max-w-md mx-auto">
-                    {{ __('The SlipGuard workspace is actively evolving. Built from the real SlipGuard Demo Workspace — some interface details may change as the product develops.') }}
+                    {{ __('Your analysis, planning tools and reports in one workspace — built from the real SlipGuard Demo Workspace, actively evolving, so some interface details may change.') }}
                 </p>
 
                 {{--
@@ -404,6 +405,155 @@
     </section>
 
     {{--
+        `PO-U24-001` §11/§12 — Feature Highlight: Analyse. New section,
+        inserted between Invisible Risk and How SlipGuard Thinks so the
+        atmosphere/quiet alternation continues unbroken (quiet → atmosphere
+        → quiet → atmosphere, see the amendment note in
+        `HOMEPAGE_STORYBOARD.md`). One real product component — a Risk
+        Report fragment styled exactly like `report.blade.php`'s own
+        §20.2/§20.3 markup (structural-score badge + Main Contributing
+        Factor panel, same factor name/explanation strings `/analyse`
+        already uses verbatim) — plus one explanation, not a screenshot
+        collage. The score (67, High) and factor (Selection Odds,
+        contributing most) are real, engine-computed output for a curated
+        4-leg sample slip (three short-odds favourites + one 8.50 outlier),
+        run once via `AnalyzeBettingSlip` against a disposable local slip
+        and verified, then discarded — not invented, matching this
+        codebase's own established practice for every other curated number
+        on this page. A different example than the Invisible Risk/How It
+        Works sections' shared "Chelsea/Arsenal/Over 2.5" slip, deliberately
+        — this section is about which *factor* drove the score, not which
+        *leg* did, and reusing the exact same slip a third time would
+        blur that distinction rather than reinforce it.
+    --}}
+    <section class="public-section-atmosphere py-16 sm:py-20" aria-labelledby="analyse-highlight-heading" data-reveal>
+        <div class="container-marketing mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+                <div class="lg:col-span-5">
+                    <p class="text-xs font-semibold tracking-widest text-accent-strong uppercase">{{ __('Feature — Analyse') }}</p>
+                    <h2 id="analyse-highlight-heading" class="mt-3 text-2xl sm:text-3xl font-semibold text-neutral-900">
+                        {{ __("See exactly what's driving the risk.") }}
+                    </h2>
+                    <p class="mt-4 text-base text-neutral-600 max-w-lg">
+                        {{ __('SlipGuard breaks an accumulator into five structural factors, scores the combined risk, and tells you which factor contributed most. No prediction. No vague confidence score. A report you can inspect.') }}
+                    </p>
+                    <a href="{{ route('analyse') }}" wire:navigate class="mt-6 inline-flex items-center text-sm font-semibold text-accent-strong hover:text-accent">
+                        {{ __('See how analysis works') }} →
+                    </a>
+                </div>
+
+                <div class="lg:col-span-7">
+                    <x-card variant="soft" class="max-w-lg mx-auto">
+                        <div class="flex items-center gap-2 -mt-1 -mx-1 mb-4 px-1 pt-1 pb-3 border-b border-neutral-200/60">
+                            <x-heroicon-o-document-text class="size-4 text-neutral-400" aria-hidden="true" />
+                            <p class="text-xs font-semibold text-neutral-500">{{ __('Sample Report') }}</p>
+                        </div>
+
+                        <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wide">{{ __('Structural risk') }}</p>
+                        <div class="mt-2 flex items-center gap-3">
+                            <span class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg border text-risk-high bg-risk-high/10 border-risk-high/30">
+                                <x-heroicon-o-exclamation-triangle class="size-4" aria-hidden="true" />
+                                {{ __('High') }}
+                            </span>
+                            <span class="text-2xl font-semibold text-neutral-900 font-tabular">67<span class="text-sm font-normal text-neutral-500">/100</span></span>
+                        </div>
+
+                        <p class="mt-5 text-xs font-semibold text-neutral-500 uppercase tracking-wide">{{ __('Main Contributing Factor') }}</p>
+                        <div class="mt-2 rounded-lg border border-neutral-200/60 bg-surface-card p-4">
+                            <p class="text-sm font-semibold text-neutral-900">{{ __('Selection Odds') }}</p>
+                            <p class="mt-1 text-sm text-neutral-600">{{ __('Reflects how high the odds are on your individual selections — a small number of high-odds selections adds risk even in an otherwise short slip.') }}</p>
+                        </div>
+                    </x-card>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{--
+        `PO-U24-001` §13/§14/§15 — Feature Highlight: Build an Accumulator.
+        A faithful, implementation-derived presentation, not a fictional
+        interface: reuses the real Builder's own existing "Illustrative
+        preview · not a live candidate" disclosure convention and fixture
+        rows (`market-intelligence/builder.blade.php`'s config-disabled
+        preview state), condensed for a homepage highlight. One row is
+        marked "Ranked by structural contribution" — the weakest-leg
+        capability belongs here, in Planner/Build an Accumulator
+        messaging, per `PO-RC1-009`'s corrected terminology boundary; it
+        is not attributed to the base Analyse/Report path anywhere on this
+        page. The conversational entry layer (`PO-U23-001`) is named only
+        in supporting copy, deliberately not given its own visual — it is
+        a deterministic interpreter for a bounded set of requests, not a
+        general-purpose AI assistant, and describing it any more
+        prominently than "in your own words" would overstate what it does.
+    --}}
+    <section class="public-section-quiet py-16 sm:py-20" aria-labelledby="builder-highlight-heading" data-reveal>
+        <div class="container-marketing mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+                <div class="lg:col-span-5">
+                    <p class="text-xs font-semibold tracking-widest text-neutral-400 uppercase">{{ __('Feature — Build an Accumulator') }}</p>
+                    <h2 id="builder-highlight-heading" class="mt-3 text-2xl sm:text-3xl font-semibold text-neutral-900">
+                        {{ __('Build with risk in view from the start.') }}
+                    </h2>
+                    <p class="mt-4 text-base text-neutral-600 max-w-lg">
+                        {{ __("Instead of assembling an accumulator first and discovering its structure afterwards, SlipGuard checks eligible fixtures and evidence against your constraints and keeps structural risk visible throughout — including which selection would contribute most if kept. Describe what you're looking for in your own words, or set the conditions yourself.") }}
+                    </p>
+                    <a href="{{ route('planner.public') }}" wire:navigate class="mt-6 inline-flex items-center text-sm font-semibold text-accent-strong hover:text-accent">
+                        {{ __('See how the Builder works') }} →
+                    </a>
+                </div>
+
+                <div class="lg:col-span-7">
+                    <x-card variant="soft" class="max-w-lg mx-auto">
+                        <div class="flex items-center justify-between gap-2 -mt-1 -mx-1 mb-4 px-1 pt-1 pb-3 border-b border-neutral-200/60">
+                            <span class="inline-flex items-center gap-1.5">
+                                <x-heroicon-o-circle-stack class="size-4 text-neutral-400" aria-hidden="true" />
+                                <span class="text-xs font-semibold text-neutral-500">{{ __('Candidate under review') }}</span>
+                            </span>
+                            <x-badge tone="neutral">{{ __('Illustrative preview') }}</x-badge>
+                        </div>
+
+                        <ul class="divide-y divide-neutral-200/60">
+                            @foreach ([
+                                ['fixture' => __('Northbridge FC vs Riverside Athletic'), 'market' => __('Double Chance · Home or Draw'), 'weakest' => false],
+                                ['fixture' => __('Harbour United vs City Rovers'), 'market' => __('Total Goals · Over 1.5'), 'weakest' => false],
+                                ['fixture' => __('Meadow Park vs Borough FC'), 'market' => __('Both Teams to Score · Yes'), 'weakest' => true],
+                            ] as $slot)
+                                <li class="py-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p class="text-sm font-semibold text-neutral-900">{{ $slot['fixture'] }}</p>
+                                            <p class="mt-0.5 text-xs text-neutral-500">{{ $slot['market'] }}</p>
+                                        </div>
+                                        @if ($slot['weakest'])
+                                            <span class="shrink-0 inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded border text-risk-high bg-risk-high/10 border-risk-high/30">
+                                                {{ __('Ranked by structural contribution') }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <div class="mt-2 flex items-center justify-between border-t border-neutral-200/60 pt-4">
+                            <span class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg border text-risk-moderate bg-risk-moderate/10 border-risk-moderate/30">
+                                {{ __('Moderate example') }}
+                            </span>
+                            <x-badge tone="quality-strong">
+                                <x-heroicon-o-check-circle class="size-3.5" aria-hidden="true" />
+                                {{ __('Constraints satisfied') }}
+                            </x-badge>
+                        </div>
+
+                        <p class="mt-4 text-xs leading-5 text-neutral-500">
+                            {{ __('The fixtures above illustrate the review layout only. They are not repository evidence, a recommendation, or an analysis result.') }}
+                        </p>
+                    </x-card>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{--
         3. How SlipGuard Thinks (replaces the former "Solution" section,
         `U-15.3`, `PO-U15.3-001`; per-stage explanations and an
         authenticity statement added `PO-U15.6-001`) — a simplified
@@ -605,7 +755,23 @@
         </div>
     </section>
 
-    {{-- 6. Product Capabilities — the three public destinations as deep-link cards, plus the remaining capabilities named without implying a guest can open an authenticated screen unannounced --}}
+    {{--
+        6. Product Capabilities — `PO-U24-001` §19/§20: rebalanced, not
+        replaced. The three public destinations remain deep-link cards;
+        Analyse's own card copy is shortened since the dedicated Feature
+        Highlight above now covers it in depth (avoiding the duplication
+        §20 warns against). The "named, not linked" strip (every item
+        lives behind sign-in, and a homepage card that silently redirects
+        a guest to login is worse than an honest, unlinked mention —
+        unchanged reasoning, `U-11.3` §6) gained one-line descriptions
+        instead of staying bare labels, so this section actually answers
+        "what else is available," not just "what else exists." Three
+        principle-tags that named no distinct capability of their own
+        ("Weakest-Leg Explanation," "Customer-Controlled Decisions," "No
+        Outcome Prediction") were dropped — the first is now demonstrated,
+        not just named, by the Build an Accumulator highlight above; the
+        other two are already stated in the Hero, Trust, and closing CTA.
+    --}}
     {{-- Atmosphere-rhythm gradient beat (see Invisible Risk section's comment above) --}}
     <section class="public-section-quiet py-16 sm:py-20" aria-labelledby="capabilities-heading" data-reveal>
         <div class="container-marketing mx-auto px-6">
@@ -618,7 +784,7 @@
                         <x-heroicon-o-magnifying-glass class="size-5" aria-hidden="true" />
                     </span>
                     <h3 class="mt-4 text-base font-semibold text-neutral-900">{{ __("See what's driving your risk") }}</h3>
-                    <p class="mt-1 text-sm text-neutral-600">{{ __('How the structural risk engine works, and why it never predicts.') }}</p>
+                    <p class="mt-1 text-sm text-neutral-600">{{ __('The deterministic risk engine, explained.') }}</p>
                     <span class="mt-4 inline-flex items-center text-sm font-semibold text-accent-strong">
                         {{ __('Learn more') }}
                         <x-heroicon-o-arrow-right class="ms-1.5 size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
@@ -648,19 +814,18 @@
                 </x-card>
             </div>
 
-            {{-- Remaining capabilities named, not linked — every one of these lives behind sign-in, and a homepage card that silently redirects a guest to login is a worse experience than an honest, unlinked mention (unchanged reasoning from the original capability strip, U-11.3 §6). --}}
-            <ul class="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+            <div class="mt-10 grid grid-cols-1 gap-x-8 gap-y-6 border-t border-neutral-200/60 pt-8 sm:grid-cols-3">
                 @foreach ([
-                    __('Build an Accumulator'),
-                    __('Decision Journal'),
-                    __('Planning History'),
-                    __('Weakest-Leg Explanation'),
-                    __('Customer-Controlled Decisions'),
-                    __('No Outcome Prediction'),
+                    ['label' => __('Build an Accumulator'), 'description' => __('Discover eligible selections and build a new accumulator.')],
+                    ['label' => __('Decision Journal'), 'description' => __('Record what influenced your decisions.')],
+                    ['label' => __('Planning History'), 'description' => __('Resume or review past planning sessions.')],
                 ] as $capability)
-                    <li class="text-xs font-semibold text-neutral-500 uppercase tracking-wide whitespace-nowrap">{{ $capability }}</li>
+                    <div>
+                        <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wide">{{ $capability['label'] }}</p>
+                        <p class="mt-1 text-sm text-neutral-600">{{ $capability['description'] }}</p>
+                    </div>
                 @endforeach
-            </ul>
+            </div>
         </div>
     </section>
 
@@ -695,6 +860,80 @@
                     <p class="mt-1 text-sm text-neutral-600">{{ __('What actually shipped, in plain language.') }}</p>
                     <a href="{{ route('release-notes') }}" wire:navigate class="mt-2 inline-block text-sm font-semibold text-accent-strong hover:text-accent">{{ __('Read notes') }} →</a>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    {{--
+        `PO-U24-001` §22-24 — FAQ. New section, bounded to 6 questions
+        (within the directed 5-7 range), inserted before the closing CTA
+        per the target architecture. Every answer is grounded in real,
+        already-approved copy rather than generic betting-industry
+        assumptions (§46): Q1/Q5 reuse `pages/faq.blade.php`'s existing
+        verbatim answers for consistency; Q2 matches the Invisible Risk
+        section's "SlipGuard shows the structural effect. You decide what
+        to do" and `ADR-012`; Q3 matches the real intake methods and
+        `betting-slips/intake.blade.php`'s "nothing is guessed" wording;
+        Q4 matches `pages/planner.blade.php`'s "You choose every
+        selection" copy; Q6 matches the real, implemented History/Journal
+        features. Pricing was deliberately not included — `/faq` already
+        answers it and this section isn't meant to duplicate that page,
+        only the practical objections specific to trying the product.
+
+        Disclosure pattern reused verbatim from `report.blade.php`'s own
+        existing implementation (documented `COMPONENT_PRINCIPLES.md`,
+        Disclosure/Accordion, this same commission) — an isolated
+        `x-data="{ open: false }"` per item, so opening one never closes
+        another.
+    --}}
+    <section class="public-section-quiet py-16 sm:py-20" aria-labelledby="faq-heading" data-reveal>
+        <div class="container-reading mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-2xl mx-auto text-center">
+                <p class="text-xs font-semibold tracking-widest text-neutral-400 uppercase">{{ __('FAQ') }}</p>
+                <h2 id="faq-heading" class="mt-3 text-2xl sm:text-3xl font-semibold text-neutral-900">
+                    {{ __('Common questions') }}
+                </h2>
+            </div>
+
+            <div class="mt-10 max-w-2xl mx-auto divide-y divide-neutral-200 border-t border-b border-neutral-200">
+                @foreach ([
+                    [
+                        'question' => __('Does SlipGuard predict who wins?'),
+                        'answer' => __('No. SlipGuard evaluates the structure of a betting slip — the number of selections, the odds involved, how concentrated the risk is — and never claims a team will win or a bet is safe.'),
+                    ],
+                    [
+                        'question' => __('Does SlipGuard tell me what to bet on?'),
+                        'answer' => __('No. SlipGuard explains where a slip\'s structural risk comes from and lets you decide what to do next — it never tells you what to bet on or suggests a selection.'),
+                    ],
+                    [
+                        'question' => __('How do I add a slip?'),
+                        'answer' => __('Type your selections in manually, paste copied slip text, or upload a PDF or screenshot. SlipGuard reads what it can confidently detect and leaves the rest for you to complete — nothing is guessed.'),
+                    ],
+                    [
+                        'question' => __('What is Build an Accumulator?'),
+                        'answer' => __('A guided way to build a new accumulator with structural risk visible from the start — SlipGuard checks eligible fixtures and evidence against your constraints, but you choose every selection.'),
+                    ],
+                    [
+                        'question' => __('Does SlipGuard place bets for me?'),
+                        'answer' => __('Never. SlipGuard never accepts deposits, holds funds, or places a wager on your behalf. Every financial transaction stays between you and your licensed operator.'),
+                    ],
+                    [
+                        'question' => __('Can I review my previous analyses?'),
+                        'answer' => __('Yes — every completed analysis is saved to your History, and the Decision Journal lets you record what influenced your choice and revisit it later.'),
+                    ],
+                ] as $i => $faq)
+                    <div x-data="{ open: false }">
+                        {{-- `min-h-11` (44px) — the button itself carries the touch target, not just its wrapping div, matching this repo's own established touch-target convention. --}}
+                        <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-controls="faq-panel-{{ $i }}"
+                                class="flex min-h-11 w-full items-center justify-between gap-4 py-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                            <span class="text-sm font-semibold text-neutral-900">{{ $faq['question'] }}</span>
+                            <x-heroicon-o-chevron-down class="size-4 shrink-0 text-neutral-400 transition-transform duration-instant" x-bind:class="open ? 'rotate-180' : ''" aria-hidden="true" />
+                        </button>
+                        <div id="faq-panel-{{ $i }}" x-show="open" x-cloak class="pb-5 text-sm text-neutral-600">
+                            {{ $faq['answer'] }}
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </section>

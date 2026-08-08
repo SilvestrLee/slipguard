@@ -76,6 +76,21 @@ Only components the product currently needs are defined here. Add a new componen
 - **Anti-patterns:** nesting a card inside a card; putting more than one unrelated action inside a single card's footer.
 - **Homepage capability card (`U-15.2`):** the same `<x-card variant="interactive">` primitive, composed with an icon inside a small soft-accent circle (`bg-accent-strong/10 text-accent-strong`, not a bare icon) and a trailing arrow glyph that shifts on hover (`translate-x` only, `MOTION_SYSTEM.md` micro-interaction budget) — a content composition using the existing component, not a new base component.
 
+## Disclosure / Accordion
+
+**Purpose:** progressive disclosure for content that's useful but not always needed at a glance — a report's supporting factors and methodology (`report.blade.php`, E-06/§20), an FAQ (`PO-U24-001`). Documented here retroactively (`PO-U24-001`, 2026-08-08) on its second real usage — the pattern already shipped in `report.blade.php` before this entry existed, per the Gap Rule.
+
+**Implementation:** no dedicated Blade component — a small, isolated Alpine scope per disclosure item (`x-data="{ open: false }"`), never one shared exclusive-accordion state across items, so opening one never closes another. Toggled via a `<button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-controls="{panel-id}">`; the panel itself uses `x-show="open" x-cloak` and the matching `id`.
+
+- **Spacing:** matches the containing card/list (`space-4`–`space-6` padding); collapsed and expanded states use identical horizontal padding so nothing shifts sideways on toggle.
+- **Radius:** inherits its container's (`radius-lg` card or plain `divide-y` list row — no radius of its own).
+- **Elevation:** none — a disclosure item sits flush in its container, same as an Alert; it doesn't compete visually with the content it's revealing.
+- **Interaction:** click/tap or keyboard (`Enter`/`Space` on the native `<button>`) toggles; the standard expand/collapse motion budget (`MOTION_SYSTEM.md`) applies, never a spring/bounce.
+- **Accessibility:** the trigger is a real `<button>` (never a `<div>` with a click handler), `:aria-expanded` reflects state, `aria-controls` points at the panel `id`, and the visible label changes with state (e.g. "Show more" / "Show less") rather than relying on an icon rotation alone.
+- **Responsive:** full width of its container at every breakpoint; no separate mobile treatment needed.
+- **Usage rules:** one topic per disclosure item; the collapsed label alone must make sense out of context (a report's factor name, an FAQ question) — never "Click here" or "More."
+- **Anti-patterns:** a shared single-open accordion state that force-closes a sibling item; hiding content behind disclosure that a first-time visitor needs immediately (that belongs in the always-visible copy, not behind a click).
+
 ## Badges
 
 **Purpose:** compact status labels — slip lifecycle status (Draft/Ready/Analysed/Archived), data-quality band, small tags. **Not** used for risk bands — see Risk Indicators below, which are a distinct, higher-stakes component.

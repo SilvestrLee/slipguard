@@ -188,17 +188,100 @@ test('U-15.2: the homepage section reveal respects prefers-reduced-motion and ne
 /**
  * PW-03 clarification supersedes U-16.2's all-translucent assumption:
  * atmosphere and quiet tonal sections now alternate deliberately.
+ *
+ * `PO-U24-001`: counts updated for the two new Feature Highlight sections
+ * (Analyse = atmosphere, Build an Accumulator = quiet, inserted between
+ * Invisible Risk and How SlipGuard Thinks) and the new FAQ section
+ * (quiet, inserted before the closing CTA) — the alternation itself is
+ * unbroken, just longer; see `HOMEPAGE_STORYBOARD.md`'s amendment note.
  */
 test('PW-03: the homepage alternates atmosphere-revealing and non-flat quiet sections', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
     expect(substr_count($html, 'public-hero-atmosphere'))->toBe(1)
-        ->and(substr_count($html, 'public-section-atmosphere'))->toBe(3)
-        ->and(substr_count($html, 'public-section-quiet'))->toBe(2);
+        ->and(substr_count($html, 'public-section-atmosphere'))->toBe(4)
+        ->and(substr_count($html, 'public-section-quiet'))->toBe(4);
 });
 
 test('U-16.2 CR-001: the closing CTA section carries its own gradient, distinguishing it from the sections above', function () {
     $this->get('/')
         ->assertOk()
         ->assertSee('bg-gradient-cta', false);
+});
+
+/**
+ * `PO-U24-001` §4/§11/§12: the two new Feature Highlight sections. Real,
+ * engine-computed sample data (not invented) — see the section's own
+ * comment in `home.blade.php` for the exact reproduction steps.
+ */
+test('the Analyse feature highlight shows a real Risk Report fragment, not a screenshot', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee("See exactly what's driving the risk.")
+        ->assertSee('Sample Report')
+        ->assertSee('Main Contributing Factor')
+        ->assertSee('Selection Odds')
+        ->assertSee('67')
+        ->assertSee(route('analyse'), false);
+});
+
+test('the Build an Accumulator feature highlight is honestly labelled illustrative, not a live candidate', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Build with risk in view from the start.')
+        ->assertSee('Illustrative preview')
+        ->assertSee('Ranked by structural contribution')
+        ->assertSee('The fixtures above illustrate the review layout only. They are not repository evidence, a recommendation, or an analysis result.')
+        ->assertSee(route('planner.public'), false);
+});
+
+/**
+ * `PO-U24-001` §50 — Regression Protection: explicitly verify PO-RC1-009's
+ * terminology correction was not reintroduced by this commission. Every
+ * "weakest leg" mention on the page must sit inside Planner/Build an
+ * Accumulator messaging (Invisible Risk or the new Builder highlight),
+ * never attributed to the base Analyse/Report path.
+ */
+test('PO-RC1-009 regression: weakest-leg language never reappears in the base Analyse/Report context', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->not->toContain('Which leg is doing the most damage')
+        ->not->toContain('Weakest leg: Over 2.5 Goals — contributes 53% of the structural score');
+
+    // The Analyse highlight — the section most likely to regress this,
+    // since it sits right next to the Builder highlight that legitimately
+    // uses "weakest leg" language — must describe a *factor*, not a leg.
+    $analyseHighlight = substr($html, (int) strpos($html, 'id="analyse-highlight-heading"'), 1200);
+    expect($analyseHighlight)->not->toContain('Weakest Leg')
+        ->not->toContain('weakest leg');
+});
+
+test('the FAQ section is present, bounded, and keyboard/ARIA accessible', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->toContain('id="faq-heading"')
+        ->toContain('Does SlipGuard predict who wins?')
+        ->toContain('Does SlipGuard tell me what to bet on?')
+        ->toContain('How do I add a slip?')
+        ->toContain('What is Build an Accumulator?')
+        ->toContain('Does SlipGuard place bets for me?')
+        ->toContain('Can I review my previous analyses?')
+        ->toContain('aria-expanded')
+        ->toContain('aria-controls="faq-panel-0"')
+        ->toContain('type="button"');
+
+    // Bounded per §22 ("not a giant Help Centre") — exactly 6 questions.
+    expect(substr_count($html, 'x-data="{ open: false }"'))->toBeGreaterThanOrEqual(6);
+});
+
+test('the rebalanced Product Capabilities section still names Build an Accumulator, Journal and Planning History without linking to authenticated-only routes', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Build an Accumulator')
+        ->assertSee('Decision Journal')
+        ->assertSee('Planning History')
+        ->assertSee('Discover eligible selections and build a new accumulator.')
+        ->assertDontSee(route('journal'), false)
+        ->assertDontSee(route('history'), false)
+        ->assertDontSee(route('builder'), false);
 });
