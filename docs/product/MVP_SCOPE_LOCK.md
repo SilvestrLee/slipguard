@@ -92,8 +92,8 @@ Nothing implemented and found in Phase 1 is omitted from this list.
 | 16 | SlipGuard Labs | **INCLUDED** | No |
 | 17 | Operations Panel | **INTERNAL** | No |
 | 18 | Profile | **INCLUDED** | No |
-| 19 | Settings | **DEFERRED** *proposed* | **Yes** |
-| 20 | Help | **DEFERRED** *proposed* | **Yes** |
+| 19 | Settings | **INCLUDED (bounded RC1 completion)** — decided | No — resolved by direct Product Office instruction, 2026-08-08 |
+| 20 | Help | **INCLUDED (bounded RC1 completion)** — decided | No — resolved by direct Product Office instruction, 2026-08-08 |
 | 21 | Public Marketing Website | **INCLUDED**, two pages blocked | **Yes** (Privacy/Terms content) |
 | 22 | Subscription / Billing | **DEFERRED** *proposed — MVP launches Free-only* | **Yes** |
 
@@ -238,19 +238,17 @@ Nothing implemented and found in Phase 1 is omitted from this list.
 
 ## 19. Settings
 
-- **Classification:** DEFERRED — **proposed, not decided**
-- **Evidence:** `routes/web.php` routes `/settings` to the generic, unimplemented `coming-soon` view. No implementation exists.
-- **Dependencies:** A scope decision on what "Settings" contains beyond what Profile already covers (notification preferences, theme default, data export, etc.) — currently undefined.
-- **Remaining work:** Not sizeable until scope is defined.
-- **Product Office Decision Required:** Confirm Settings can remain an honest "coming soon" for v1.0, or define its required MVP scope.
+- **Classification:** INCLUDED (bounded RC1 completion) — **decided**, superseding the deferral proposed here
+- **Decision:** Direct Product Office instruction, 2026-08-08 (following `PO-RC1-009`'s acceptance): the deferral above is superseded because Settings is "already exposed as authenticated product destination[s]" — a real nav entry and route already reachable by every customer, not an unbuilt surface. Explicitly bounded: fill the existing destination with real content; **do not expand it into new product capability** (no notification preferences, theme default, data export, or other net-new functionality authorised by this decision alone).
+- **Evidence:** `routes/web.php` routes `/settings` to the generic, unimplemented `coming-soon` view — still the case; content is a separate, not-yet-started bounded commission.
+- **Remaining work:** Scoped and delivered as a separate bounded commission (not this document, not yet started as of this entry).
 
 ## 20. Help
 
-- **Classification:** DEFERRED — **proposed, not decided**
-- **Evidence:** Same generic `coming-soon` view as Settings; no implementation.
-- **Dependencies:** A decision on whether MVP needs in-app Help content or can rely on direct support contact alone.
-- **Remaining work:** Not sizeable until scope is defined.
-- **Product Office Decision Required:** Confirm Help can remain deferred, or define minimum required content (e.g., FAQ linkage, which already exists publicly at `/faq`).
+- **Classification:** INCLUDED (bounded RC1 completion) — **decided**, superseding the deferral proposed here
+- **Decision:** Direct Product Office instruction, 2026-08-08 (following `PO-RC1-009`'s acceptance): same reasoning and bound as Settings above — Help is already a real, reachable nav destination, so its stub content is now in scope to complete, but net-new capability beyond real content (e.g. FAQ linkage, which already exists publicly at `/faq`) is not authorised by this decision alone.
+- **Evidence:** Same generic `coming-soon` view as Settings — still the case; content is a separate, not-yet-started bounded commission.
+- **Remaining work:** Scoped and delivered as a separate bounded commission (not this document, not yet started as of this entry).
 
 ## 21. Public Marketing Website
 
@@ -302,7 +300,7 @@ Planner (§4.13)
 Return Session (Dashboard → History/Journal/Planner, all §4.2/§4.11–13)
 ```
 
-Every stage in this journey is currently INCLUDED or INCLUDED (Polish Required) — there is no point in the core customer journey that depends on a DEFERRED or Product-Office-pending item. The pending items (Capability B, Settings, Help, Subscription, Privacy/Terms content) sit outside this core loop, not inside it.
+Every stage in this journey is currently INCLUDED or INCLUDED (Polish Required) — there is no point in the core customer journey that depends on a DEFERRED or Product-Office-pending item. The pending items (Subscription, Privacy/Terms content) sit outside this core loop, not inside it. (Capability B, Settings, and Help are no longer pending — see §4.14/§4.19/§4.20; Settings/Help content delivery is scoped as separate, not-yet-started bounded commissions, not a gap in this core loop.)
 
 ---
 
@@ -317,8 +315,9 @@ Every stage in this journey is currently INCLUDED or INCLUDED (Polish Required) 
 - **Social/community features** — no implementation exists; not part of Phase 1's audit findings.
 - **AI-assisted recommendations beyond approved scope** — `CLAUDE.md`'s Locked Decisions already bound this precisely: "AI may explain verified findings only; AI never determines suitability, ranking, confidence, selection order, correlation, or planner/risk outputs." Nothing in the current implementation exceeds this boundary, and MVP does not propose to.
 - **Enterprise features** — no implementation exists; not part of Phase 1's audit findings.
-- **Settings and Help real content** — proposed deferred, pending Product Office confirmation (§4.19, §4.20).
 - **Subscription/Premium tier** — proposed deferred, pending Product Office pricing decision (§4.22).
+
+(Settings and Help real content are no longer in this section — decided INCLUDED, bounded RC1 completion, direct Product Office instruction 2026-08-08; see §4.19/§4.20. Delivery itself remains separate, not-yet-started bounded commissions.)
 
 ---
 
@@ -328,7 +327,7 @@ No feature appears in more than one category below.
 
 ## Free
 
-Every INCLUDED and INCLUDED (Polish Required) item from Section 4: Authentication, Dashboard, Slip Builder, all three working intake methods (Screenshot, PDF, Paste), the Deterministic Rule Engine, Explainability, Risk Report, History, Decision Journal, Planner (Capability A), Capability B (Market Intelligence, §4.14 — decided `PO-MVP-004`), SlipGuard Labs, Profile, the Public Marketing Website.
+Every INCLUDED and INCLUDED (Polish Required) item from Section 4: Authentication, Dashboard, Slip Builder, all three working intake methods (Screenshot, PDF, Paste), the Deterministic Rule Engine, Explainability, Risk Report, History, Decision Journal, Planner (Capability A), Capability B (Market Intelligence, §4.14 — decided `PO-MVP-004`), SlipGuard Labs, Profile, Settings (§4.19 — decided, direct Product Office instruction 2026-08-08), Help (§4.20 — same), the Public Marketing Website.
 
 ## Premium
 
@@ -340,7 +339,7 @@ Demo Workspace (§4.15), Operations Panel including Administration/Support Notes
 
 ## Future
 
-Bet Code/share-link ingestion (§4.7); Settings and Help real content if deferred (§4.19, §4.20); OCR automation (§4.4); any eventual Premium tier once pricing is approved (§4.22); Intelligence Builder Workspace evolution phases the pending gap analysis (§4.14) buckets as post-launch or longer-term architecture. See Section 9 for named destination releases.
+Bet Code/share-link ingestion (§4.7); OCR automation (§4.4); any eventual Premium tier once pricing is approved (§4.22); Intelligence Builder Workspace evolution phases the pending gap analysis (§4.14) buckets as post-launch or longer-term architecture. See Section 9 for named destination releases. (Settings and Help real content are no longer here — decided INCLUDED, bounded RC1 completion, §4.19/§4.20 — though delivery itself is a separate, not-yet-started bounded commission.)
 
 ---
 
@@ -391,12 +390,12 @@ Outside this document's evidence base — Phase 1/Phase 2 covered application-la
 
 # Section 9 — Deferred Roadmap
 
+**Settings and Help (real content) removed from this table** (direct Product Office instruction, 2026-08-08, following `PO-RC1-009`'s acceptance) — both were previously destined for Version 1.1 here; superseding §4.19/§4.20's deferral moved them to bounded RC1 completion instead, so they are no longer part of the *deferred* roadmap. Delivery remains a separate, not-yet-started bounded commission — not re-added to Section 4 as complete.
+
 | Feature | Destination |
 |---|---|
 | OCR automation for screenshot intake | Version 1.1 |
 | Bet Code / share-link ingestion | Version 1.1 |
-| Settings (real content) | Version 1.1 |
-| Help (real content) | Version 1.1 |
 | Intelligence Builder Workspace evolution items the §4.14 gap analysis defers | Version 1.1 or later, per the gap analysis's own bucketing |
 | Subscription / Premium tier | Version 1.1 (pending Product Office pricing decision — this is a *proposed* destination, contingent on that decision existing at all) |
 | Expanded live market intelligence beyond current Capability B scope | Version 1.2 |
@@ -425,7 +424,7 @@ Outside this document's evidence base — Phase 1/Phase 2 covered application-la
 - [ ] Premium boundary approved (Section 7 — currently empty, pending pricing)
 - [x] Capability B decision recorded (Section 4.14) — `PO-MVP-004`, 2026-08-03: INCLUDED, launch-enabled
 - [ ] Capability B gap analysis complete (Section 4.14 — determines any remaining pre-launch items)
-- [ ] Settings/Help scope decision recorded (Section 4.19/4.20)
+- [x] Settings/Help scope decision recorded (Section 4.19/4.20) — direct Product Office instruction, 2026-08-08: INCLUDED, bounded RC1 completion (content delivery itself remains a separate, not-yet-started bounded commission)
 
 ## Compliance
 - [ ] Privacy Policy approved
@@ -468,11 +467,11 @@ Outside this document's evidence base — Phase 1/Phase 2 covered application-la
 1. A real Privacy Policy and Terms of Service (Compliance/Legal-authored).
 2. A Product Office decision on pricing — even if that decision is "Free-only for v1.0."
 3. ~~A Product Office decision on Capability B's launch visibility.~~ Resolved — `PO-MVP-004`, 2026-08-03: INCLUDED, launch-enabled.
-4. A Product Office decision on Settings/Help's MVP scope.
+4. ~~A Product Office decision on Settings/Help's MVP scope.~~ Resolved — direct Product Office instruction, 2026-08-08: INCLUDED, bounded RC1 completion (content delivery itself remains a separate, not-yet-started bounded commission).
 5. Infrastructure/Operations readiness (production environment, monitoring, backups, disaster recovery) — not assessed in this document and required before public launch regardless of feature scope.
 6. Resolution of the `DecisionJournalTest` flakiness.
 7. Completion of the Engineering gap analysis between the current Capability B implementation and the approved Intelligence Builder Workspace design direction (§4.14), and delivery of whatever it buckets as pre-launch.
 
 **Evidence demonstrating readiness of everything already decided:** `docs/product/MVP_CURRENT_STATE_AUDIT.md` (Phase 1), this document's Section 4 (per-feature evidence), and `docs/engineering/I-01.2-MYSQL-MIGRATION-SAFETY-VERIFICATION.md` (platform-layer verification the whole MVP journey was exercised against).
 
-This document is Engineering's evidence-grounded proposal for the MVP Contract. It becomes binding — "no feature may be added to or removed from MVP without an explicit Product Office decision" — only once the Product Office confirms or amends the six items marked "Decision Required" above.
+This document is Engineering's evidence-grounded proposal for the MVP Contract. It becomes binding — "no feature may be added to or removed from MVP without an explicit Product Office decision" — only once the Product Office confirms or amends the remaining items marked "Decision Required" above (two of the original six — Capability B's launch visibility and Settings/Help's MVP scope — are now resolved, per items 3 and 4 above).
