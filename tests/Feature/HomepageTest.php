@@ -90,6 +90,30 @@ test('the hero shows a real, theme-aware Demo Workspace dashboard screenshot, cl
         ->toContain('@media (max-width: 767px)');
 });
 
+/**
+ * `PO-RC1-010` — the Hero's intentional full-bleed dashboard-viewport
+ * mechanism (`-mx-3`/`-mx-4` wrapper margin, the drag-viewport's own
+ * `margin-right: calc(50% - 50vw)` bleed) was leaking into page-level
+ * horizontal scroll at mobile/tablet widths (~28px overflow, confirmed
+ * via real Playwright measurement pre-fix and traced via a controlled
+ * experiment, not assumed): `<body>` already carried `overflow-x-clip`
+ * but `<html>` — the actual document scrolling element whose own
+ * scrollWidth determines page-level scroll — did not. This test can't
+ * exercise real layout/scrollWidth (no browser in the Pest environment),
+ * so it asserts the static markup fact a real-browser regression would
+ * hinge on: `<html>` now carries the same `overflow-x-clip` utility as
+ * `<body>`, keeping both halves of the containment pair consistent.
+ * Real-browser confirmation (0px overflow at 390/430/768/1024/1440px,
+ * both themes, drag-to-explore still functional) is recorded in
+ * `CHANGELOG.md`/`TASKS.md` for this directive.
+ */
+test('PO-RC1-010: the root html element clips horizontal overflow, matching the existing body containment', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->toMatch('/<html[^>]*class="overflow-x-clip"/')
+        ->toContain('<body class="overflow-x-clip font-sans antialiased">');
+});
+
 test('the hero actions remain aligned across mobile tablet and desktop layouts', function () {
     $html = $this->get('/')->assertOk()->getContent();
 

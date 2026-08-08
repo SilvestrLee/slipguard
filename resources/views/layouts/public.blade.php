@@ -1,5 +1,24 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+{{--
+    `PO-RC1-010` — `overflow-x-clip` was applied to `<body>` below but not
+    to `<html>`, the actual document scrolling element whose own
+    `scrollWidth` determines page-level horizontal scroll. Confirmed by
+    direct measurement (not assumed): with only `<body>` clipped,
+    `document.documentElement.scrollWidth` was 418px against a 390px
+    viewport (28px overflow) at mobile widths, sourced to the Hero's own
+    intentional full-bleed dashboard-viewport mechanism (`-mx-3`/`-mx-4`
+    wrapper margin plus the drag-viewport's own `calc(50% - 50vw)` bleed,
+    §912-919 `resources/css/app.css`) — both deliberately wider than the
+    viewport by design, for the drag-to-explore interaction, and neither
+    touched here. Adding the same, already-approved `overflow-x-clip`
+    utility to `<html>` closed the gap to exactly 0px in a controlled
+    experiment before this fix was written — the Hero interaction, the
+    dashboard screenshot, and every other page composition were
+    unaffected (the negative-margin bleed still paints to the physical
+    edge exactly as before; only the resulting whole-page scroll capsule
+    is now the correct 390px/768px instead of 418px/889px).
+--}}
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="overflow-x-clip">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
