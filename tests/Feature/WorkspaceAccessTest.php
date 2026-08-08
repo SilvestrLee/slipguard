@@ -34,21 +34,24 @@ test('the dashboard greets the user and offers the primary call to action', func
         ->assertSee('No slips yet.');
 });
 
-test('coming soon pages identify themselves and link back to the dashboard', function () {
+test('the remaining coming soon page identifies itself and links back to the dashboard', function () {
     $user = User::factory()->create();
 
+    // `PO-U24-002`: Help is real content now — see tests/Feature/Workspace/HelpTest.php.
+    // Only Settings remains a coming-soon stub as of this test.
     $this->actingAs($user)
-        ->get(route('help'))
+        ->get(route('settings'))
         ->assertOk()
-        ->assertSee('Help')
+        ->assertSee('Settings')
         ->assertSee('Back to Dashboard');
 });
 
-test('History and Journal are real Workspace screens, not coming-soon placeholders', function () {
+test('History, Journal and Help are real Workspace screens, not coming-soon placeholders', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)->get(route('history'))->assertOk()->assertDontSee('is on the way');
     $this->actingAs($user)->get(route('journal'))->assertOk()->assertDontSee('is on the way');
+    $this->actingAs($user)->get(route('help'))->assertOk()->assertDontSee('is on the way');
 });
 
 test('the slip index shows an empty state for a new user', function () {

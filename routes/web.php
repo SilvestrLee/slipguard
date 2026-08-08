@@ -85,7 +85,8 @@ Route::middleware('auth')->group(function () {
     Volt::route('journal/create', 'journal.entry')->name('journal.create');
     Volt::route('journal/{journalEntry}/edit', 'journal.entry')->name('journal.edit');
 
-    Route::view('help', 'coming-soon', ['title' => 'Help'])->name('help');
+    // `PO-U24-002` — real Help & Methodology content, replacing the coming-soon stub.
+    Volt::route('help', 'help.index')->name('help');
     Route::view('settings', 'coming-soon', ['title' => 'Settings'])->name('settings');
 });
 

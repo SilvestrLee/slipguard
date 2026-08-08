@@ -17,7 +17,7 @@
         request()->routeIs('labs') => __('SlipGuard Labs'),
         request()->routeIs('profile') => __('Profile'),
         request()->routeIs('settings') => __('Settings'),
-        request()->routeIs('help') => __('Help'),
+        request()->routeIs('help') => __('Help & Methodology'),
         default => config('app.name', 'SlipGuard'),
     };
 @endphp
