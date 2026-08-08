@@ -93,6 +93,26 @@ test('the public footer links every social icon to the real, confirmed slipguard
         ->not->toContain('account link coming soon');
 });
 
+/**
+ * `PO-RC1-009` — the footer's Product-column "Dashboard" link had no
+ * `@auth` guard (unlike the identical link in the header nav), so a guest
+ * clicking it landed on /login with no explanation. Now matches the
+ * header's own convention: Sign In for guests, Dashboard once authenticated.
+ */
+test('the public footer Product column shows Sign In to a guest and Dashboard to an authenticated user', function () {
+    $guestHtml = $this->get('/')->assertOk()->getContent();
+    $footer = substr($guestHtml, (int) strpos($guestHtml, '<footer'));
+
+    expect($footer)->toContain(route('login'))
+        ->not->toContain(route('dashboard'));
+
+    $user = User::factory()->create();
+    $authHtml = $this->actingAs($user)->get('/')->assertOk()->getContent();
+    $authFooter = substr($authHtml, (int) strpos($authHtml, '<footer'));
+
+    expect($authFooter)->toContain(route('dashboard'));
+});
+
 test('header and footer chrome use container-marketing, not a second raw max-w-7xl class', function () {
     $user = User::factory()->create();
 

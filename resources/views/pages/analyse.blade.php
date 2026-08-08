@@ -92,12 +92,23 @@
         </div>
     </section>
 
-    {{-- Weakest-leg explanation. Atmosphere-rhythm beat --}}
-    <section class="public-section-atmosphere" aria-labelledby="weakest-leg-heading" data-reveal>
+    {{--
+        `PO-RC1-009` — corrected from a "weakest leg" claim. This page
+        walks through the base Analyse → Report pipeline (the factors
+        above are "reused verbatim from report.blade.php"), and that
+        report shows the Main Contributing Factor (§20.3), never a
+        per-leg weakest-leg ranking — that's a separate, real capability
+        (`RankLegsByStructuralWeakness`, the Marginal Structural
+        Contribution model) that lives in the Planner, not here. The
+        homepage's Invisible Risk section, which actually explains
+        weakest-leg analysis, now links to /planner instead of here for
+        the same reason. Atmosphere-rhythm beat.
+    --}}
+    <section class="public-section-atmosphere" aria-labelledby="main-factor-heading" data-reveal>
         <div class="container-marketing mx-auto px-6 py-20 text-center">
-            <h2 id="weakest-leg-heading" class="text-2xl font-semibold text-neutral-900">{{ __('Which leg is doing the most damage?') }}</h2>
+            <h2 id="main-factor-heading" class="text-2xl font-semibold text-neutral-900">{{ __("What's actually driving the risk?") }}</h2>
             <p class="mt-4 text-base text-neutral-600 max-w-xl mx-auto">
-                {{ __("SlipGuard identifies which selection contributes the most structural risk to your slip — not by guessing, but by measuring how the score changes if that selection weren't there.") }}
+                {{ __('Each report identifies the single factor contributing most to your structural score — not by guessing, but by comparing every factor’s calculated contribution against the others.') }}
             </p>
         </div>
     </section>

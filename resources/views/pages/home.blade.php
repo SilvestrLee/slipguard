@@ -309,7 +309,8 @@
                     <p class="mt-4 text-sm font-medium text-neutral-700">
                         {{ __('SlipGuard shows the structural effect. You decide what to do.') }}
                     </p>
-                    <a href="{{ route('analyse') }}" wire:navigate class="mt-6 inline-flex items-center text-sm font-semibold text-accent-strong hover:text-accent">
+                    {{-- `PO-RC1-009`: was `route('analyse')`, but /analyse walks through the base report (Main Contributing Factor), not weakest-leg ranking — /planner is the real destination that explains this. --}}
+                    <a href="{{ route('planner.public') }}" wire:navigate class="mt-6 inline-flex items-center text-sm font-semibold text-accent-strong hover:text-accent">
                         {{ __('See how weakest-leg analysis works') }} →
                     </a>
                 </div>
@@ -596,7 +597,7 @@
                             </span>
                             <span class="text-2xl font-semibold text-neutral-900 font-tabular">53<span class="text-sm font-normal text-neutral-500">/100</span></span>
                         </div>
-                        <p class="mt-2 text-sm text-neutral-600">{{ __('Weakest leg: Over 2.5 Goals — contributes 53% of the structural score.') }}</p>
+                        {{-- `PO-RC1-009`: was "Weakest leg: Over 2.5 Goals — contributes 53% of the structural score." — this step describes the base report, which shows the Main Contributing Factor (headline above), never a per-leg weakest-leg ranking; removed rather than replaced with an unverified factor/percentage pairing (this repo's numbers are always engine-computed and curated, never guessed). --}}
                         <p class="mt-3 text-xs text-neutral-500">{{ __('The report explains the structure. You make the decision.') }}</p>
                     </div>
                 </div>

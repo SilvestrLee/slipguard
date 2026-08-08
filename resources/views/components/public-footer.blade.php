@@ -78,7 +78,12 @@
                     <li><a href="{{ route('analyse') }}" wire:navigate class="text-neutral-600 hover:text-neutral-900">{{ __('Analyse') }}</a></li>
                     <li><a href="{{ route('planner.public') }}" wire:navigate class="text-neutral-600 hover:text-neutral-900">{{ __('Planner') }}</a></li>
                     <li><a href="{{ route('reports') }}" wire:navigate class="text-neutral-600 hover:text-neutral-900">{{ __('Reports') }}</a></li>
-                    <li><a href="{{ route('dashboard') }}" wire:navigate class="text-neutral-600 hover:text-neutral-900">{{ __('Dashboard') }}</a></li>
+                    {{-- `PO-RC1-009`: was an unconditional Dashboard link — a guest clicking it landed on /login with no explanation. Matches the header nav's own @auth/@else convention. --}}
+                    @auth
+                        <li><a href="{{ route('dashboard') }}" wire:navigate class="text-neutral-600 hover:text-neutral-900">{{ __('Dashboard') }}</a></li>
+                    @else
+                        <li><a href="{{ route('login') }}" wire:navigate class="text-neutral-600 hover:text-neutral-900">{{ __('Sign In') }}</a></li>
+                    @endauth
                 </ul>
             </div>
 

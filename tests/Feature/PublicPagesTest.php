@@ -71,7 +71,10 @@ test('the Analyse page explains methodology, factors, and the deterministic-not-
         ->assertSee('Selection Odds')
         ->assertSee('Risk Concentration')
         ->assertSee('Market Complexity')
-        ->assertSee('Which leg is doing the most damage?')
+        // `PO-RC1-009`: was 'Which leg is doing the most damage?' — that described
+        // weakest-leg ranking (a Planner-only capability), not this page's own base
+        // report walkthrough, which shows the Main Contributing Factor. Corrected.
+        ->assertSee("What's actually driving the risk?")
         ->assertSee('No outcome prediction — SlipGuard evaluates structural risk, not who wins.');
 });
 
