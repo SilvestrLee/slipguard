@@ -2039,3 +2039,55 @@ No test-observable behaviour changed; full regression unchanged from the `PO-U23
 - N/A — narrowly scoped language correction, fully applied.
 
 No test-observable behaviour changed; full regression unchanged from the `PO-U23-001` figure above (documentation-only commit).
+
+## `PO-RC1-009` — Final User-Facing RC1 Closure Pass
+
+**Status:** Delivered, Product Office accepted.
+
+### Fixed
+- Real, user-facing Analyse/Report-vs-Planner terminology conflation: the public `/analyse` page and one homepage "How It Works" card both attributed weakest-leg ranking (a Planner-only capability) to the base Analyse → Report path, which only ever shows the Main Contributing Factor (`report.blade.php` §20.3). `analyse.blade.php`'s "Which leg is doing the most damage?" section rewritten to describe Main Contributing Factor; `home.blade.php`'s "Weakest leg: Over 2.5 Goals — contributes 53%" line (directly contradicting the "main contributing factor" sentence eight lines above it) removed; the homepage's Invisible Risk CTA re-pointed from `/analyse` to `/planner`, the page that actually explains weakest-leg analysis.
+- Footer "Dashboard" link had no `@auth` guard (unlike the identical header link) — a guest clicking it landed on `/login` unannounced. Now matches the header's Sign In / Dashboard convention.
+
+### Added
+- 2 new Pest tests (the footer auth-state regression, plus one updated assertion for the corrected `/analyse` heading).
+
+Full regression: 761 tests, 754 passed, 7 pre-existing self-skipped, 0 failed.
+
+## Settings/Help Scope Decision (`PO-RC1-009` acceptance, 2026-08-08)
+
+**Status:** Recorded — documentation only, no code change.
+
+### Changed
+- `docs/product/MVP_SCOPE_LOCK.md` — `PO-MVP-002`'s proposed Settings/Help deferral (§4.19/§4.20, both previously "DEFERRED *proposed*") superseded by direct Product Office instruction: both now INCLUDED for bounded RC1 completion, on the reasoning that both are already real, reachable authenticated destinations (not unbuilt surfaces). Explicitly bounded — real content only, no new product capability. Updated throughout: the §4 summary table, Sections 6/7/9 (Not Included, Premium Boundary, Deferred Roadmap), the release checklist, and the launch-blocker list.
+- `docs/00-governance/DECISION_LOG.md` — new row recording this decision alongside `PO-RC1-009`'s acceptance.
+
+### Not Done
+- Settings/Help content delivery itself — explicitly scoped as separate, not-yet-started bounded commissions.
+
+## `PO-U24-001` — Homepage Completion & Product Storytelling Uplift
+
+**Status:** Delivered, Product Office accepted. A bounded uplift, explicitly not a redesign — the Hero and dashboard screenshot were preserved exactly; only weak or under-explained sections were touched.
+
+### Added
+- Two Feature Highlight sections — Analyse and Build an Accumulator — inserted between Invisible Risk and How SlipGuard Thinks. Each is one real product component plus one explanation, never a screenshot collage: the Analyse highlight is a Risk Report fragment (Structural Score badge + Main Contributing Factor panel) with real, engine-computed sample data (a curated 4-leg slip — three short-odds favourites plus one 8.50 outlier — run once via `AnalyzeBettingSlip` against a disposable local slip: score 67, band High, Main Contributing Factor "Selection Odds" — verified, then the test data discarded, never invented); the Build an Accumulator highlight reuses the real Builder's own existing "Illustrative preview · not a live candidate" honesty convention and fixture-row markup, condensed for the homepage, with one row marked "Ranked by structural contribution" (the weakest-leg capability legitimately belongs here, per `PO-RC1-009`'s corrected terminology boundary). The conversational entry layer (`PO-U23-001`) is named only in one modest supporting-copy phrase ("in your own words") — no dedicated visual, deliberately, since it is a deterministic interpreter for a bounded set of requests, not a general AI assistant.
+- A bounded FAQ (6 questions, within the directed 5–7 range), reusing `report.blade.php`'s existing per-item Alpine disclosure pattern verbatim — now documented for the first time in `COMPONENT_PRINCIPLES.md`'s new Disclosure/Accordion entry, closing a real documentation gap found while reusing it (the pattern had shipped in `report.blade.php` before this entry existed). Every answer grounded in already-approved copy (`pages/faq.blade.php`, `pages/planner.blade.php`, `betting-slips/intake.blade.php`), not generic betting-industry assumptions; pricing deliberately omitted (already answered on `/faq`).
+- `docs/05-ux/HOMEPAGE_STORYBOARD.md` amended (v1.2 → v1.3) with a third recorded amendment, ahead of implementation per the Frontend Work Rule — the new flow and the reasoning for every insertion/consolidation.
+
+### Changed
+- Product Capabilities rebalanced, not replaced: the Analyse card's own description shortened to avoid duplicating the new highlight directly above it; three bare principle-tag pills ("Weakest-Leg Explanation," "Customer-Controlled Decisions," "No Outcome Prediction," which named no distinct capability of their own) replaced with real one-line descriptions for Build an Accumulator, Decision Journal, and Planning History.
+- Product Preview caption tightened — leads with workspace breadth ("Your analysis, planning tools and reports in one workspace") while keeping the existing evolving-product honesty note, one sentence instead of two.
+- Atmosphere/quiet background alternation (`public-section-atmosphere`/`public-section-quiet`) continues unbroken through both new insertions — verified by an updated Pest assertion, not assumed.
+
+### Design Capability Invocation
+- UI UX Pro Max genuinely invoked (`--design-system` and targeted `landing`/`ux` domain queries) — its generic "Enterprise Gateway" pattern and gold/purple palette/typography suggestion rejected in full (SlipGuard's own locked, approved design system used throughout instead); its general "one key message per card" principle and accessibility findings adopted, corroborating decisions already grounded in this repository's own governance.
+- 21st.dev: confirmed unavailable in this session (`API_KEY_21ST` unset, no `mcp__21st__*` tool registered) — consistent with this repository's own prior documented finding for this exact tool. Not queried; disclosed rather than fabricated.
+- No OddStorm imitation — reviewed as a content-architecture reference only, per the commissioning directive; no layout, colour, typography, or component reproduced.
+
+### Verified
+- Real browser verification performed via Playwright against a locally cached, mac12-compatible Chromium (the Claude-in-Chrome extension remains unavailable in this execution environment) — the first genuinely browser-verified pass in this session's homepage work: full-page screenshots at mobile (390px)/tablet (768px)/desktop (1440px), light and dark theme; the FAQ accordion opened and closed via real click in every combination; theme persistence verified through real navigation (Home → Analyse → Home → Planner → Home, dark theme held throughout every hop, zero console errors on any page load).
+- 6 new/updated Pest tests: two highlight-content tests, one explicit `PO-RC1-009` terminology-regression test, one FAQ test, one rebalanced-Capabilities test, one updated atmosphere/quiet section-count assertion.
+- Full regression: 766 tests, 759 passed, 7 pre-existing self-skipped, 0 failed, 3003 assertions. Pint clean on every file touched. Production build clean. `git diff --check` clean.
+
+### Not Done
+- **One responsive defect found and explicitly not fixed here:** a ~28px horizontal overflow at mobile/tablet viewport widths, sourced to the Hero's own pre-existing drag-to-explore dashboard-viewport mechanism. Confirmed via a `git stash` A/B test to be present identically with every `PO-U24-001` change removed — genuinely pre-existing, not introduced by this commission. Left unfixed per this commission's own "preserve the homepage architecture exactly... do not redesign" scope (a fix would mean touching shared Hero/layout mechanics well beyond this bounded uplift) — flagged for a future, separately-scoped commission, matching this repository's own established precedent (`U-20.8`'s footer contrast finding).
+- Full U-21.5 "Why Trust SlipGuard" expansion, Risk Watch, External Intelligence, multi-sport expansion, OCR, bookmaker automation, new pricing architecture — none introduced, all explicitly out of scope.
