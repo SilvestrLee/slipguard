@@ -47,12 +47,13 @@ version_constraint: NOT_RECORDED
 project_specific_context: >
   docs/05-ux/ (UX Constitution), docs/design-intelligence/PROJECT-DESIGN-CONTEXT.md,
   CLAUDE.md's Mandatory Specialist Design Capability Invocation section.
-evidence_location: >
-  General design-capability evidence: CHANGELOG.md's "Specialist Design
-  Capability Usage" sections (SlipGuard's existing, pre-CAPSYS convention).
-  Structured resolution/invocation records for capability-system
-  integration work specifically:
-  docs/operating-system/capabilities/adapters/evidence/.
+evidence_channels:
+  - kind: general
+    location: "CHANGELOG.md Specialist Design Capability Usage sections"
+    purpose: "General/project-wide design-capability evidence, SlipGuard's own pre-existing convention."
+  - kind: integration
+    location: docs/operating-system/capabilities/adapters/evidence/
+    purpose: "Structured resolution/invocation records for capability-system integration work specifically (CAPSYS-P2)."
 notes: >
   SlipGuard's own CAPABILITY-REGISTRY.md status for this capability is
   "Active Pilot" (pilot started 2026-08-06, review date 2026-09-05) —
@@ -63,3 +64,14 @@ notes: >
   That illustrative file is not authoritative over this real record; this
   file is SlipGuard's own, and "Active Pilot" maps most precisely to
   PILOT, not APPROVED, under the central vocabulary's own definitions.
+
+  (`CAPSYS-P5A`, 2026-08-09): the single free-text `evidence_location`
+  field this record originally carried (`CAPSYS-P2`) is migrated to the
+  structured `evidence_channels` list above, following the central
+  contract's retirement of `evidence_location` (`CS-DEC-020`,
+  `adapters/CONTRACT.md`'s "Evidence channels" section). The two channels
+  represented are the same two real locations this record already
+  described — CHANGELOG.md's narrative convention and this project's own
+  structured integration-evidence directory — restructured, not changed
+  in substance. No other field on this adapter was altered by this
+  migration.
