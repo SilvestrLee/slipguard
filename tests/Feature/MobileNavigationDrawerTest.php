@@ -43,6 +43,8 @@ test('the desktop sidebar is a distinct, always-present element from the mobile 
         // The fixed desktop sidebar (lg:flex, hidden below lg) is a
         // structurally separate element from the mobile drawer (lg:hidden) —
         // both render in the response, CSS decides which is visible.
-        ->assertSee('hidden w-72 flex-col border-r border-neutral-200 bg-surface-card/95 backdrop-blur-xl lg:flex', false)
+        // `PO-U24-004`: fixed w-72 replaced by the collapsible rail's
+        // CSS-variable width (see CollapsibleSidebarTest for that behaviour).
+        ->assertSee('hidden w-[var(--sidebar-w)] flex-col border-r border-neutral-200 bg-surface-card/95 backdrop-blur-xl transition-[width] duration-standard ease-in-out lg:flex', false)
         ->assertSee('lg:hidden', false);
 });

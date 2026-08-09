@@ -10,6 +10,7 @@
         @include('partials.favicon-links')
 
         @include('partials.theme-init-script')
+        @include('partials.sidebar-init-script')
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

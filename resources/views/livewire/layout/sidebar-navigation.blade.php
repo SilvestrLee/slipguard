@@ -53,6 +53,11 @@ new class extends Component
             ?? (document.documentElement.getAttribute('data-theme') === 'dark'
                 || (document.documentElement.getAttribute('data-theme') === null
                     && window.matchMedia('(prefers-color-scheme: dark)').matches)),
+        collapsed: window.SlipGuardSidebar?.isCollapsed() ?? false,
+        toggleCollapsed() {
+            this.collapsed = ! this.collapsed;
+            window.SlipGuardSidebar?.set(this.collapsed);
+        },
         openDrawer() {
             this.open = true;
             document.body.classList.add('overflow-hidden');
@@ -92,35 +97,56 @@ new class extends Component
         });
     "
     x-on:slipguard-theme-changed.window="isDark = $event.detail.dark"
+    x-on:slipguard-sidebar-changed.window="collapsed = $event.detail.collapsed"
     @keydown.escape.window="closeDrawer()"
     @keydown.tab.window="trapFocus($event)"
     class="print:hidden"
 >
-    <aside class="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-neutral-200 bg-surface-card/95 backdrop-blur-xl lg:flex"
+    <aside class="fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-w)] flex-col border-r border-neutral-200 bg-surface-card/95 backdrop-blur-xl transition-[width] duration-standard ease-in-out lg:flex"
            aria-label="{{ __('Customer workspace navigation') }}">
-        <div class="flex h-20 shrink-0 items-center border-b border-neutral-200 px-6">
+        <div class="flex h-20 shrink-0 items-center border-b border-neutral-200 px-6" :class="{ 'justify-center px-3': collapsed }">
             <a href="{{ route('dashboard') }}" wire:navigate aria-label="{{ __('SlipGuard dashboard') }}" class="flex items-center gap-3 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">
                 <img src="{{ asset('brand/slipguard-icon-accent.svg') }}"
                      alt="" aria-hidden="true" class="h-9 w-auto shrink-0">
-                <span>
+                <span x-show="!collapsed" x-cloak>
                     <span class="block text-lg font-semibold tracking-tight text-neutral-900">{{ __('SlipGuard') }}</span>
                     <span class="block text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-neutral-500">{{ __('Risk intelligence') }}</span>
                 </span>
             </a>
         </div>
 
-        <div class="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-5">
-            <p class="px-3 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-neutral-400">{{ __('Workspace') }}</p>
-            <nav class="mt-3 space-y-1" aria-label="{{ __('Primary') }}">
+        {{--
+            `PO-U24-004` §2 — the collapse control, a dedicated row directly
+            beneath the logo header ("restrained placement near the
+            navigation header") rather than crammed into the h-20 logo row
+            itself, so neither state risks the 44px touch target feeling
+            tight against the wordmark. One existing icon
+            (`chevron-double-left`), rotated 180° on collapse — the same
+            transform-only micro-interaction language already used for
+            disclosure chevrons elsewhere, not a new icon metaphor.
+        --}}
+        <div class="flex shrink-0 items-center border-b border-neutral-200 px-3 py-2" :class="collapsed ? 'justify-center' : 'justify-end'">
+            <button type="button" @click="toggleCollapsed()"
+                    :aria-expanded="(!collapsed).toString()"
+                    :aria-label="collapsed ? '{{ __('Expand navigation') }}' : '{{ __('Collapse navigation') }}'"
+                    class="inline-flex size-11 items-center justify-center rounded-lg text-neutral-500 transition-colors duration-instant hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                <x-heroicon-o-chevron-double-left class="size-5 transition-transform duration-standard ease-in-out" x-bind:class="{ 'rotate-180': collapsed }" aria-hidden="true" />
+            </button>
+        </div>
+
+        <div class="flex min-h-0 flex-1 flex-col overflow-y-auto py-5" :class="collapsed ? 'px-2' : 'px-4'">
+            <p class="px-3 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-neutral-400" x-show="!collapsed" x-cloak>{{ __('Workspace') }}</p>
+            <nav class="space-y-1" :class="collapsed ? 'mt-0' : 'mt-3'" aria-label="{{ __('Primary') }}">
                 @foreach ($primaryItems as $item)
                     @php $isActive = request()->routeIs(...$item['matches']); @endphp
                     <a href="{{ route($item['route']) }}" wire:navigate
                        @if ($isActive) aria-current="page" @endif
                        @class([
-                           'group flex min-h-11 items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+                           'group relative flex min-h-11 items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
                            'border-accent/30 bg-accent/10 font-semibold text-neutral-900' => $isActive,
                            'border-transparent font-medium text-neutral-600 hover:border-neutral-200 hover:bg-neutral-100 hover:text-neutral-900' => ! $isActive,
-                       ])>
+                       ])
+                       :class="{ 'justify-center px-0': collapsed }">
                         <span @class([
                             'flex size-8 shrink-0 items-center justify-center rounded-md',
                             'bg-accent-strong text-white' => $isActive,
@@ -128,20 +154,24 @@ new class extends Component
                         ])>
                             <x-dynamic-component :component="$item['icon']" class="size-4.5" aria-hidden="true" />
                         </span>
-                        <span class="min-w-0 flex-1 truncate">{{ $item['label'] }}</span>
+                        <span class="min-w-0 flex-1 truncate" :class="{ 'sr-only': collapsed }">{{ $item['label'] }}</span>
                         @if ($item['preview'] ?? false)
-                            <span class="rounded-full border border-neutral-300 px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-neutral-500">
+                            <span class="rounded-full border border-neutral-300 px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-neutral-500" x-show="!collapsed" x-cloak>
                                 {{ __('Preview') }}
                             </span>
                         @endif
+                        <span x-show="collapsed" x-cloak role="tooltip" aria-hidden="true"
+                              class="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
+                            {{ $item['label'] }}{{ ($item['preview'] ?? false) ? ' — '.__('Preview') : '' }}
+                        </span>
                     </a>
                 @endforeach
             </nav>
 
             <div class="mt-auto pt-7">
                 <nav class="space-y-1 border-t border-neutral-200 pt-4" aria-label="{{ __('Utilities') }}">
-                    <div class="flex min-h-10 items-center justify-between gap-2 px-2 py-1">
-                        <span class="text-xs font-medium text-neutral-500">{{ __('Find & language') }}</span>
+                    <div class="flex min-h-10 items-center gap-2 px-2 py-1" :class="collapsed ? 'justify-center' : 'justify-between'">
+                        <span class="text-xs font-medium text-neutral-500" x-show="!collapsed" x-cloak>{{ __('Find & language') }}</span>
                         <span class="flex items-center gap-1">
                             <x-search-trigger-button />
                             <x-language-selector />
@@ -152,40 +182,59 @@ new class extends Component
                         <a href="{{ route($item['route']) }}" wire:navigate
                            @if ($isActive) aria-current="page" @endif
                            @class([
-                               'flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+                               'group relative flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
                                'bg-accent/10 font-semibold text-neutral-900' => $isActive,
                                'font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900' => ! $isActive,
-                           ])>
+                           ])
+                           :class="{ 'justify-center px-0': collapsed }">
                             <x-dynamic-component :component="$item['icon']" class="size-5 shrink-0" aria-hidden="true" />
-                            {{ $item['label'] }}
+                            <span :class="{ 'sr-only': collapsed }">{{ $item['label'] }}</span>
+                            <span x-show="collapsed" x-cloak role="tooltip" aria-hidden="true"
+                                  class="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
+                                {{ $item['label'] }}
+                            </span>
                         </a>
                     @endforeach
-                    <div class="flex min-h-11 items-center justify-between gap-3 px-3 py-2">
-                        <span class="flex items-center gap-3 text-sm font-medium text-neutral-600">
+                    <div class="group relative flex min-h-11 items-center gap-3 px-3 py-2" :class="collapsed ? 'justify-center' : 'justify-between'">
+                        <span class="flex items-center gap-3 text-sm font-medium text-neutral-600" x-show="!collapsed" x-cloak>
                             <x-heroicon-o-sun class="size-5 shrink-0" aria-hidden="true" />
                             {{ __('Theme') }}
                         </span>
                         <x-theme-toggle />
+                        <span x-show="collapsed" x-cloak role="tooltip" aria-hidden="true"
+                              class="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
+                            {{ __('Theme') }}
+                        </span>
                     </div>
                 </nav>
 
                 <div class="mt-3 border-t border-neutral-200 pt-3">
                     <a href="{{ route('profile') }}" wire:navigate
                        @if (request()->routeIs('profile')) aria-current="page" @endif
-                       class="flex min-h-12 items-center gap-3 rounded-lg px-3 py-2 hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                       class="group relative flex min-h-12 items-center gap-3 rounded-lg px-3 py-2 hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                       :class="{ 'justify-center px-0': collapsed }">
                         <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent-strong">
                             {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr(auth()->user()->name, 0, 1)) }}
                         </span>
-                        <span class="min-w-0 flex-1">
+                        <span class="min-w-0 flex-1" :class="{ 'sr-only': collapsed }">
                             <span class="block truncate text-sm font-semibold text-neutral-900">{{ auth()->user()->name }}</span>
                             <span class="block truncate text-xs text-neutral-500">{{ __('Profile & account') }}</span>
                         </span>
-                        <x-heroicon-o-chevron-right class="size-4 shrink-0 text-neutral-400" aria-hidden="true" />
+                        <x-heroicon-o-chevron-right class="size-4 shrink-0 text-neutral-400" aria-hidden="true" x-show="!collapsed" x-cloak />
+                        <span x-show="collapsed" x-cloak role="tooltip" aria-hidden="true"
+                              class="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
+                            {{ auth()->user()->name }} — {{ __('Profile & account') }}
+                        </span>
                     </a>
                     <button type="button" wire:click="logout"
-                            class="mt-1 flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                            class="group relative mt-1 flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            :class="{ 'justify-center px-0': collapsed }">
                         <x-heroicon-o-arrow-left-on-rectangle class="size-5" aria-hidden="true" />
-                        {{ __('Log out') }}
+                        <span :class="{ 'sr-only': collapsed }">{{ __('Log out') }}</span>
+                        <span x-show="collapsed" x-cloak role="tooltip" aria-hidden="true"
+                              class="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
+                            {{ __('Log out') }}
+                        </span>
                     </button>
                 </div>
             </div>

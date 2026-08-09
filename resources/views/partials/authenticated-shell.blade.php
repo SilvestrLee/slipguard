@@ -37,8 +37,20 @@
 <div class="relative z-10 min-h-screen lg:h-screen lg:overflow-hidden">
     <livewire:layout.sidebar-navigation />
 
-    <div class="min-w-0 pt-16 lg:h-screen lg:overflow-y-auto lg:pl-72 lg:pt-0" data-workspace-scroll>
-        <header class="sticky top-0 z-30 border-b border-neutral-200/80 bg-surface-page/90 backdrop-blur-xl print:hidden">
+    <div class="min-w-0 pt-16 lg:h-screen lg:overflow-y-auto lg:pt-0 lg:transition-[padding-left] lg:duration-standard lg:ease-in-out lg:pl-[var(--sidebar-w)]" data-workspace-scroll>
+        {{--
+            `PO-U24-004` §7 — restrained glassmorphism, aligned to the one
+            recipe already documented and approved for this exact treatment
+            (`VISUAL_INSPIRATION.md`: "translucent surface + backdrop-blur-md
+            + hairline border, no colour tint") and already implemented
+            identically on the public/portal header (`navigation.blade.php`).
+            Previously `backdrop-blur-xl` + `/90` here — heavier blur and
+            higher opacity than that documented recipe, and exactly the
+            "heavy blur... excessive translucency" this commission's own
+            §7 names as something to avoid. Brought in line with the
+            existing recipe rather than inventing a second one.
+        --}}
+        <header class="sticky top-0 z-30 border-b border-neutral-200/70 bg-surface-page/70 backdrop-blur-md print:hidden">
             <div class="mx-auto flex min-h-16 max-w-[88rem] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
                 <div class="min-w-0">
                     @if (isset($header))

@@ -2106,3 +2106,74 @@ Full regression: 761 tests, 754 passed, 7 pre-existing self-skipped, 0 failed.
 - Hero copy, CTAs, dashboard screenshot, and section order all confirmed pixel-identical before/after via real screenshot comparison — nothing else touched.
 - 1 new Pest test (asserts the static markup fact a real-browser regression would hinge on, since Pest has no layout engine to assert `scrollWidth` directly).
 - Full regression: 767 tests, 760 passed, 7 pre-existing self-skipped, 0 failed, 3006 assertions. Pint clean on both touched files. Production build clean. `git diff --check` clean.
+
+## `PO-U24-002` — Help & Methodology Completion
+
+**Status:** Delivered (commit `47e31fc`).
+
+### Added
+- A real, content-truth-matrix-grounded `/help` page (`resources/views/livewire/help/index.blade.php`), replacing the previous coming-soon stub. Every claim verified against the actual RC1 implementation before being written: Getting Started (4-step journey); Analysing a Slip (real intake methods — manual/paste/PDF/screenshot — with an explicit no-OCR/no-bet-code disclosure); Understanding Your Report (Structural Risk Score 0–100 explicitly not a probability, the real `RiskBand::forScore()` bands/thresholds, Main Contributing Factor, all 5 active Structural Factors plus the inactive 6th, a Finding→Evidence→Reasoning→Conclusion illustration explicitly not claimed as a literal report diagram); Build an Accumulator (real flow steps, the Planner's structural-ranking capability explicitly kept distinct from the base report's Main Contributing Factor per `PO-RC1-009`); How SlipGuard Thinks (methodology + the same pipeline diagram already used sitewide); What SlipGuard Does Not Do; a 9-question FAQ (reusing `report.blade.php`'s existing disclosure pattern); a Contact CTA.
+- 13 new Pest tests (`tests/Feature/Workspace/HelpTest.php`), including explicit `PO-RC1-009` regression protection so Main Contributing Factor and the Planner's own ranking capability stay distinct.
+
+### Changed
+- `routes/web.php` — coming-soon stub swapped for a real Volt component.
+- `authenticated-shell.blade.php` — page title corrected to "Help & Methodology" to match the real content now behind it.
+- `WorkspaceAccessTest.php` — updated: Help is real now (Settings remained the one coming-soon stub until `PO-U24-003` below).
+
+### Fixed
+- One real, pre-existing accessibility defect this page introduced: an invalid `<dl>` child structure and a risk-band badge colour pairing that failed contrast at compact size — replaced with solid text plus a decorative colour dot rather than fighting the pairing.
+
+### Disclosed, Not Fixed
+- One real, pre-existing repository contradiction, not silently resolved: the Builder route's own comment claims a 404 when `MARKET_WIDE_PLANNER_ENABLED` is off, but the real `mount()` has no such abort. Help describes the real (honest-preview) behaviour, not the stale comment.
+- A second, unrelated dark-theme contrast pattern was investigated, confirmed pre-existing via a control scan against the untouched `/journal` page, and flagged rather than fixed — matching the `PO-RC1-010` precedent.
+
+### Verified
+- Real browser verification via Playwright + a locally cached, mac12 Chromium (logged in through the real login form): 0px overflow at 390/430/768/1024/1440, light and dark; FAQ accordion exercised via real click; Contact CTA clicked through to a real 200.
+- Full regression: 780 tests, 773 passed, 7 pre-existing self-skipped, 0 failed. Pint clean. Production build clean. `git diff --check` clean.
+
+## `PO-U24-003` — Settings Completion
+
+**Status:** Delivered (commit `aa48d91`).
+
+### Added
+- A real, repository-truth-grounded `/settings` page (`resources/views/livewire/settings/index.blade.php`), replacing the previous coming-soon stub. Repository inspection found exactly one setting genuinely exclusive to this destination and safely exposable at RC1: Appearance (Theme) — a client-side-only Light/Dark control sharing the exact sitewide mechanism (`window.SlipGuardTheme`), never a second theme state, never sent to the server. Final information architecture: `Settings → Appearance (Theme: Light/Dark), Account (summary → Profile), Security (summary → Profile)` — three sections, all real, no empty/filler sections.
+- 9 new Pest tests (`tests/Feature/Workspace/SettingsTest.php`).
+
+### Changed
+- `routes/web.php` — coming-soon stub swapped for a real Volt route.
+- `WorkspaceAccessTest.php` — stale coming-soon assertion replaced; Settings added to the "real screens" test.
+
+### Fixed
+- One real, page-owned accessibility defect: the theme control's checked-state text failed contrast in dark theme (`text-white` on the dark theme's lighter `accent-strong`, 2.98:1) — fixed by switching to the existing theme-constant `text-surface-inverse` token in dark theme (5.7:1); `text-white` unchanged in light theme (6.3:1, already passing).
+
+### Not Done
+- Language and Notifications correctly omitted, not faked — no second locale set exists (`config('app.locale')` is `en`-only) and no real product/marketing email opt-in/opt-out exists anywhere in the codebase to back a toggle. Session management deferred — no device/session listing or revocation is implemented anywhere. Name/email/password/deletion editing intentionally kept on Profile (the page that already fully owns them) rather than duplicating a second, competing editor here.
+
+### Disclosed, Not Fixed
+- Two pre-existing dark-theme axe-core findings from the shared `.atmosphere` background layer and the pre-existing `accent-strong`/white contrast pattern already live on Help's CTA — both predate this commission and belong to a separately-scoped shell/token pass, matching the `PO-RC1-010`/`PO-U24-002` precedent.
+
+### Verified
+- Real browser verification via Playwright + system Chrome (logged in via the real login form): 0px overflow at 390/430/768/1024/1440, light and dark. Real theme-persistence journey: select Dark → navigate to Dashboard → return to Settings (still Dark, radio correctly checked) → hard refresh (still Dark). Keyboard: focus Light → ArrowRight → focus and selection both move to Dark (native radiogroup behaviour, no custom handler needed).
+- axe-core (WCAG 2 A/AA) at 390/1440 × light/dark: 0 violations after the contrast fix above.
+- Full regression: 788 tests, 781 passed, 7 pre-existing self-skipped, 0 failed. Pint clean. Production build clean. `git diff --check` clean.
+
+## `PO-U24-004` — Collapsible Desktop Sidebar & Sticky Header Glass Correction
+
+**Status:** Delivered. Founder-commissioned shell UX polish, the desktop/tablet counterpart to the pre-existing mobile drawer, which this pattern does not replace or touch.
+
+### Added
+- A collapsible desktop/tablet sidebar: a single shared preference (`data-sidebar="collapsed"` on `<html>`, `window.SlipGuardSidebar` in `resources/js/app.js`) architecturally identical to the existing theme system — localStorage-backed, applied pre-paint via a new `partials/sidebar-init-script.blade.php` (mirroring `theme-init-script.blade.php` exactly, included in both `layouts/app.blade.php` and `layouts/labs.blade.php`), re-synchronized after every `wire:navigate` morph via the same `MutationObserver` pattern theme already uses.
+- One CSS custom property (`--sidebar-w`, `18rem` expanded / `5rem` collapsed via `resources/css/app.css`) drives both the rail's own width and the workspace content wrapper's `padding-left` (`authenticated-shell.blade.php`) from two separate files without a cross-component JS binding.
+- A dedicated, explicit collapse toggle (never hover-to-expand) in its own row beneath the logo header: `aria-expanded` reflects state, `aria-label` switches between "Collapse navigation"/"Expand navigation", 44×44px touch target, the existing `chevron-double-left` icon rotated 180° on collapse.
+- Every nav item's accessible name stays the full label at all times (`sr-only` when collapsed, never `hidden`/removed); a decorative (`aria-hidden`, `role="tooltip"`) hover/focus tooltip restores the visible label for sighted users — the first tooltip pattern this codebase has needed.
+- Three new `COMPONENT_PRINCIPLES.md` entries — Collapsible Sidebar, Tooltip, Collapse Control — documented ahead of implementation per the Frontend Work Rule, not invented in code.
+- 7 new Pest tests (`tests/Feature/CollapsibleSidebarTest.php`) — server-rendered structural coverage (accessible labels, pre-paint script presence, CSS-variable-driven width/padding, tooltip presence, sticky header treatment, unchanged route destinations); collapse/expand interaction itself is Alpine/CSS-driven and outside what a Pest HTTP test can execute.
+
+### Fixed
+- The authenticated shell's sticky header was using heavier blur/opacity (`backdrop-blur-xl`, `bg-surface-page/90`) than the one documented, approved glassmorphism recipe (`VISUAL_INSPIRATION.md`: translucent surface + `backdrop-blur-md` + hairline border, no colour tint) already implemented identically on the public/portal header — brought in line with the existing recipe (`backdrop-blur-md`, `bg-surface-page/70`, `border-neutral-200/70`) rather than inventing a second one.
+
+### Changed
+- `tests/Feature/MobileNavigationDrawerTest.php` — updated assertion: the fixed `w-72` desktop rail class is now the collapsible rail's CSS-variable width (`w-[var(--sidebar-w)]`); the mobile drawer itself is untouched.
+
+### Verified
+- Full regression: 795 tests, 788 passed, 7 pre-existing self-skipped, 0 failed. Pint clean (one pre-existing, unrelated violation remains in `database/seeders/LabsMobileAppFeatureSeeder.php`, not this commission's to fix). Production build clean. `git diff --check` clean.

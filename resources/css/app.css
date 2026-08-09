@@ -508,6 +508,30 @@ html {
     --ease-entrance: var(--ease-out);
     --ease-exit: var(--ease-in);
     --ease-state: var(--ease-in-out);
+
+    /* `PO-U24-004` — the authenticated desktop sidebar's rail width, driven
+       by `data-sidebar` on `<html>` (parallel to `data-theme`/`--*` theme
+       tokens). One variable, read by both the sidebar's own width and the
+       workspace content wrapper's `padding-left` (two different files —
+       `sidebar-navigation.blade.php` and `authenticated-shell.blade.php` —
+       so a shared CSS variable avoids the cross-component Livewire/Alpine
+       boundary a JS-driven binding would otherwise have to cross). Not a
+       colour, so unlike `--accent`/`--neutral-*` it is not redefined in
+       either dark-theme block below — light and dark use the same widths. */
+    --sidebar-w: 18rem;
+    --sidebar-w-collapsed: 5rem;
+}
+
+/*
+ * `PO-U24-004` — collapsed state override. `[data-sidebar="collapsed"]` is
+ * applied client-side only (see `sidebar-init-script.blade.php` for the
+ * pre-paint read and `app.js`'s `slipGuardSidebar` for the runtime
+ * controller) — exactly the same mechanism `data-theme` already uses, so
+ * this needs no separate persistence layer, no Livewire round-trip, and
+ * survives `wire:navigate` morphing via the same MutationObserver pattern.
+ */
+:root[data-sidebar="collapsed"] {
+    --sidebar-w: var(--sidebar-w-collapsed);
 }
 
 /*

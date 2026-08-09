@@ -172,6 +172,48 @@ Only components the product currently needs are defined here. Add a new componen
 - **Usage rules:** maximum 5 primary destinations; anything else lives in an account/settings menu.
 - **Anti-patterns:** a nav bar that changes height or position on scroll in a way that shifts page content (layout jump).
 
+### Collapsible Sidebar (desktop/tablet only)
+
+**Purpose:** let the customer reclaim horizontal space from the fixed desktop navigation rail without losing access to any destination — added `U-24` (`PO-U24-004`, founder-commissioned shell UX polish), the desktop counterpart to the pre-existing mobile drawer, which this pattern does not replace or touch.
+
+- **Mechanism:** a single shared preference (`data-sidebar="collapsed"` on `<html>`, `window.SlipGuardSidebar`), architecturally identical to the theme system (`data-theme`, `window.SlipGuardTheme`) — localStorage-backed, applied pre-paint by an inline head script, re-synchronized after every `wire:navigate` morph via the same `MutationObserver` pattern theme already uses. One CSS custom property (`--sidebar-w`, overridden under the collapsed attribute) drives both the rail's own width and the workspace content wrapper's `padding-left` from two different files without a cross-component JS binding.
+- **Spacing:** expanded rail `18rem`; collapsed rail `5rem` — wide enough for a centred 44×44px icon touch target with breathing room either side.
+- **Radius:** unchanged from the existing nav-item radius (`radius-lg` on links) in both states.
+- **Elevation:** unchanged — the rail remains at its existing `border-r` + `backdrop-blur-xl` treatment in both states; collapsing does not add elevation.
+- **Interaction:** an explicit, dedicated toggle control (see Collapse Control below) — never hover-to-expand. Width/padding transition on `width`/`padding-left` only, `duration-standard` (200ms) `ease-in-out` (a state change in place, per `MOTION_SYSTEM.md`), respecting `prefers-reduced-motion` automatically (the sitewide universal override already covers any `transition-*` utility, including these).
+- **Accessibility:** every nav item's accessible name is always the full label (`sr-only` when collapsed, never `hidden`/removed) — the visual tooltip is a decorative (`aria-hidden`) duplicate for sighted users, not the source of the accessible name, so nothing depends on hover/focus timing to be announced correctly.
+- **Responsive:** desktop/tablet (`lg:` and above) only, where the fixed rail already exists. Below `lg`, the pattern does not apply — the mobile drawer is untouched and remains the only navigation surface.
+- **Usage rules:** one collapsible sidebar per authenticated shell; do not introduce a second, independently-collapsible navigation surface elsewhere.
+- **Anti-patterns:** hiding labels while leaving the content wrapper's gutter at its expanded width (the collapsed rail must genuinely reclaim the space); a collapse control with no accessible label or one that relies on an icon alone.
+
+### Tooltip
+
+**Purpose:** restore a hidden text label's meaning for sighted users when an interface (currently: the Collapsible Sidebar above, icon-only) removes visible text — added alongside Collapsible Sidebar, `U-24` (`PO-U24-004`), the first place this codebase has needed one.
+
+- **Trigger:** hover or keyboard focus on the icon-only control it describes. Never shown for a control that already has a visible label.
+- **Spacing:** `px-2.5 py-1.5`, positioned `ml-2` clear of the trigger's edge.
+- **Radius:** `radius-md`.
+- **Elevation:** `elevation-2` (sits above the surface it floats over).
+- **Colour:** `bg-surface-inverse` / `text-white` — the same theme-constant "always dark" pairing already used elsewhere for high-contrast overlay text (not a new colour decision), so it reads correctly against either theme's sidebar surface without a separate light/dark variant.
+- **Interaction:** opacity fade only (`duration-standard`, `ease-out`), CSS-driven (`group-hover`/`group-focus-within`) — no JS-managed show/hide state per item.
+- **Accessibility:** `role="tooltip"`, `aria-hidden="true"` — decorative, since the triggering control already carries the full text as its own accessible name (an `sr-only` label, not `aria-describedby`), so nothing is announced twice.
+- **Responsive:** desktop/tablet only, matching the one surface that currently needs it (Collapsible Sidebar, collapsed state).
+- **Usage rules:** only for a control whose visible label has been deliberately hidden elsewhere in the same interface; never a substitute for a real, visible label where space allows one.
+- **Anti-patterns:** a tooltip that is the only way to learn what a control does (screen-reader users must get the same information some other way — here, the `sr-only` label); a tooltip on a control that already shows its label.
+
+### Collapse Control
+
+**Purpose:** the dedicated, explicit toggle for the Collapsible Sidebar above — never inferred from hover, always a real control with its own accessible name.
+
+- **Spacing:** its own row directly beneath the logo header, not crammed into it — `px-3 py-2`.
+- **Radius:** `radius-lg`, matching other icon buttons in the shell (e.g. the mobile menu trigger).
+- **Elevation:** none — sits flush with the rail's own surface.
+- **Interaction:** one existing icon (`chevron-double-left`), rotated 180° on collapse (`duration-standard`, `ease-in-out`) — reuses the transform-only chevron-rotation language already established for disclosure chevrons elsewhere, not a new icon metaphor.
+- **Accessibility:** `aria-expanded` reflects state; `aria-label` switches between "Collapse navigation" / "Expand navigation" (never icon-only with no label); 44×44px touch target; visible `focus-visible` ring, matching every other interactive control in the shell.
+- **Responsive:** desktop/tablet only — the control does not render or apply below `lg`.
+- **Usage rules:** exactly one per authenticated shell.
+- **Anti-patterns:** relying on the icon's direction alone to communicate state (the `aria-label` text and `aria-expanded` both carry it independently of colour or shape).
+
 ## Section Headers
 
 **Purpose:** introduce a page section (marketing page or in-app) with one clear idea.

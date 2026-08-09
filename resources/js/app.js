@@ -104,6 +104,92 @@ themeAttributeGuard.observe(document.documentElement, {
     attributeFilter: ['data-theme'],
 });
 
+/*
+ * `PO-U24-004` — one runtime authority for the collapsible sidebar's
+ * persisted preference, mirroring `slipGuardTheme` above exactly: same
+ * localStorage-backed apply/synchronize shape, same root-attribute
+ * mechanism (`data-sidebar="collapsed"` on `<html>`, parallel to
+ * `data-theme`), same `slipguard-*-changed` window event convention. The
+ * inline pre-paint partial (`partials/sidebar-init-script.blade.php`,
+ * alongside the existing `theme-init-script.blade.php`) sets the attribute
+ * before first paint so collapsed mode never flashes expanded first; this
+ * controller owns interaction and post-morph synchronization.
+ */
+const slipGuardSidebar = (() => {
+    const storageKey = 'slipguard-sidebar-collapsed';
+
+    const readPreference = () => {
+        try {
+            return window.localStorage.getItem(storageKey) === 'true';
+        } catch (error) {
+            return false;
+        }
+    };
+
+    const writePreference = (collapsed) => {
+        try {
+            window.localStorage.setItem(storageKey, collapsed ? 'true' : 'false');
+        } catch (error) {
+            // The active page can still collapse/expand when persistence is
+            // unavailable; it simply won't survive a refresh.
+        }
+    };
+
+    const apply = (collapsed, persist = false) => {
+        if (persist) {
+            writePreference(collapsed);
+        }
+
+        if (collapsed) {
+            document.documentElement.setAttribute('data-sidebar', 'collapsed');
+        } else {
+            document.documentElement.removeAttribute('data-sidebar');
+        }
+
+        window.dispatchEvent(new CustomEvent('slipguard-sidebar-changed', {
+            detail: { collapsed },
+        }));
+    };
+
+    return {
+        isCollapsed: readPreference,
+        set: (collapsed) => apply(Boolean(collapsed), true),
+        toggle: () => apply(!readPreference(), true),
+        synchronize: () => apply(readPreference()),
+    };
+})();
+
+window.SlipGuardSidebar = slipGuardSidebar;
+
+/* Same morph-survival problem as `data-theme` (see the guard below), same
+ * fix: Livewire's `wire:navigate` morph reconciles `<html>`'s attributes
+ * against the target page's raw server-rendered markup, which never
+ * carries `data-sidebar` (client-applied only), clearing it silently. */
+const sidebarAttributeGuard = new MutationObserver(() => {
+    let stored = false;
+
+    try {
+        stored = window.localStorage.getItem('slipguard-sidebar-collapsed') === 'true';
+    } catch (error) {
+        return;
+    }
+
+    const hasAttribute = document.documentElement.hasAttribute('data-sidebar');
+
+    if (stored && !hasAttribute) {
+        document.documentElement.setAttribute('data-sidebar', 'collapsed');
+    } else if (!stored && hasAttribute) {
+        document.documentElement.removeAttribute('data-sidebar');
+    }
+});
+
+sidebarAttributeGuard.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-sidebar'],
+});
+
+document.addEventListener('livewire:navigated', () => slipGuardSidebar.synchronize());
+
 /**
  * U-20.2 — real root cause found via live browser verification, not
  * theorised: a `wire:navigate` transition (used by every Livewire redirect,
