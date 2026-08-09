@@ -1,0 +1,65 @@
+# SlipGuard Project Adapter — UI/UX Pro Max
+#
+# Conforms to the central Capability System's adapter contract:
+#   adapters/CONTRACT.md, schemas/adapter.schema.yaml
+#   in SilvestrLee/capability-system (canonical remote) /
+#   /Users/silvestr/Documents/capability-system (local operator path).
+#
+# References, and never duplicates, the central capability record:
+#   registry/capabilities/ui-ux-pro-max.yaml
+#   canonical_id: nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max
+#
+# See docs/operating-system/capabilities/adapters/README.md for how this
+# file relates to SlipGuard's own pre-existing capability governance.
+
+project: SlipGuard
+capability_id: nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max
+authorization: PILOT
+authority_weight: supporting
+local_enablement: >
+  Available via Claude Code plugin marketplace at user/global scope only
+  (~/.claude/settings.json enabledPlugins:
+  "ui-ux-pro-max@ui-ux-pro-max-skill": true, version 2.11.0,
+  gitCommitSha 1307d97a72e6c1cda572cb65471ae5ce82995218). NOT separately
+  listed in SlipGuard's own .claude/settings.local.json enabledPlugins —
+  SlipGuard inherits availability from the global install rather than
+  pinning it project-locally. Directly re-verified 2026-08-09.
+project_restrictions: >
+  Reference and inspiration only, never a source of committed code or
+  assets (CLAUDE.md's Tool Invocation Policy, TOOL-UX-001). Every
+  recommendation is advisory until reconciled against SlipGuard's own
+  repository evidence and UX Constitution (docs/05-ux/) and may never be
+  treated as an adopted design decision on its own authority
+  (DESIGN-CAPABILITY-MATRIX.md, Prohibited Overlap #8). Primary capability
+  for exactly one responsibility (accessibility guidance) per
+  DESIGN-CAPABILITY-MATRIX.md's Responsibility Matrix; Supporting for
+  every other responsibility it appears against there (user journey,
+  information architecture, workflow sequencing, progressive disclosure,
+  product-interface composition) — this record's overall
+  authority_weight of "supporting" reflects the general case, not the one
+  accessibility-guidance exception, which a future consumer of this record
+  should check DESIGN-CAPABILITY-MATRIX.md directly for rather than assume
+  from this field alone. Must validate stack relevance before any
+  recommendation is applied (CAPABILITY-REGISTRY.md's Active Pilot
+  restrictions row).
+project_overrides: NOT_RECORDED
+version_constraint: NOT_RECORDED
+project_specific_context: >
+  docs/05-ux/ (UX Constitution), docs/design-intelligence/PROJECT-DESIGN-CONTEXT.md,
+  CLAUDE.md's Mandatory Specialist Design Capability Invocation section.
+evidence_location: >
+  General design-capability evidence: CHANGELOG.md's "Specialist Design
+  Capability Usage" sections (SlipGuard's existing, pre-CAPSYS convention).
+  Structured resolution/invocation records for capability-system
+  integration work specifically:
+  docs/operating-system/capabilities/adapters/evidence/.
+notes: >
+  SlipGuard's own CAPABILITY-REGISTRY.md status for this capability is
+  "Active Pilot" (pilot started 2026-08-06, review date 2026-09-05) —
+  mapped here to the central vocabulary's PILOT value. This corrects a
+  looser mapping used in the central repository's own illustrative example
+  (capability-system's adapters/examples/slipguard.example.yaml, authored
+  during CAPSYS-P1 as a non-binding reconstruction, which used APPROVED).
+  That illustrative file is not authoritative over this real record; this
+  file is SlipGuard's own, and "Active Pilot" maps most precisely to
+  PILOT, not APPROVED, under the central vocabulary's own definitions.

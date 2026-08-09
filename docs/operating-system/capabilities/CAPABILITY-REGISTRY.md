@@ -119,3 +119,27 @@ Evaluation Record entry replaces "Not yet evaluated."
 | Project | Capability | Source | Version/commit | Installed date | Installed by | Status |
 |---|---|---|---|---|---|---|
 | SlipGuard | Emil Design Engineering | `emilkowalski/skill` (GitHub), `skills/emil-design-eng/SKILL.md`, project-local `.claude/skills/emil-design-eng/SKILL.md` | `skills-lock.json` records `computedHash: 41b0a4dc1a27164fe297845a6c6850a39e9242c42c9be999967fcee9df2c5974`; local sha256 of the installed file does not reproduce this value under sha256/sha1/md5/git-hash-object — algorithm unconfirmed, flagged as an open verification gap, not treated as a factuality failure given the stronger direct evidence (file present, correct frontmatter `name`/`description`, listed in live skill discovery, successfully invoked) | 2026-08-06 | User/agent | Installed (project-local; untracked in git as of this record) |
+
+## Central Capability System Integration
+
+**(`CAPSYS-P2`, 2026-08-09):** A standalone Capability System repository now
+holds canonical, cross-project capability identity, provenance, and
+governance contracts — remote `SilvestrLee/capability-system` (local
+operator path `/Users/silvestr/Documents/capability-system` where present).
+This Registry remains SlipGuard's own authoritative record of status,
+evaluation, and pilot history exactly as before, unchanged by this
+integration — see this document's own Registry Rules above. What changes is
+that SlipGuard now also carries real, project-local **Project Adapter**
+records expressing this Registry's own values (status, restrictions) in the
+central system's shared vocabulary, so a capability's identity is never
+duplicated or redefined locally. These records, and their supporting
+evidence, live under `docs/operating-system/capabilities/adapters/` (see
+that directory's own `README.md`) — not in this file, and not in the
+central repository. The central repository does not gain any authority
+this Registry did not already have; it supplies shared identity only, per
+its own `governance/CENTRAL_GOVERNANCE.md`.
+
+The first, and currently only, capability with a real adapter record is
+UI/UX Pro Max (`docs/operating-system/capabilities/adapters/ui-ux-pro-max.adapter.yaml`),
+mapping this Registry's "Active Pilot" status to the central vocabulary's
+`PILOT` value.

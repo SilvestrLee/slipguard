@@ -1,0 +1,24 @@
+# Structured invocation record, per the central Capability System's
+# evidence/CONTRACT.md and schemas/evidence.schema.yaml. Paired with
+# 2026-08-09-capsys-p2-adapter-integration.resolution.yaml.
+
+kind: invocation
+capability_id: nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max
+task: >
+  CAPSYS-P2: create SlipGuard's first real Project Adapter record for the
+  central Capability System.
+invocation_status: NOT_INVOKED
+reason: >
+  Consistent with the paired resolution record (NOT_REQUIRED). The task
+  performed — writing a YAML adapter record, a documentation pointer, and
+  this evidence pair — required no design reference, generation, or
+  verification capability. Not invoked, and not reported as invoked,
+  per the central repository's CLAUDE.md truthful-evidence rule and
+  evidence/CONTRACT.md's forbidden equations (INSTALLED ≠ INVOKED,
+  AVAILABLE ≠ USED) — UI/UX Pro Max remains installed and available to
+  SlipGuard throughout, and neither fact is treated here as evidence of
+  use.
+scope: NOT_RECORDED
+result: NOT_RECORDED
+evidence_quality: NOT_RECORDED
+limitations: NOT_RECORDED

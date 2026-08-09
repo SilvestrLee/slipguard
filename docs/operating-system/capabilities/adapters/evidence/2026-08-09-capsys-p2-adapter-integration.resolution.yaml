@@ -1,0 +1,21 @@
+# Structured resolution record, per the central Capability System's
+# evidence/CONTRACT.md and schemas/evidence.schema.yaml.
+
+kind: resolution
+capability_id: nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max
+task: >
+  CAPSYS-P2: create SlipGuard's first real Project Adapter record for the
+  central Capability System — a YAML adapter record, a documentation
+  pointer, and this evidence pair. No visual, interaction, or UX decision
+  is made by this task.
+resolution: NOT_REQUIRED
+reason: >
+  This task is structural/governance integration, not a design task. It
+  introduces no new visual, interaction, or design-system decision, and it
+  is not a case of "faithful reuse of an already-approved system" either
+  (domains/design/DESIGN_CAPABILITY_DOMAIN.md in the central repository) —
+  it simply does not touch the design domain at all. Invoking UI/UX Pro
+  Max here would be performative invocation, the exact failure mode
+  evidence/CONTRACT.md exists to prevent: it would produce no genuine
+  input to the work actually performed.
+evidence_quality: NOT_RECORDED
