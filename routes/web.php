@@ -87,7 +87,8 @@ Route::middleware('auth')->group(function () {
 
     // `PO-U24-002` — real Help & Methodology content, replacing the coming-soon stub.
     Volt::route('help', 'help.index')->name('help');
-    Route::view('settings', 'coming-soon', ['title' => 'Settings'])->name('settings');
+    // `PO-U24-003` — real Settings content, replacing the coming-soon stub.
+    Volt::route('settings', 'settings.index')->name('settings');
 });
 
 require __DIR__.'/auth.php';
