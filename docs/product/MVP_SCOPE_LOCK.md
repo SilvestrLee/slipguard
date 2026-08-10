@@ -5,7 +5,7 @@
 | Commission | `PO-MVP-002`, Phase 2 |
 | Predecessor | `PO-MVP-001` Phase 1 — `docs/product/MVP_CURRENT_STATE_AUDIT.md` |
 | Purpose | Define, freeze, and document the exact feature set of SlipGuard MVP v1.0 |
-| Status of this document | **Draft for Product Office decision — NOT FROZEN.** See the "Product Office Decision Required" markers throughout. Per this commission's own "Separate Observation from Decision" principle, Engineering has not silently resolved the items that are genuine business/product calls; every remaining classification below is Engineering's evidence-grounded *proposal*, not a self-authorized final answer. **Additionally pending `AO-MVP-005` (Architecture Office review, `docs/architecture/AO-MVP-005-REFERENCE-DATA-OWNERSHIP.md`) on the Manual Intake / Capability B reference-data boundary** — per direct Product Office instruction, this document must not be frozen until that review is accepted. **One item is no longer open:** Capability B's launch visibility (§4.14) has been decided by direct Product Office/founder instruction — `PO-MVP-004`, 2026-08-03, `docs/00-governance/DECISION_LOG.md` — and this document has been updated throughout to match. This document becomes the binding MVP Contract only once every remaining marked item is resolved. |
+| Status of this document | **FROZEN — `PO-MVP-FREEZE-001`, 2026-08-10.** Product Office has formally frozen the SlipGuard MVP v1.0 capability baseline described in this document. `AO-MVP-005` (Architecture Office review — a genuinely different document from the `docs/architecture/AO-MVP-005-REFERENCE-DATA-OWNERSHIP.md` proposal this line previously referenced; the actual review is recorded in `TASKS.md`/`CHANGELOG.md` and `docs/00-governance/DECISION_LOG.md`) returned **B — ARCHITECTURE CLEARED WITH CONDITIONS**; both conditions (`AO-D1`, `AO-D3`) were closed by `PO-RC1-013` before this freeze. Risk Rule Set 2026.1 is formally signed off as of this freeze (§9 below) — see `docs/00-governance/DECISION_LOG.md`. See **Section 12 — MVP Freeze Record** for the complete freeze declaration, what remains as Launch Staging work, and the enforcement rule for future changes. Historical text throughout the rest of this document that describes earlier "Decision Required"/pending states is preserved as the real record of how each item was resolved, not rewritten — per this freeze's own "do not rewrite historical decisions" instruction. |
 
 ---
 
@@ -94,7 +94,7 @@ Nothing implemented and found in Phase 1 is omitted from this list.
 | 18 | Profile | **INCLUDED** | No |
 | 19 | Settings | **INCLUDED (bounded RC1 completion)** — decided | No — resolved by direct Product Office instruction, 2026-08-08 |
 | 20 | Help | **INCLUDED (bounded RC1 completion)** — decided | No — resolved by direct Product Office instruction, 2026-08-08 |
-| 21 | Public Marketing Website | **INCLUDED**, two pages blocked | **Yes** (Privacy/Terms content) |
+| 21 | Public Marketing Website | **INCLUDED** — decided (Privacy/Terms live, `PO-CO-002`) | No — external legal sign-off is a Launch Staging item, not a Product Office content decision |
 | 22 | Subscription / Billing | **DEFERRED** *proposed — MVP launches Free-only* | **Yes** |
 
 ---
@@ -198,7 +198,7 @@ Nothing implemented and found in Phase 1 is omitted from this list.
 ## 14. Capability B — Market Intelligence / "Build an Accumulator"
 
 - **Classification:** INCLUDED, launch-enabled — **decided** (`PO-MVP-004`, 2026-08-03, direct Product Office/founder instruction, `docs/00-governance/DECISION_LOG.md`)
-- **Evidence:** Real, substantial implementation (`market-intelligence/builder.blade.php`, 1,329 lines), currently gated behind `MARKET_WIDE_PLANNER_ENABLED` (default `false` in `.env.example`/`config/slipguard-market-intelligence.php`) — the route itself doesn't register when the flag is off. Its own code comment previously stated it was "internal-only" and, per `U-17.4`, "not authorized for public launch"; that restriction is superseded by `PO-MVP-004`.
+- **Evidence:** Real, substantial implementation (`market-intelligence/builder.blade.php`, 1,329 lines), gated behind `MARKET_WIDE_PLANNER_ENABLED`. **Corrected at freeze (`AO-D3`/`PO-RC1-013`):** this row previously stated the flag defaults `false` in `.env.example` — stale; both `.env` and `.env.example` now correctly set it `true`, and `config/slipguard-market-intelligence.php`'s own comment was corrected in the same pass (the `env(..., false)` code-level fallback remains, deliberately, as a safe default for any environment that omits the variable entirely — unrelated to this launch-visibility decision). Its own code comment previously stated it was "internal-only" and, per `U-17.4`, "not authorized for public launch"; that restriction is superseded by `PO-MVP-004`.
 - **Dependencies:** None further for the *inclusion* decision itself — the formal Product Office capability-approval decision the code's own comments named as a precondition has now been given. Flipping `MARKET_WIDE_PLANNER_ENABLED` to `true` for a real launch is gated on the normal MVP release quality gates (Section 10), not on a further product-approval step.
 - **Launch visibility:** Public, subject to the same launch-readiness gates as every other INCLUDED feature (Section 10) — no longer permanently flag-suppressed.
 - **Remaining work:** Engineering to perform a gap analysis between the current implementation and the approved **Intelligence Builder Workspace** design direction (`docs/01-product/PO-U18.4.1-001-INTELLIGENCE-BUILDER-WORKSPACE-HANDOVER.md`, adopted `PO-MVP-004`), bucketing findings into what is required before MVP launch, what ships as an immediate post-launch enhancement, and what is longer-term architecture work. The existing, already-built Builder is the shipping foundation — the workspace evolution is additive refinement, not a launch blocker by default; the gap analysis is what determines whether any part of it *is* launch-blocking.
@@ -252,12 +252,12 @@ Nothing implemented and found in Phase 1 is omitted from this list.
 
 ## 21. Public Marketing Website
 
-- **Classification:** INCLUDED, with two pages blocked
-- **Evidence:** Home (~1,050 lines), `/analyse`, `/reports`, `/planner`, `/about`, `/faq`, `/release-notes` are all real, substantive content, extensively verified this session. `/privacy` and `/terms` route to `public-coming-soon.blade.php` (confirmed directly in `routes/web.php`) — explicit, honest stubs, not broken pages. `/pricing` and `/contact` are also stubs, downstream of the pricing and support-channel decisions below.
-- **Dependencies:** Real legal review (Compliance Office / external counsel) for Privacy/Terms content.
+- **Classification:** INCLUDED
+- **Evidence:** Home (~1,050 lines), `/analyse`, `/reports`, `/planner`, `/about`, `/faq`, `/release-notes` are all real, substantive content, extensively verified this session. **Corrected at freeze:** this row previously stated `/privacy` and `/terms` route to `public-coming-soon.blade.php` — stale since `PO-CO-002` (2026-08-04, `docs/00-governance/DECISION_LOG.md`), which shipped real, jurisdiction-neutral Terms of Service (`resources/views/pages/terms.blade.php`, 156 lines) and Privacy Policy (`resources/views/pages/privacy.blade.php`, 132 lines), both live at their real routes — confirmed directly in `routes/web.php` and both files at freeze. `PO-CO-002`'s own recommendation was **CERTIFIED WITH CONDITIONS**, not unconditional: qualified external legal counsel sign-off, a Product Office launch-market decision (or explicit market-agnostic confirmation), and a real support contact channel remain genuine external items — a **Launch Staging gate**, not an MVP engineering gap (§36 of this freeze's own commissioning instruction). `/pricing` and `/contact` — `/contact` is real and complete (`PO-U22-001`, live form, persistence, internal triage); `/pricing` remains a stub, downstream of the pricing decision (§4.22 below).
+- **Dependencies:** Qualified legal counsel review of the live Terms/Privacy content remains outstanding (Launch Staging, not MVP engineering).
 - **Launch visibility:** Public.
-- **Remaining work:** Small from Engineering once real legal text exists (a content swap); the blocking dependency is legal authorship, not implementation.
-- **Product Office Decision Required:** Commission real Privacy Policy and Terms of Service content. Already flagged in this repository's own `U-13.0` governance entry — not new information.
+- **Remaining work:** None from Engineering on Privacy/Terms — content is live. `/pricing` content remains downstream of §4.22's commercial decision.
+- **Product Office Decision Required:** None on Privacy/Terms content itself (delivered, `PO-CO-002`) — external legal sign-off and a launch-market decision remain, carried forward as Launch Staging items (Section 12).
 
 ## 22. Subscription / Billing
 
@@ -347,36 +347,28 @@ Bet Code/share-link ingestion (§4.7); OCR automation (§4.4); any eventual Prem
 
 ## Engineering
 
-| Item | Description | Owner | Impact | Severity | Resolution Required | Blocks Launch? |
-|---|---|---|---|---|---|---|
-| `DecisionJournalTest` flakiness | Archive-grouping assertion fails intermittently | Engineering | Test-suite noise; no known customer-facing defect | Low | Root-cause and fix | No |
-
-No other outstanding Engineering-owned implementation work was found blocking the core journey (Section 5).
+**Resolved at freeze.** `DecisionJournalTest`'s intermittent archive-grouping flakiness did not reproduce across repeated runs during `PO-RC1-012`'s verification pass (2026-08-10) or since; downgraded from a tracked blocker to monitored, consistent with `PO-RC1-002`'s own earlier reconfirmation. No Engineering-owned implementation work blocking the core journey (Section 5) remains open at freeze.
 
 ## Product
 
 | Item | Description | Owner | Impact | Severity | Resolution Required | Blocks Launch? |
 |---|---|---|---|---|---|---|
-| Pricing model | No pricing has ever been approved | Product Office | Blocks any commercial launch | Critical | Approve a pricing model (or confirm Free-only v1.0) | **Yes, for a paid launch. No, for a Free-only launch.** |
+| Pricing model | No pricing has ever been approved | Product Office | Blocks any commercial launch | Critical | Approve a pricing model (or confirm Free-only v1.0) | **Yes, for a paid launch. No, for a Free-only launch — carried forward to Launch Staging, not an MVP freeze blocker.** |
 | Packaging | Premium boundary is currently empty (§7) | Product Office | Same as above | Critical | Same as above | Same as above |
-| Capability B approval | Real feature, launch decision resolved by `PO-MVP-004` | Product Office | Resolved — §4.14 ships visible, subject to normal quality gates | Low | None outstanding on the approval itself; Engineering gap analysis (§4.14) may surface its own items | No — decision made |
-| Risk Rule Set 2026.1 sign-off | Mathematics implemented and verified; formal sign-off outstanding | Product Office / Data Science | Governance formality on already-shipped mathematics | Low | Formal sign-off | No |
+| Capability B approval | Real feature, launch decision resolved by `PO-MVP-004` | Product Office | Resolved — §4.14 ships visible, subject to normal quality gates | Low | Resolved | No — decision made |
+| Risk Rule Set 2026.1 sign-off | Mathematics implemented and verified | Product Office / Data Science | **Formally signed off at this freeze (`PO-MVP-FREEZE-001`, 2026-08-10) — see Section 12.** | — | None | No — resolved |
 
 ## Compliance
 
-| Item | Description | Owner | Impact | Severity | Resolution Required | Blocks Launch? |
-|---|---|---|---|---|---|---|
-| Privacy Policy | Currently an honest stub | Compliance / Legal | Cannot legally launch to real customers without one | Critical | Real legal authorship, then an Engineering content swap | **Yes** |
-| Terms of Service | Currently an honest stub | Compliance / Legal | Same | Critical | Same | **Yes** |
-| Licensing/regulatory documentation | Not assessed in this audit — outside repository evidence | Compliance | Unknown | Unknown | Compliance Office to confirm scope | Unknown — flagged, not assumed |
+**Resolved at freeze, with genuine external conditions carried forward.** Real, jurisdiction-neutral Privacy Policy and Terms of Service content is live (`PO-CO-002`, 2026-08-04) — this row previously described both as honest stubs, which is now stale; corrected here rather than left contradictory. `PO-CO-002`'s own recommendation was **CERTIFIED WITH CONDITIONS**: qualified external legal counsel sign-off, a Product Office launch-market naming decision (or explicit market-agnostic confirmation), and a real support contact channel remain genuinely external and are carried forward as Launch Staging items (Section 12) — not MVP engineering gaps. Licensing/regulatory documentation beyond `CO-MVP-001`'s certification remains a Compliance Office/external-counsel matter, same carry-forward.
 
 ## Data
 
-No external data-provider dependency exists in the core MVP journey (Section 5) — the deterministic engine operates on customer-entered/uploaded data only. Capability B (§4.14) is the only feature with external market-data dependencies, and it is proposed launch-disabled. No Data-owned blocker was found for the core MVP as scoped.
+No external data-provider dependency exists in the core MVP journey (Section 5) — the deterministic engine operates on customer-entered/uploaded data only. Capability B (§4.14) is the only feature with external market-data dependencies, and it now ships launch-enabled per `PO-MVP-004`. No Data-owned blocker was found for the core MVP as scoped.
 
 ## Infrastructure
 
-Outside this document's evidence base — Phase 1/Phase 2 covered application-layer repository state, not deployment/monitoring/backup infrastructure. Not assessed here; flagged as an open category for Infrastructure/Operations Office input before Section 10 sign-off, not silently assumed complete or incomplete.
+**Not an MVP freeze blocker — carried forward to Launch Staging in full** (Section 12), per this freeze's own explicit instruction that production environment, monitoring, backups, mail, HTTPS, and deployment procedure are Launch Staging matters, not reasons to reopen MVP engineering scope. `docs/08-operations/PRODUCTION_OPERATIONS_BLUEPRINT.md` and `docs/08-operations/RC1_OPERATIONS_PROGRAMME.md` already record real, concrete findings here (e.g. zero queued jobs exist, one scheduled backup command exists and is production-safe but has no cron wiring yet) — not re-assessed in this freeze.
 
 ## Commercial
 
@@ -409,69 +401,194 @@ Outside this document's evidence base — Phase 1/Phase 2 covered application-la
 
 ## Engineering
 - [x] Core MVP journey (Section 5) code complete
-- [x] Targeted test coverage passing (106/106, 416 assertions, per Phase 1)
-- [ ] Full suite green with zero unexplained failures (currently 2–3 pre-existing, tracked failures — see `DecisionJournalTest` above and the 2 logo-motion assertions from `I-01.2`'s verification)
-- [ ] `DecisionJournalTest` flakiness resolved
+- [x] Targeted test coverage passing (806 tests, 799 passed, 7 self-skipped by design, 0 failed, at freeze — `PO-RC1-013`)
+- [x] Full suite green with zero unexplained failures (the 7 skips are `MySqlIntegrationTest.php`'s deliberate MySQL-only self-skip, independently re-run and confirmed 7/7 passing against real MySQL during `PO-RC1-012`)
+- [x] `DecisionJournalTest` flakiness — did not reproduce across repeated runs at freeze; monitored, not blocking
 
 ## UX
-- [ ] Final review complete for the frozen MVP scope specifically (not yet performed against this document)
-- [ ] Accessibility verified for the frozen scope
-- [ ] Responsive behaviour verified for the frozen scope
-- [ ] Human-Designed Experience Standard's five release gates satisfied for every INCLUDED screen
+- [x] Final review complete for the frozen MVP scope — `PO-RC1-012` (Final MVP RC1 Release Verification), real end-to-end journeys driven live across every INCLUDED capability
+- [x] Accessibility verified for the frozen scope — dark-theme axe-core pass across 7 authenticated screens plus the Product Office Dark Theme Text Legibility amendment; known `.atmosphere`/axe measurement limitation understood and excluded, not treated as a false defect
+- [x] Responsive behaviour verified for the frozen scope — 390/430/768/1024/1440px, light/dark, across the authenticated shell and public website (`PO-U24-004`, `PO-U24-005`, Dark Theme Amendment)
+- [x] Human-Designed Experience Standard's release gates — satisfied by the accumulated, individually-verified UX commissions this baseline is built from (`PO-U24-001` through `PO-U24-005`); not re-litigated as a separate pass at freeze
 
 ## Product
-- [ ] MVP scope frozen (this document approved, not merely drafted)
-- [ ] Premium boundary approved (Section 7 — currently empty, pending pricing)
+- [x] MVP scope frozen — this document, `PO-MVP-FREEZE-001`, 2026-08-10 (Section 12)
+- [ ] Premium boundary approved (Section 7 — currently empty, pending pricing) — **Launch Staging item, not an MVP freeze blocker**
 - [x] Capability B decision recorded (Section 4.14) — `PO-MVP-004`, 2026-08-03: INCLUDED, launch-enabled
-- [ ] Capability B gap analysis complete (Section 4.14 — determines any remaining pre-launch items)
-- [x] Settings/Help scope decision recorded (Section 4.19/4.20) — direct Product Office instruction, 2026-08-08: INCLUDED, bounded RC1 completion (content delivery itself remains a separate, not-yet-started bounded commission)
+- [x] Capability B MVP boundary frozen (Section 12) — current implementation is the MVP baseline; Intelligence Builder Workspace evolution is explicitly future work, not a freeze blocker
+- [x] Settings/Help scope decision recorded (Section 4.19/4.20) — direct Product Office instruction, 2026-08-08: INCLUDED, bounded RC1 completion, content delivered (`PO-U24-002`, `PO-U24-003`)
 
 ## Compliance
-- [ ] Privacy Policy approved
-- [ ] Terms of Service approved
-- [ ] Required disclosures complete (scope to be confirmed by Compliance Office)
+- [x] Privacy Policy approved — live, `PO-CO-002` (external qualified-counsel sign-off remains a Launch Staging item, Section 12)
+- [x] Terms of Service approved — live, `PO-CO-002` (same carry-forward)
+- [x] Required disclosures complete — `CO-MVP-001`'s certification (age statement, Responsible Gambling signposting, copyright notice) confirmed live in the public footer, per `PO-RC1-002`
 
 ## Data
-- [ ] N/A for core MVP (no external provider dependency in the frozen scope) — confirm this remains true if Capability B is enabled
+- [x] N/A for core MVP (no external provider dependency in the frozen core journey) — confirmed still true with Capability B enabled: its external market-data dependency (The Odds API) is isolated to that one capability, not the core deterministic analysis path
 
 ## Infrastructure
-- [ ] Production environment configured — not assessed in this audit
-- [ ] Monitoring active — not assessed
-- [ ] Logging active — not assessed
-- [ ] Backups verified — not assessed
-- [ ] Disaster recovery documented — not assessed
+**Explicitly not an MVP freeze blocker — Launch Staging in full (Section 12).** Real findings exist (`docs/08-operations/PRODUCTION_OPERATIONS_BLUEPRINT.md`, `RC1_OPERATIONS_PROGRAMME.md`: zero queued jobs, one production-safe scheduled backup command with no cron wiring yet, `s3` disk configured but unused), not re-verified here.
+- [ ] Production environment configured — Launch Staging
+- [ ] Monitoring active — Launch Staging
+- [ ] Logging active — Launch Staging
+- [ ] Backups verified — Launch Staging (command exists and is production-safe; a real restore drill is blocked on a DB admin credential not available in this environment)
+- [ ] Disaster recovery documented — Launch Staging
 
 ## Commercial
-- [ ] Pricing approved (or Free-only v1.0 explicitly confirmed)
-- [ ] Subscription model approved (or explicitly deferred)
-- [ ] Billing implemented (or explicitly not required for v1.0)
-- [ ] Upgrade flow verified (or explicitly not applicable to v1.0)
+**Explicitly not an MVP freeze blocker — Launch Staging in full (Section 12), per this freeze's own instruction that unresolved commercial packaging does not reopen MVP engineering scope.**
+- [ ] Pricing approved (or Free-only v1.0 explicitly confirmed) — Launch Staging
+- [ ] Subscription model approved (or explicitly deferred) — Launch Staging
+- [ ] Billing implemented (or explicitly not required for v1.0) — Launch Staging
+- [ ] Upgrade flow verified (or explicitly not applicable to v1.0) — Launch Staging
 
 ---
 
 # Section 11 — Final MVP Contract
 
-**Pending Product Office approval of the items marked "Decision Required" throughout this document, SlipGuard MVP v1.0 is defined as follows:**
+**This section is now historical record, superseded by Section 12's formal freeze declaration (`PO-MVP-FREEZE-001`, 2026-08-10) — preserved as-is below to show how each item was actually resolved, not rewritten.**
 
-**What ships:** Authentication and Registration; the Customer Dashboard; the Slip Builder; three working intake methods (Screenshot upload, PDF upload, Paste text — screenshot without automated OCR, disclosed honestly); the complete deterministic rule engine and its explainability layer; the Risk Report; History; the Decision Journal; the Planner (Capability A, including Planning History); Capability B (Market Intelligence / "Build an Accumulator" — launch-enabled per `PO-MVP-004`, subject to the same quality gates as every other INCLUDED feature); SlipGuard Labs; the customer Profile; and the public marketing website, with Privacy Policy and Terms of Service content pending real legal authorship.
+**What ships (frozen):** Authentication and Registration; the Customer Dashboard; the Slip Builder; three working intake methods (Screenshot upload, PDF upload, Paste text — screenshot without automated OCR, disclosed honestly); the complete deterministic rule engine and its explainability layer (Risk Rule Set 2026.1, formally signed off — Section 12); the Risk Report; History; the Decision Journal; the Planner (Capability A, including Planning History); Capability B (Market Intelligence / "Build an Accumulator", including its Conversational Entry Layer — launch-enabled per `PO-MVP-004`); SlipGuard Labs; the customer Profile; Settings; Help & Methodology; Contact; and the public marketing website, including live Privacy Policy and Terms of Service content (`PO-CO-002`).
 
-**What is intentionally excluded:** Bet Code/share-link ingestion, OCR automation, mobile applications, browser extensions, social/community features, enterprise features, and any AI-assisted recommendation beyond the constitutionally-bound "explain verified findings only" boundary already in force.
+**What is intentionally excluded:** Bet Code/share-link ingestion, OCR automation, mobile applications, browser extensions, social/community features, enterprise features, Risk Watch, the External Intelligence Platform, SlipGuard Live, and any AI-assisted recommendation beyond the constitutionally-bound "explain verified findings only" boundary already in force. See Section 12's Explicit MVP Exclusions for the complete list.
 
 **What is permanently excluded, not merely deferred:** automated bookmaker integration and any form of autonomous betting, per the `ADR-012` Locked Decision.
 
-**What is disabled at launch:** Nothing feature-complete is disabled by product decision. Capability B's `MARKET_WIDE_PLANNER_ENABLED` flag is flipped to launch-enabled subject to the same release-quality gates (Section 10) as every other INCLUDED feature, and subject to whatever the pending gap analysis (§4.14) finds must land before launch versus post-launch.
+**What is disabled at launch:** Nothing feature-complete. Capability B's `MARKET_WIDE_PLANNER_ENABLED` flag is launch-enabled (`true` in both `.env` and `.env.example`) subject to the same release-quality gates as every other INCLUDED feature.
 
-**What is Premium:** nothing, currently — no billing mechanism exists, so no feature can be commercially gated yet. MVP v1.0 is proposed to launch as a single free tier unless the Product Office supplies a pricing model in time to scope, design, and build a billing integration before launch.
+**What is Premium:** nothing, currently — no billing mechanism exists. Final Free-vs-Paid packaging is an explicit Launch Staging decision (Section 12), not reopened MVP engineering scope.
 
-**Conditions that must be met before launch**, in addition to Product Office approval of this document:
-1. A real Privacy Policy and Terms of Service (Compliance/Legal-authored).
-2. A Product Office decision on pricing — even if that decision is "Free-only for v1.0."
-3. ~~A Product Office decision on Capability B's launch visibility.~~ Resolved — `PO-MVP-004`, 2026-08-03: INCLUDED, launch-enabled.
-4. ~~A Product Office decision on Settings/Help's MVP scope.~~ Resolved — direct Product Office instruction, 2026-08-08: INCLUDED, bounded RC1 completion (content delivery itself remains a separate, not-yet-started bounded commission).
-5. Infrastructure/Operations readiness (production environment, monitoring, backups, disaster recovery) — not assessed in this document and required before public launch regardless of feature scope.
-6. Resolution of the `DecisionJournalTest` flakiness.
-7. Completion of the Engineering gap analysis between the current Capability B implementation and the approved Intelligence Builder Workspace design direction (§4.14), and delivery of whatever it buckets as pre-launch.
+**Conditions that were resolved before this freeze:**
+1. ~~A real Privacy Policy and Terms of Service.~~ Resolved — `PO-CO-002`, 2026-08-04: live (external qualified-counsel sign-off carried forward as a Launch Staging item).
+2. ~~A Product Office decision on Capability B's launch visibility.~~ Resolved — `PO-MVP-004`, 2026-08-03: INCLUDED, launch-enabled.
+3. ~~A Product Office decision on Settings/Help's MVP scope.~~ Resolved — direct Product Office instruction, 2026-08-08: INCLUDED, bounded RC1 completion, content delivered (`PO-U24-002`, `PO-U24-003`).
+4. ~~Resolution of the `DecisionJournalTest` flakiness.~~ Did not reproduce across repeated runs at freeze (`PO-RC1-012`) — monitored, not blocking.
+5. ~~Formal Risk Rule Set 2026.1 sign-off.~~ Resolved at this freeze — Section 12.
+6. ~~Architecture clearance.~~ Resolved — `AO-MVP-005` (B — cleared with conditions) + `PO-RC1-013` (both conditions closed).
 
-**Evidence demonstrating readiness of everything already decided:** `docs/product/MVP_CURRENT_STATE_AUDIT.md` (Phase 1), this document's Section 4 (per-feature evidence), and `docs/engineering/I-01.2-MYSQL-MIGRATION-SAFETY-VERIFICATION.md` (platform-layer verification the whole MVP journey was exercised against).
+**Carried forward as Launch Staging, explicitly not MVP freeze blockers** (Section 12): a Product Office pricing decision; infrastructure/Operations readiness (production environment, monitoring, backups, disaster recovery); qualified external legal counsel sign-off on Privacy/Terms; a launch-market naming decision; a real support contact channel; provisioning an isolated MySQL `_test` database for the seven MySQL integration tests; registration throttling.
 
-This document is Engineering's evidence-grounded proposal for the MVP Contract. It becomes binding — "no feature may be added to or removed from MVP without an explicit Product Office decision" — only once the Product Office confirms or amends the remaining items marked "Decision Required" above (two of the original six — Capability B's launch visibility and Settings/Help's MVP scope — are now resolved, per items 3 and 4 above).
+**Evidence demonstrating readiness:** `docs/product/MVP_CURRENT_STATE_AUDIT.md` (Phase 1), this document's Section 4 (per-feature evidence), `docs/engineering/I-01.2-MYSQL-MIGRATION-SAFETY-VERIFICATION.md`, and this session's `PO-RC1-012` (live end-to-end verification) and `AO-MVP-005`/`PO-RC1-013` (architecture review and closure) — recorded in full in `TASKS.md`/`CHANGELOG.md` and `docs/00-governance/DECISION_LOG.md`.
+
+This document is now the binding MVP Contract: no feature may be added to or removed from the frozen MVP baseline without an explicit new Product Office commission, per Section 12's enforcement rule.
+
+---
+
+# Section 12 — MVP Freeze Record (`PO-MVP-FREEZE-001`, 2026-08-10)
+
+## 12.1 Freeze Declaration
+
+**SlipGuard MVP v1.0's implemented capability set is formally frozen as of 2026-08-10, branch `develop`.** The exact commit hash is recorded in `TASKS.md`/`CHANGELOG.md` and `docs/00-governance/DECISION_LOG.md` for this entry, since a commit cannot cite its own hash inside itself. From this point, **changes to the frozen MVP baseline require a new explicit Product Office commission** — Launch Staging work (deployment, infrastructure, security hardening, legal/commercial configuration, launch-surface work, and genuine production defect/release-blocking corrections) is authorized without reopening this freeze; casual product expansion during Launch Staging is not.
+
+Architecture Clearance: `AO-MVP-005` (Final MVP Architecture Review) returned **B — ARCHITECTURE CLEARED WITH CONDITIONS**. Both conditions were closed before this freeze:
+- **`AO-D1`** (destructive MySQL integration-test isolation) — closed by `PO-RC1-013`. The fail-closed guard (`tests/Support/MySqlTestDatabaseGuard.php` + `tests/Support/GuardsMySqlTestDatabase.php`, wired directory-wide in `tests/Pest.php`) is present in the frozen baseline: a destructive MySQL integration test now hard-fails before `RefreshDatabase` runs unless `APP_ENV=testing` **and** the resolved database name ends in `_test`. Verified for real against the exact prior incident (`DB_DATABASE=slipguard` rejected with a clear error, dev/demo data confirmed byte-identical before/after) and via 11 DB-free unit tests. The live-MySQL *permit* path remains verified only at the unit-test level — carried forward as a Launch Staging item (§12.6).
+- **`AO-D3`** (stale Capability B feature-gate documentation) — closed by `PO-RC1-013`. `config/slipguard-market-intelligence.php`'s comment corrected; runtime behaviour unchanged.
+
+## 12.2 Risk Rule Set 2026.1 — Formal Sign-Off
+
+**Risk Rule Set 2026.1 is the formally approved deterministic analysis baseline for SlipGuard MVP**, effective this freeze. Verified before sign-off, not redesigned or tuned:
+- **Canonical version identifier:** `RuleSet2026_1::VERSION = '2026.1'` (`app/Domain/Risk/RuleSets/RuleSet2026_1.php`), independently tracked alongside `CalculateStructuralRisk::ENGINE_VERSION = '1.0'` — ADR-007's four traceability axes (engine, rule-set, taxonomy, input-schema), all four persisted per `SlipAnalysis` row.
+- **Deterministic behaviour:** confirmed by code inspection (no random/time/session access anywhere in the engine or its factor classes; `Brick\Math\BigDecimal` throughout, not floats) and by live re-execution — a real MySQL-backed analysis run during `PO-RC1-013`'s evidence-gathering and `PO-RC1-012`'s live journeys produced consistent, persisted results; a historical report reopened twice showed byte-identical scores.
+- **Historical report integrity:** enforced by `BettingSlipStatus::allowedTransitions()` — `Analysed => [Archived]` only, no path back to an editable state, so a `SlipAnalysis` row is never overwritten in the normal customer workflow.
+- **Explainability linkage:** Main Contributing Factor, Other Contributing Factors, and methodology disclosure are wired to real persisted analysis data (`report.blade.php`), not separately maintained copy.
+- **Absence of generative AI from deterministic scoring:** confirmed by repository-wide grep — zero AI-provider SDK matches anywhere in `app/`. The Conversational Entry Layer is a deterministic rule-based parser (`DeterministicAccumulatorIntentInterpreter`), never a source of `SlipAnalysis` output.
+- **Representative deterministic tests:** 204/204 Risk Engine tests (`tests/Unit/Risk`, `tests/Feature/Risk`) passing at freeze.
+
+**Future modifications to Risk Rule Set 2026.1 require:** a new version identifier; explicit Product Office approval; deterministic regression proving the new version's own mathematics; and preservation of every historical analysis under the version it was actually computed with. 2026.1 itself must not be silently modified after this freeze.
+
+## 12.3 Deterministic Product Boundary (Frozen Principle)
+
+```
+Canonical structured slip + Risk Rule Set version + defined deterministic inputs
+        ↓
+Deterministic Analysis
+        ↓
+Structural Risk Score, Risk Band, Findings, Main Contributing Factor, Explainability
+```
+
+Generative AI must not become the source of these outputs. This is architectural, not aspirational — confirmed by `AO-MVP-005`'s code-level review, not merely stated.
+
+## 12.4 Historical Analysis Principle (Frozen Rule)
+
+Historical analyses represent the deterministic result produced under the rule set and input state applicable when that analysis was created. Future changes must not silently rewrite historical analytical truth. Where reanalysis is ever introduced, it must create or represent a new analysis state under the existing state-machine architecture (§12.1's `BettingSlipStatus`), never retroactively alter a historical result in place.
+
+## 12.5 Frozen MVP Capability Matrix
+
+| Capability | Classification | Notes |
+|---|---|---|
+| Authentication & Registration | MVP — Active | §4.1 |
+| Customer Dashboard | MVP — Active | §4.2 |
+| Slip Builder (manual entry) | MVP — Active | §4.3 |
+| Intake — Screenshot Upload | MVP — Active | No OCR, disclosed honestly (§4.4) |
+| Intake — PDF Upload | MVP — Active | §4.5 |
+| Intake — Paste Text | MVP — Active | §4.6 |
+| Intake — Bet Code / Share Link | Deferred | UI present, no backend (§4.7) |
+| Deterministic Rule Engine (Risk Rule Set 2026.1) | MVP — Active | Formally signed off, §12.2 |
+| Explainability | MVP — Active | §4.9 |
+| Risk Report | MVP — Active | §4.10 |
+| History | MVP — Active | §4.11 |
+| Decision Journal | MVP — Active | §4.12 |
+| Planner (Capability A) | MVP — Active | §4.13 |
+| Build an Accumulator (Capability B) | MVP — Feature Gated | `MARKET_WIDE_PLANNER_ENABLED=true`, §4.14, §12.6 |
+| Conversational Entry Layer | MVP — Feature Gated | Same gate as Capability B, §12.7 |
+| Demo Workspace | MVP — Active (Internal) | Staff/sales tooling, not customer-facing, §4.15 |
+| SlipGuard Labs | MVP — Active | §4.16 |
+| Operations Panel (Filament) | MVP — Active (Internal) | §4.17 |
+| Profile | MVP — Active | §4.18 |
+| Settings | MVP — Active | §4.19 |
+| Help & Methodology | MVP — Active | §4.20 |
+| Contact | MVP — Active | §4.21 |
+| Public Marketing Website (incl. Privacy/Terms) | MVP — Active | §4.21 |
+| Subscription / Billing | Deferred | §4.22, Launch Staging commercial decision |
+| OCR automation | Deferred | Version 1.1 destination |
+| Intelligence Builder Workspace evolution | Future Research / Incubation | §12.6 — additive, not required for MVP |
+| Expanded live market intelligence beyond current Capability B scope | Future Research / Incubation | Version 1.2 destination |
+| Mobile application | Future Research / Incubation | Version 2 destination |
+| Browser extension | Future Research / Incubation | Version 2 destination |
+| Risk Watch | Future Research / Incubation | §12.8 |
+| External Intelligence Platform | Future Research / Incubation | §12.8 |
+| SlipGuard Live | Future Research / Incubation | §12.9 |
+| Automated bookmaker integration / autonomous betting | Explicitly Prohibited | `ADR-012` Locked Decision — permanent, not a roadmap slot |
+| Customer funds handling / wallet / stake custody | Explicitly Prohibited | `ADR-012` |
+| Outcome prediction | Explicitly Prohibited | `SD-001`/`CLAUDE.md` Locked Decision |
+
+## 12.6 Capability B — Frozen MVP Boundary
+
+**What is frozen as MVP:** PlanningBrief (competitions, leg count, market constraints, risk ceiling); candidate discovery against real market evidence (The Odds API, 3 configured competitions — EPL, La Liga, Serie A); deterministic evaluation; candidate acceptance producing a real, ordinary `Ready` `BettingSlip` (not a parallel object); Planning History integration via the existing, unmodified Planner (`ADR-013` — no parallel session/lifecycle system); feature gating via `MARKET_WIDE_PLANNER_ENABLED` (`true` in `.env`/`.env.example`, launch-enabled per `PO-MVP-004`; when `false`, the route still registers and renders an honest "Experience preview" state, not a 404 — no gated route leaks partial functionality or fails uncleanly).
+
+**What is explicitly NOT frozen as MVP — the Intelligence Builder Workspace:** the broader future intelligence/planning direction (`docs/01-product/PO-U18.4.1-001-INTELLIGENCE-BUILDER-WORKSPACE-HANDOVER.md`) is additive future work, not required for this freeze. The current Builder is the coherent, launchable MVP foundation; the Workspace direction does not block freezing it.
+
+## 12.7 Conversational Entry Layer — Frozen Boundary
+
+```
+Natural-language request → Interpretation → Structured PlanningBrief → Capability B → Deterministic evaluation → User decision
+```
+
+Frozen as an entry layer only, never an independent risk engine. Confirmed architecturally incapable of: inventing Structural Risk Scores or Risk Bands; bypassing PlanningBrief validation or Capability B constraints; authoring deterministic findings independently; silently introducing unsupported markets; placing bets; modifying accumulators without user action; or making the final user decision. The implementation (`DeterministicAccumulatorIntentInterpreter`) is a bounded-vocabulary rule-based parser — its own docblock states no live AI provider exists anywhere in this codebase. AI assists interpretation only; SlipGuard's deterministic systems remain authoritative.
+
+## 12.8 Risk Watch / External Intelligence Platform
+
+Recorded as **Post-MVP / future platform capability**. The existing research/proposal material is not deleted and not implemented by this freeze — it remains outside the MVP baseline unless a future, separate Product Office commission explicitly brings it in.
+
+## 12.9 SlipGuard Live
+
+Recorded as **architecturally separate future work**, outside this MVP freeze. Not designed, scoped, or implemented by this commission.
+
+## 12.10 Explicit MVP Exclusions
+
+Confirmed excluded from the frozen baseline, by absence of any implementing code (verified via direct repository grep for bet-placement/wallet/deposit/withdrawal/payment-SDK code — zero matches anywhere in `app/`): Risk Watch; External Intelligence Platform; SlipGuard Live; prediction engines; betting tips; bookmaker optimisation; automatic bet placement; customer-funds handling; bookmaker account integration; unsupported OCR; rumours/social intelligence; automatic user decision-making; future Intelligence Builder Workspace expansion. These are future work, not RC1 or freeze defects.
+
+## 12.11 Launch-Staging Carry-Forward Items (Not MVP Freeze Blockers)
+
+| Item | Status at freeze |
+|---|---|
+| Isolated MySQL `_test` database | Not yet provisioned in this environment (no `CREATE DATABASE` privilege, no `mysql` CLI) — provision, then run the 7 MySQL integration tests against it; the `AO-D1` guard must remain active and must never be pointed at development/demo/staging/production |
+| Registration throttling | Classified Launch Staging / Security Hardening by `AO-MVP-005` — not an MVP freeze blocker |
+| Production environment (Hostinger or equivalent) | Not provisioned; `docs/08-operations/PRODUCTION_OPERATIONS_BLUEPRINT.md` defines requirements |
+| Backups | Command exists (`slipguard:backup-database`, production-safe, scheduled daily) — cron wiring and a real restore drill remain outstanding |
+| Scheduler | One job scheduled (backup); no real cron → `schedule:run` wiring exists yet |
+| Mail | `log` driver in dev; real provider needed for production |
+| HTTPS / security configuration | Launch Staging |
+| Monitoring / logging | Launch Staging |
+| Legal | Privacy/Terms content live (`PO-CO-002`); qualified external counsel sign-off remains outstanding |
+| Pricing / commercial decision | No pricing ever approved; Premium boundary (§7) remains empty by design until Product Office supplies one |
+| Coming Soon / public launch staging | Not implemented; per the approved launch-staging model (§40 of this freeze's own commissioning instruction), this is `PO-LAUNCH-STAGING-001`'s to sequence, not this freeze's |

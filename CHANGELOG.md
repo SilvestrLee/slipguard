@@ -2252,3 +2252,32 @@ Full regression: 761 tests, 754 passed, 7 pre-existing self-skipped, 0 failed.
 ### Not Done
 - `MVP_SCOPE_LOCK.md`'s own similar stale reference to the `MARKET_WIDE_PLANNER_ENABLED` decision was noted but left untouched — outside this bounded commission's named scope (`config/slipguard-market-intelligence.php` and `.env.example` only).
 - No product, UI, Risk Engine, Rule Set, Builder, or Conversational Builder behaviour changed anywhere.
+
+## `PO-MVP-FREEZE-001` — MVP Baseline Freeze & Risk Rule Set 2026.1 Sign-Off
+
+**Status:** SlipGuard MVP v1.0 is formally **FROZEN**, 2026-08-10. Governance closure — no product code changed.
+
+### Investigated
+- The previously-unexplained `454cabe` commit ("fix(capabilities): record UI/UX Pro Max availability") — classified **B, valid repository/governance change**, safe to retain: a documentation-only metadata field addition to an existing capability-adapter record already part of this repository's own pre-existing `docs/operating-system/capabilities/` governance tree (predates this session), zero product/architecture/config/test impact, consistent with the same `chore(capabilities)`/`fix(capabilities)` pattern already in this repository's history.
+- `PO-U24-005` confirmed present in the frozen baseline at its own commit (`cec79ba`), design not reopened.
+
+### Accepted
+- `AO-MVP-005` — Final MVP Architecture Review: **B, ARCHITECTURE CLEARED WITH CONDITIONS**.
+- `PO-RC1-013` — both conditions (`AO-D1`, `AO-D3`) closed.
+- **Risk Rule Set 2026.1** — formally signed off as the approved deterministic analysis baseline. Future modifications require a new version, explicit Product Office approval, deterministic regression, and preservation of every historical analysis under the version it was actually computed with.
+
+### Fixed (documentation)
+- `docs/product/MVP_SCOPE_LOCK.md` — one real, genuinely stale contradiction found and corrected: still described `/privacy`/`/terms` as coming-soon stubs, though real Terms of Service and Privacy Policy content had shipped four days earlier (`PO-CO-002`, 2026-08-04, CERTIFIED WITH CONDITIONS — external legal counsel sign-off remains a genuine Launch Staging item, not an MVP gap).
+- `docs/01-product/FEATURE_MATRIX.md`, `docs/01-product/FEATURE_GATING.md` — the same stale "pending public-launch authorization" language for `MARKET_WIDE_PLANNER_ENABLED` (already superseded by `PO-MVP-004`) corrected; Settings, Help & Methodology, and Contact rows added — all three shipped but had no row in either document at all.
+
+### Changed
+- `docs/product/MVP_SCOPE_LOCK.md` — status changed from "Draft for Product Office decision — NOT FROZEN" to **FROZEN**. New **Section 12 — MVP Freeze Record**: the freeze declaration and enforcement rule; the frozen MVP capability matrix (MVP — Active / MVP — Feature Gated / Deferred / Future Research-Incubation / Explicitly Prohibited); Capability B's and the Conversational Entry Layer's exact frozen boundaries (current implementation only — the Intelligence Builder Workspace evolution and expanded live market intelligence remain explicitly future, not required for this freeze); explicit exclusions (Risk Watch, External Intelligence Platform, SlipGuard Live, automated bookmaker integration/autonomous betting — the last two permanently excluded per `ADR-012`, not merely deferred); and the complete Launch Staging carry-forward list (isolated MySQL `_test` database provisioning, registration throttling, production infrastructure, backups/scheduler/mail/HTTPS/monitoring, qualified legal counsel sign-off, pricing/commercial decision, Coming Soon/public launch staging) — none of which are MVP freeze blockers. Sections 4, 8, 10, and 11 updated to reflect resolved items (Privacy/Terms live, Capability B gate corrected, `DecisionJournalTest` flakiness not reproduced, Risk Rule Set sign-off) without rewriting the historical record of how each was actually resolved.
+- `docs/00-governance/DECISION_LOG.md` — two new entries: formal acceptance of `AO-MVP-005`/`PO-RC1-013`, and the MVP freeze itself.
+
+### Verified
+- Full regression: 806 tests, 799 passed, 7 pre-existing self-skipped, 0 failed. Focused deterministic evidence: 204/204 Risk Engine tests (`tests/Unit/Risk`, `tests/Feature/Risk`) passing. Pint clean (one pre-existing, unrelated violation remains). Production build clean. `git diff --check` clean.
+
+### Not Done
+- No product, UI, Risk Engine, Rule Set mathematics, Builder, or Conversational Builder behaviour changed anywhere — this commission is governance/documentation only.
+- No Git tag created or pushed (recommendation only, per the commissioning instruction).
+- Launch Staging not begun; Coming Soon not implemented.
