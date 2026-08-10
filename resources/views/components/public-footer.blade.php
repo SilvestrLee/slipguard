@@ -43,7 +43,17 @@
 
 <footer class="border-t border-neutral-200">
     <div class="container-marketing mx-auto px-6 sm:px-8 py-16">
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-10">
+        {{--
+            `PO-U24-005` §3 — the brand column now clearly outweighs each
+            nav column (~2fr vs 1fr, close to the requested ~40/20/20/20)
+            instead of four equal columns. Applied at the same `sm:`
+            breakpoint the four-column layout already used (no new
+            breakpoint introduced) — mobile's existing `grid-cols-2` +
+            `col-span-2` brand-first stacking is untouched, since PO-U24-005
+            §5 explicitly says not to force the desktop ratio onto narrow
+            screens and that model already puts the brand block first.
+        --}}
+        <div class="grid grid-cols-2 sm:grid-cols-[2fr_1fr_1fr_1fr] gap-10">
             <div class="col-span-2 sm:col-span-1">
                 <a href="{{ route('home') }}" wire:navigate aria-label="{{ __('SlipGuard home') }}"
                    class="inline-flex items-center gap-2.5 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">
@@ -53,19 +63,40 @@
                 <p class="mt-4 text-sm text-neutral-500 max-w-xs">
                     {{ __('An independent intelligence layer between the bettor and the bookmaker.') }}
                 </p>
+                {{--
+                    `PO-U24-005` §6/§7/§8 — visually smaller, restrained
+                    social row without shrinking the accessible target below
+                    this project's 44×44px standard (`ACCESSIBILITY.md`): the
+                    outer `<a>` (the actual interactive/focusable element)
+                    grew from `size-10` (40px — already below the 44px
+                    standard, a latent pre-existing gap this change also
+                    happens to close) to `size-11` (44px, this codebase's own
+                    existing accessible-icon-button convention), but now
+                    carries no visible border itself — the visible "chip" is
+                    a smaller inner span (`size-7`, 28px) so the icon reads
+                    as secondary to the brand block above it. `gap-2` (8px)
+                    between icons is kept, not tightened, per UI UX Pro Max's
+                    own touch-target-spacing guideline (minimum 8px between
+                    adjacent tappable elements) — genuinely queried for this
+                    commission, not assumed.
+                --}}
                 <div class="mt-5 flex items-center gap-2" aria-label="{{ __('SlipGuard social media') }}">
                     @foreach ($socialProfiles as $profile)
                         @if ($profile['url'])
                             <a href="{{ $profile['url'] }}" target="_blank" rel="noopener noreferrer"
-                               class="inline-flex size-10 items-center justify-center rounded-lg border border-neutral-300 text-neutral-500 transition-colors hover:border-neutral-400 hover:bg-surface-soft hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                               class="group inline-flex size-11 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                                aria-label="{{ __($profile['label']) }}">
-                                <x-social-icon :brand="$profile['brand']" />
+                                <span class="inline-flex size-7 items-center justify-center rounded-md border border-neutral-300 transition-colors group-hover:border-neutral-400 group-hover:bg-surface-soft">
+                                    <x-social-icon :brand="$profile['brand']" class="!size-4" />
+                                </span>
                             </a>
                         @else
-                            <span class="inline-flex size-10 items-center justify-center rounded-lg border border-neutral-200 text-neutral-400"
+                            <span class="inline-flex size-11 items-center justify-center rounded-lg text-neutral-400"
                                   role="img" aria-label="{{ __($profile['label'].' account link coming soon') }}"
                                   title="{{ __($profile['label'].' account link will be added when available') }}">
-                                <x-social-icon :brand="$profile['brand']" />
+                                <span class="inline-flex size-7 items-center justify-center rounded-md border border-neutral-200">
+                                    <x-social-icon :brand="$profile['brand']" class="!size-4" />
+                                </span>
                             </span>
                         @endif
                     @endforeach

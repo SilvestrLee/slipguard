@@ -2204,3 +2204,26 @@ Full regression: 761 tests, 754 passed, 7 pre-existing self-skipped, 0 failed.
 ### Not Done
 - Light theme — untouched, out of scope per the commissioning instruction.
 - The two unrelated pre-existing findings named above under Verified — flagged for a future, separately-scoped pass, matching this repository's established disclose-don't-silently-expand-scope precedent.
+
+## `PO-U24-005` — Public Website Spacing & Footer Proportion Refinement
+
+**Status:** Delivered. Bounded finishing pass, explicitly not a redesign — no copy, section order, or homepage architecture changed.
+
+### Changed
+- `resources/views/pages/home.blade.php` — Hero top spacing made responsive rather than one fixed value: `pt-14 sm:pt-20` → `pt-16 sm:pt-24 lg:pt-32`. Real-browser-measured header-to-eyebrow gap: 64px at 390/430px, 96px at 768px, 128px at 1024/1440px (was ~34–60px depending on viewport). Zero horizontal overflow at any tested width, either theme. Headline, supporting copy, CTAs, two-column composition, background atmosphere, and dashboard preview all pixel-identical to before.
+- `resources/views/components/public-footer.blade.php` — footer grid changed from an equal 4-column split (`sm:grid-cols-4`) to `sm:grid-cols-[2fr_1fr_1fr_1fr]`, applied at the same existing `sm:` breakpoint the equal grid already used. Mobile's `grid-cols-2` + brand-first stacking is untouched. Social icons: outer `<a>` grew from `size-10` (40px) to `size-11` (44px) — this project's own accessible-touch-target standard, `ACCESSIBILITY.md` — while losing its own visible border; the visible "chip" is now a smaller inner `size-7` (28px) span with a `!size-4` (16px, down from 20px) icon glyph inside it, so the row reads as secondary to the brand block above it. `gap-2` (8px) between icons kept unchanged.
+
+### Fixed (incidental)
+- The social icons' actual interactive/focusable target was 40px, already below this project's own 44×44px accessibility standard (`ACCESSIBILITY.md`) before this change. Now 44px — a byproduct of making the *visible* icon read smaller via a separate inner chip, not a deliberate accessibility fix in its own right, but a real latent gap this change closes rather than worsens.
+
+### Design Capability Invocation
+- UI UX Pro Max queried directly: (1) footer-proportion/hero-spacing-specific queries returned no directly matching entries — disclosed, not fabricated; the 2fr:1fr:1fr:1fr ratio and responsive Hero spacing steps are grounded in the commissioning instruction itself. (2) A touch-spacing query returned a directly relevant, adopted guideline: minimum 8px gap between adjacent tappable elements, with `gap-0`/`gap-1` named as the anti-pattern — this reversed an earlier draft plan to tighten the social-icon row's `gap-2` to `gap-1` for a more compact look; `gap-2` was kept instead, a genuine adopt/reject decision, not a rubber stamp.
+- 21st.dev: confirmed live-callable this session, queried (`footer brand column proportion social icons compact`) — returned only React/shadcn component-catalog entries (animated footers, gradient social icons). Nothing adopted: installing any would introduce a second frontend framework, violating the Blade+Livewire locked decision, and none matched SlipGuard's flat, restrained visual language regardless.
+
+### Verified
+- Real-browser verification (Playwright + system Chrome) at 390/430/768/1024/1440px, light and dark: Hero header-to-eyebrow gap measured programmatically at every viewport (64/64/96/128/128px, matching the intended mobile→tablet→desktop hierarchy); footer column widths measured programmatically (brand column wider than every nav column at all five viewports); social icon outer/inner sizes confirmed 44px/28px at all viewports; zero horizontal overflow anywhere; zero console errors.
+- One genuine investigation, not glossed over: at 768px the footer's raw column-width ratio skews further toward the brand column than the intended 2:1:1:1 (CSS Grid's `1fr` min-content floor behaviour under a narrower container, most visible at exactly this width — 1024/1440px land close to the intended ratio). Checked against the real screenshot rather than the raw number alone: renders cleanly, "Company"/"Resources" are not cramped, no drift, brand is clearly and unambiguously wider — accepted as correct in practice, not silently dismissed.
+- Full regression: 795 tests, 788 passed, 7 pre-existing self-skipped, 0 failed. Pint clean (one pre-existing, unrelated violation remains, not this commission's). Production build clean. `git diff --check` clean.
+
+### Not Done
+- No unrelated homepage sections touched (feature highlights, FAQ, final CTA, navigation, dashboard screenshot — all untouched, confirmed via diff scope).

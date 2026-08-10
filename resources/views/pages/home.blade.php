@@ -84,7 +84,21 @@
         explicitly rather than silently skipped or fabricated a result for.
     --}}
     <section class="public-hero-atmosphere relative bg-gradient-hero" aria-labelledby="hero-heading">
-        <div class="container-marketing mx-auto px-6 pt-14 pb-6 sm:pt-20 sm:pb-8">
+        {{--
+            `PO-U24-005` — deliberate breathing room between the sticky
+            public header and the eyebrow, responsive rather than one fixed
+            value: a modest step on mobile (pt-16, avoids pushing Hero
+            content further below the fold on a small viewport), a clearer
+            step at tablet width (sm:pt-24), and the most generous step at
+            desktop (lg:pt-32) — where PO-U24-005 §2 specifically asks for
+            more separation than tablet, not the same `sm:` value stretched
+            across every width above 640px. Existing Tailwind spacing scale
+            values throughout (DESIGN_TOKENS.md's "Tailwind's default scale,
+            used as-is" — `pt-14`/`pt-20` were already unnamed-but-standard
+            values in this exact line before this change). Was
+            `pt-14 sm:pt-20`.
+        --}}
+        <div class="container-marketing mx-auto px-6 pt-16 pb-6 sm:pt-24 sm:pb-8 lg:pt-32">
             {{--
                 `PO-U15.4R-001` §5.1/§13.1: the top row uses a narrower inner
                 width than the dashboard row below, so the dashboard reads
