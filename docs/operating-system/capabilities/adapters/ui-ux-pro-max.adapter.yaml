@@ -16,6 +16,7 @@ project: SlipGuard
 capability_id: nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max
 authorization: PILOT
 authority_weight: supporting
+availability: INSTALLED_CALLABLE
 local_enablement: >
   Available via Claude Code plugin marketplace at user/global scope only
   (~/.claude/settings.json enabledPlugins:
@@ -75,3 +76,22 @@ notes: >
   structured integration-evidence directory — restructured, not changed
   in substance. No other field on this adapter was altered by this
   migration.
+
+  (`CAPSYS-P17`, 2026-08-10): adds the structured `availability` field
+  this record previously lacked, per the central contract's
+  `governance/STATE_MODEL.md` Dimension 2 vocabulary
+  (`schemas/adapter.schema.yaml`, `CS-DEC-022`/`CS-DEC-027`). Value
+  `INSTALLED_CALLABLE`, grounded in a fresh, direct re-verification on
+  2026-08-10 of exactly the same facts `local_enablement` above already
+  documents: the plugin cache directory and its one installed version
+  (2.11.0) present, `~/.claude/settings.json`'s `enabledPlugins` entry
+  ("ui-ux-pro-max@ui-ux-pro-max-skill": true) and `installed_plugins.json`
+  (scope "user", gitCommitSha `1307d97a72e6c1cda572cb65471ae5ce82995218`)
+  both confirmed unchanged, and a real, direct invocation of the
+  capability's own bundled `search.py` (its documented query mechanism)
+  completing successfully. Not inferred from `local_enablement`'s prose
+  alone — independently re-checked against the live environment.
+  `authorization`, `authority_weight`, `local_enablement`,
+  `project_restrictions`, `project_overrides`, `version_constraint`,
+  `project_specific_context`, and `evidence_channels` are all otherwise
+  unchanged by this edit.
