@@ -2177,3 +2177,30 @@ Full regression: 761 tests, 754 passed, 7 pre-existing self-skipped, 0 failed.
 
 ### Verified
 - Full regression: 795 tests, 788 passed, 7 pre-existing self-skipped, 0 failed. Pint clean (one pre-existing, unrelated violation remains in `database/seeders/LabsMobileAppFeatureSeeder.php`, not this commission's to fix). Production build clean. `git diff --check` clean.
+
+## Product Office Amendment — Dark Theme Text Legibility
+
+**Status:** Delivered. Token-level correction, no page-by-page patching.
+
+### Changed
+- `resources/css/app.css` — `--neutral-400` (dark) `#55565b` → `#8e8f94`; `--neutral-500` (dark) `#85868b` → `#a3a4a8`. Updated in both dark-theme blocks (`@media (prefers-color-scheme: dark)` and the explicit `:root[data-theme="dark"]` override), which this file's own standing comment requires be kept in sync. `--neutral-600` through `--neutral-950` (dark) and the entire light-theme scale are unchanged — already clearing WCAG AA with margin (7.48:1+), and this amendment is dark-theme-only per the commissioning instruction.
+- `docs/05-ux/DESIGN_TOKENS.md` — neutral scale table and provenance notes updated to record the new dark values, the measured before/after contrast ratios, and the reasoning.
+
+### Fixed
+- `--neutral-400` was documented as "placeholder text, muted icons" but is in fact used across the product as real metadata/helper-text colour (timestamps, footer disclaimers, `<dt>` labels, hint tags — 23 files) — at the old value it measured 2.33:1/2.12:1 against `surface-page`/`surface-card`, failing WCAG AA outright, not merely "muted."
+- `--neutral-500` ("secondary text" — dashboard section headers, journal captions — 36 files) measured 4.69:1/4.27:1, passing `surface-page` but failing `surface-card`'s stricter case.
+- New values clear 4.5:1 AA against **both** surfaces with real margin (5.27:1/4.80:1 and 6.84:1/6.23:1 respectively) while preserving a clearly perceptible step down from `neutral-600` and up, so the brightness hierarchy Product Office asked for (primary → body → secondary → metadata → disabled) stays intact rather than collapsing toward flat white.
+
+### Design Capability Invocation
+- UI UX Pro Max genuinely invoked (`--domain ux "dark mode text hierarchy contrast"`, `--domain color "dark mode neutral grey scale accessible pairs"`) — its dark-mode "muted foreground" reference pairing independently lands at 6.96:1/6.26:1 for a structurally identical role, corroborating the brightness range chosen here rather than it being picked freehand.
+- 21st.dev: verified live-callable this session (`mcp__21st__search`), a change from this repository's own prior documented "unavailable" finding — queried directly, returned generic component-catalog results (no colour/contrast-guidance content relevant to a semantic-token decision), nothing adopted. Disclosed rather than silently skipped, per the standing "nothing adopted is a legitimate outcome" rule.
+
+### Verified
+- Real-browser dark-mode verification (Playwright + system Chrome) at 390/768/1440px across Dashboard, Analyse, Report, Planner (mapped to Planning History — no standalone session-less Planner screen exists in this product), Journal, Help, Settings.
+- axe-core's automated color-contrast check reported violations against the new values on several of these screens — investigated directly rather than accepted at face value, and confirmed to be false positives: the same pre-existing, already-disclosed `.atmosphere` fixed-decorative-layer limitation this repository's own history already names (`PO-U24-002`, `PO-U24-003`, `PO-RC1-010`) — axe cannot see a `position: fixed` background layer and falls back to assuming a plain white canvas, understating real contrast. Confirmed by direct pixel sampling (not axe's computed-style guess) of the actual rendered screenshots: `neutral-500` against the real Dashboard card background measures 6.03:1 (axe claimed 3.48:1 against a wrong `#4b4b4f`); `neutral-500`/`neutral-400` against the real footer background measure 6.48:1/5.0:1 (axe claimed 2.49:1 against a wrong pure-white `#ffffff`) — both comfortably AA in reality.
+- Two unrelated, pre-existing findings surfaced by the same scan, out of this amendment's scope, disclosed not fixed: a risk-badge icon axe sampled as black-on-tinted-background (risk/accent tokens, not the neutral text scale — likely the same atmosphere-sampling artifact, not investigated further) and a pre-existing `hover:bg-accent` white-icon contrast case.
+- Full regression: 795 tests, 788 passed, 7 pre-existing self-skipped, 0 failed (no test or application code touched — CSS tokens and documentation only). Pint clean. Production build clean. `git diff --check` clean.
+
+### Not Done
+- Light theme — untouched, out of scope per the commissioning instruction.
+- The two unrelated pre-existing findings named above under Verified — flagged for a future, separately-scoped pass, matching this repository's established disclose-don't-silently-expand-scope precedent.

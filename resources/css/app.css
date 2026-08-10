@@ -250,12 +250,30 @@ html {
            evenly-stepped warm-neutral scale — genuinely desaturated graphite, not a navy
            with the blue turned down. Light theme's neutral scale is intentionally
            untouched (already a low-saturation slate, not the thing §12 was about). */
+        /* Product Office Amendment (dark theme text legibility) — --neutral-400/500
+           brightened; every other step (50-300, 600-950) is unchanged, already clearing
+           WCAG AA with margin. Real defect found during audit: --neutral-400 (the token
+           documented as "placeholder text, muted icons") is in fact widely used across
+           the product as genuine metadata/helper-text colour (timestamps, footer/dt
+           labels, caption text) — at the old #55565b it measured only 2.33:1/2.12:1
+           against surface-page/surface-card, failing WCAG AA outright, not merely
+           "muted." --neutral-500 ("secondary text" — dashboard section labels, journal
+           captions) measured 4.69:1/4.27:1, passing against surface-page but failing
+           surface-card's stricter case. New values verified to clear 4.5:1 AA against
+           BOTH surfaces with real margin (see table below), corroborated independently
+           by UI UX Pro Max's own dark-mode "muted foreground" reference pairing, which
+           lands at 6.96:1/6.26:1 for a structurally identical role — confirming this
+           brightness range, not just this one contrast check. Both dark-theme blocks in
+           this file updated together (see this file's own standing warning above about
+           keeping them in sync). Light theme intentionally untouched — out of scope.
+             neutral-400  #55565b -> #8e8f94  (2.33/2.12 FAIL -> 5.27/4.80 AA)
+             neutral-500  #85868b -> #a3a4a8  (4.69/4.27 AA-large -> 6.84/6.23 AA) */
         --neutral-50: #1b1c20;
         --neutral-100: #232428;
         --neutral-200: #2e2f34;
         --neutral-300: #3c3d42;
-        --neutral-400: #55565b;
-        --neutral-500: #85868b;
+        --neutral-400: #8e8f94;
+        --neutral-500: #a3a4a8;
         --neutral-600: #b3b4b8;
         --neutral-700: #d3d4d6;
         --neutral-800: #e8e8ea;
@@ -349,12 +367,15 @@ html {
        despite the gradient and `--surface-inverse` tokens correctly reading
        the new graphite values. This is exactly the failure mode the comment
        immediately above already warned about. */
+    /* Product Office Amendment (dark theme text legibility) — kept in sync with
+       the media-query block above, per this file's own warning immediately
+       above; see that block's comment for the full rationale/measurements. */
     --neutral-50: #1b1c20;
     --neutral-100: #232428;
     --neutral-200: #2e2f34;
     --neutral-300: #3c3d42;
-    --neutral-400: #55565b;
-    --neutral-500: #85868b;
+    --neutral-400: #8e8f94;
+    --neutral-500: #a3a4a8;
     --neutral-600: #b3b4b8;
     --neutral-700: #d3d4d6;
     --neutral-800: #e8e8ea;

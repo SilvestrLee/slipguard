@@ -23,19 +23,21 @@ One functional accent colour, a neutral scale, and reserved semantic colours for
 
 **Amended `U-08.1` (`PO-U08.1-AC-001` §12/§13):** the dark neutral scale below is now "smoked graphite" — a genuinely desaturated, warm-neutral scale, not the prior blue-tinted slate (deliberately avoiding "generic dark navy" per the memo's own wording); anchored on the memo's own directional values (`#1B1C20`/`#141518`) and extended into a full scale. `--color-accent` is now Rich Indigo in both themes, replacing the prior restrained blue — values corroborated via UI UX Pro Max's colour domain rather than picked freehand (an indigo-500/600 pairing recurs across its own design-system/SaaS references). Light theme's neutral scale is unchanged — §12 was specifically about the dark-theme foundation, and light theme was already a low-saturation, non-navy slate.
 
+**Amended — Product Office Amendment, Dark Theme Text Legibility (2026-08-10):** `--color-neutral-400`/`--color-neutral-500` (dark) brightened; every other step is unchanged, already clearing WCAG AA with real margin. Audit found a genuine defect, not just a subjective "too muted" impression: `--color-neutral-400`, documented immediately below as "placeholder text, muted icons," is in fact used across the product as real metadata/helper-text colour (timestamps, footer disclaimers, `<dt>` labels, hint tags) — at the old `#55565b` it measured 2.33:1/2.12:1 against `surface-page`/`surface-card`, failing WCAG AA outright. `--color-neutral-500` ("secondary text" — dashboard section headers, journal captions) measured 4.69:1/4.27:1, passing against `surface-page` but failing `surface-card`'s stricter case. New values clear 4.5:1 AA against **both** surfaces with margin, and were cross-checked (not invented freehand) against UI UX Pro Max's own dark-mode "muted foreground" reference pairing for a structurally identical role, which independently lands in the same 6-7:1 range. `--color-neutral-600` through `--color-neutral-950` were re-verified during this pass and left untouched (7.48:1 or higher against both surfaces already). Light theme is unchanged — this amendment is dark-theme-only, per the commissioning instruction.
+
 | Token | Light | Dark | Purpose |
 |---|---|---|---|
 | `--color-neutral-50` | `#f8fafc` | `#1b1c20` | Page background (light) / smoked-graphite surface (dark). |
 | `--color-neutral-100` | `#f1f5f9` | `#232428` | Subtle surface tint, hover backgrounds. |
 | `--color-neutral-200` | `#e2e8f0` | `#2e2f34` | Borders, dividers. |
 | `--color-neutral-300` | `#cbd5e1` | `#3c3d42` | Stronger borders, disabled element outlines. |
-| `--color-neutral-400` | `#94a3b8` | `#55565b` | Placeholder text, muted icons. |
-| `--color-neutral-500` | `#64748b` | `#85868b` | Secondary text. |
-| `--color-neutral-600` | `#475569` | `#b3b4b8` | Body text on light surfaces / secondary text on dark. |
+| `--color-neutral-400` | `#94a3b8` | `#8e8f94` | Placeholder text, muted icons, metadata/helper text (timestamps, captions, hint labels). Dark: 5.27:1 (`surface-page`) / 4.80:1 (`surface-card`) — AA. |
+| `--color-neutral-500` | `#64748b` | `#a3a4a8` | Secondary text (section labels, supporting captions). Dark: 6.84:1 / 6.23:1 — AA with margin. |
+| `--color-neutral-600` | `#475569` | `#b3b4b8` | Body text on light surfaces / body text on dark. Dark: 8.22:1 / 7.48:1 — AA. |
 | `--color-neutral-700` | `#334155` | `#d3d4d6` | Emphasised body text. |
 | `--color-neutral-800` | `#1e293b` | `#e8e8ea` | Headings on light surfaces. |
-| `--color-neutral-900` | `#0f172a` | `#f6f6f7` | Primary text (light) / primary surface text (dark). |
-| `--color-neutral-950` | `#020617` | `#ffffff` | Reserved — highest-contrast text only. |
+| `--color-neutral-900` | `#0f172a` | `#f6f6f7` | Primary text (light) / primary surface text, headings (dark) — near-white, deliberately not pure white. |
+| `--color-neutral-950` | `#020617` | `#ffffff` | Reserved — highest-contrast text only. Confirmed unused as a text colour anywhere in the product today (grep-verified) — stays reserved, not promoted to a default. |
 | `--color-accent` | `#6366f1` (text/icons/borders), `#4f46e5` (filled button background) | `#818cf8` | Primary buttons, links, active nav state, focus rings. One colour, used sparingly. |
 | `--color-risk-low` | `#059669` (700-weight text: `#047857`) | `#34d399` | Risk band: Low. |
 | `--color-risk-moderate` | `#d97706` (700-weight text: `#b45309`) | `#fbbf24` | Risk band: Moderate. |
