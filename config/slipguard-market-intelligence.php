@@ -2,10 +2,21 @@
 
 /**
  * `U-17.5`/`PO-U17.5-AC-001` — Capability B's Engineering Foundation
- * Package. `enabled` gates the feature entirely (no route, no public
- * exposure) per `U-17.4`'s "no public launch" compliance constraint —
- * false by default, and must stay false until Product Office explicitly
- * authorizes a public launch, not merely internal build-and-test.
+ * Package. `enabled` gates the feature's visible discovery action (the
+ * route itself always registers; a real "Experience preview" state
+ * renders when this is `false`, not a 404 — `MVP_SCOPE_LOCK.md` §4.14).
+ *
+ * `AO-D3` (`PO-RC1-013`) — this comment previously read "false by default,
+ * and must stay false until Product Office explicitly authorizes a public
+ * launch," a restriction from `U-17.4`'s own "no public launch"
+ * compliance constraint. That restriction has since been superseded:
+ * Product Office explicitly authorized public launch (`PO-MVP-004`,
+ * 2026-08-03, `docs/00-governance/DECISION_LOG.md`), and both `.env` and
+ * `.env.example` already correctly set `MARKET_WIDE_PLANNER_ENABLED=true`
+ * — only this comment had not caught up. The `env(..., false)` fallback
+ * immediately below is unchanged and intentional — a safe fail-closed
+ * default for any environment that omits the variable entirely, unrelated
+ * to the now-resolved launch-visibility decision this comment describes.
  *
  * Confirmed against real `U-17.3` trial data, not assumed:
  * `allowed_competitions` and `default_markets` match exactly what was

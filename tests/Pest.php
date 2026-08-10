@@ -8,7 +8,7 @@ use App\Domain\Risk\Taxonomy\FootballMarketTaxonomyV1;
 use App\Domain\Risk\Taxonomy\MarketComplexity;
 use App\Domain\Risk\Taxonomy\MarketFamily;
 use App\Domain\Risk\Taxonomy\NormalizationStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\GuardsMySqlTestDatabase;
 use Tests\TestCase;
 
 /*
@@ -22,8 +22,22 @@ use Tests\TestCase;
 |
 */
 
+/*
+ * `AO-D1` (`PO-RC1-013`) — `GuardsMySqlTestDatabase` replaces the plain
+ * `RefreshDatabase` binding here, directory-wide, rather than being
+ * layered on a single test file. It is a transparent superset: for every
+ * connection except `mysql` (the default sqlite in-memory suite, for
+ * every Feature test) it behaves exactly like `RefreshDatabase` always
+ * did. The one added check only engages when the resolved connection
+ * driver is `mysql` — see `tests/Support/GuardsMySqlTestDatabase.php` for
+ * why the check must live at this exact binding point (not a per-test
+ * `beforeEach()`) and `tests/Support/MySqlTestDatabaseGuard.php` for the
+ * permitted/rejected rule itself. This also means any *future* destructive
+ * MySQL-integration test file is protected automatically, not just
+ * `tests/Feature/MySqlIntegrationTest.php`.
+ */
 pest()->extend(TestCase::class)
-    ->use(RefreshDatabase::class)
+    ->use(GuardsMySqlTestDatabase::class)
     ->in('Feature');
 
 /*

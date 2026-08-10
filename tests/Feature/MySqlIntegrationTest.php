@@ -22,14 +22,25 @@ use Illuminate\Support\Facades\DB;
  * Deliberately excluded from the default `vendor/bin/pest` run — every
  * test here connects directly against whatever `DB_CONNECTION` the active
  * `.env` specifies, so it silently no-ops everywhere except a real MySQL
- * environment. Run explicitly:
+ * environment. Run explicitly, against a database whose name ends in
+ * `_test` (see `AO-D1`/`PO-RC1-013` below — anything else is now refused
+ * before it can be touched):
  *
- *   php artisan test tests/Feature/MySqlIntegrationTest.php
+ *   DB_DATABASE=slipguard_test php artisan test tests/Feature/MySqlIntegrationTest.php
  *
- * against a MySQL connection (ideally the disposable verification
- * database, never a database whose data matters) — never mixed into CI's
- * default SQLite pass, per this commission's own "do not silently modify
- * the entire test suite to MySQL" boundary.
+ * never mixed into CI's default SQLite pass, per this commission's own
+ * "do not silently modify the entire test suite to MySQL" boundary.
+ *
+ * `AO-D1` (`PO-RC1-013`) — the destructive-reset guard for this file lives
+ * in `tests/Pest.php`, not here: the directory-wide `RefreshDatabase`
+ * binding was swapped for `Tests\Support\GuardsMySqlTestDatabase` (a
+ * transparent superset — see that trait's own docblock for why a
+ * `beforeEach()` guard in this file would be too late, and why the check
+ * only engages for a `mysql` connection, leaving every other Feature test
+ * — including this file's own graceful skip below on any other driver —
+ * unaffected). See `tests/Support/MySqlTestDatabaseGuard.php` for the
+ * permitted/rejected rule and `tests/Unit/Support/
+ * MySqlTestDatabaseGuardTest.php` for its own safe, DB-free coverage.
  */
 beforeEach(function () {
     if (DB::connection()->getDriverName() !== 'mysql') {

@@ -2227,3 +2227,28 @@ Full regression: 761 tests, 754 passed, 7 pre-existing self-skipped, 0 failed.
 
 ### Not Done
 - No unrelated homepage sections touched (feature highlights, FAQ, final CTA, navigation, dashboard screenshot — all untouched, confirmed via diff scope).
+
+## `PO-RC1-013` — Architecture Freeze Conditions Closure
+
+**Status:** Delivered. Closes both conditions `AO-MVP-005` recorded before MVP freeze; nothing else touched.
+
+### Added
+- `tests/Support/MySqlTestDatabaseGuard.php` — a pure, framework-independent rule: a database is permitted for a destructive MySQL integration test only if its name ends in `_test` *and* `APP_ENV` is `testing`, both required. A positive-evidence allow-list by design, not a denylist of known-bad names (`slipguard`, `slipguard_staging`, ...) — a denylist only protects names someone thought to write down.
+- `tests/Support/GuardsMySqlTestDatabase.php` — a drop-in replacement for Laravel's `RefreshDatabase` trait that overrides `refreshDatabase()` itself and checks the guard before delegating to the real (aliased) implementation, only when the resolved connection driver is `mysql`. Placement matters: verified empirically (a disposable diagnostic test against the safe in-memory suite, deleted after use) that `RefreshDatabase`'s destructive `migrate:fresh` runs from `TestCase::setUp()`, before any Pest `beforeEach()` closure ever executes — a `beforeEach()`-based guard would check too late.
+- `tests/Unit/Support/MySqlTestDatabaseGuardTest.php` — 11 tests proving the rule directly against plain strings, no database connection at any point: ordinary/staging/production-shaped names rejected; a name containing "test" as a substring but not as the suffix rejected (guards against a naive substring match); correct `_test` names rejected outside the `testing` environment; a credential-free error message confirmed.
+
+### Changed
+- `tests/Pest.php` — the directory-wide Feature-test binding swapped `RefreshDatabase` for `GuardsMySqlTestDatabase`. Applied directory-wide rather than per-file: a file-level `uses()` override was attempted first and collided with Pest's own directory-binding resolution (`TestCaseAlreadyInUse` — encountered and worked around, not hidden); the directory-wide swap is also a strict superset (identical behaviour for every non-`mysql` connection, i.e. every other Feature test) and protects any future destructive MySQL-integration suite automatically, not just this one file.
+- `tests/Feature/MySqlIntegrationTest.php` — docblock updated to describe the new guard and the required `_test`-suffixed invocation; no test logic changed.
+- `config/slipguard-market-intelligence.php` — the file's own docblock corrected: no longer states the `MARKET_WIDE_PLANNER_ENABLED` flag "must stay false until Product Office explicitly authorizes a public launch" (stale — superseded by `PO-MVP-004`, 2026-08-03, already reflected in both `.env` and `.env.example`). The `env('MARKET_WIDE_PLANNER_ENABLED', false)` fallback value itself is unchanged — a safe default for an unset variable, independent of the now-resolved launch-visibility decision the comment describes.
+
+### Verified
+- Real re-run of the exact incident this guard exists for: `DB_DATABASE=slipguard php artisan test tests/Feature/MySqlIntegrationTest.php` — now rejected with a clear error, before any destructive operation runs. Dev/demo data confirmed byte-identical before and after (3 users, 33 betting slips, unchanged).
+- Default full suite re-run to confirm the guard's addition doesn't regress existing behaviour: the 7 MySQL-integration tests still skip cleanly (not fail) against the standard sqlite suite, since the guard only engages for a `mysql` connection.
+- The live-MySQL *permit* path (guard correctly allowing a real, properly-named test database) could not be exercised this pass: the configured MySQL user lacks `CREATE DATABASE` privilege, and no `mysql` CLI is installed in this environment. Reported as an environmental requirement — the suite was deliberately not pointed at the real development database to "prove" this, per the commissioning instruction's own explicit fallback. The permit path is otherwise proven correct via the 11 DB-free unit tests.
+- `.env.example` inspected for the same staleness `AO-MVP-005` flagged in `MVP_SCOPE_LOCK.md`'s prose — found already correct (already cites `PO-MVP-004`, already states "default is now true"). No correction made there; disclosed rather than assumed clean.
+- Full regression: 806 tests, 799 passed, 7 pre-existing self-skipped, 0 failed (11 more tests than before this commission, all new, all passing; none of the 7 pre-existing skips converted to failures). Pint clean (one pre-existing, unrelated violation remains; two new-file style issues introduced by this commission were found and fixed in the same pass). Production build clean. `git diff --check` clean.
+
+### Not Done
+- `MVP_SCOPE_LOCK.md`'s own similar stale reference to the `MARKET_WIDE_PLANNER_ENABLED` decision was noted but left untouched — outside this bounded commission's named scope (`config/slipguard-market-intelligence.php` and `.env.example` only).
+- No product, UI, Risk Engine, Rule Set, Builder, or Conversational Builder behaviour changed anywhere.
