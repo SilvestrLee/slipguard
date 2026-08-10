@@ -58,6 +58,25 @@ new class extends Component
             this.collapsed = ! this.collapsed;
             window.SlipGuardSidebar?.set(this.collapsed);
         },
+        // `PO-U24-004` defect correction (real-browser verification): the
+        // collapsed-state tooltip is `position: fixed` (not `absolute`) so
+        // it escapes the nav list's own `overflow-y-auto` container, which
+        // the CSS overflow spec forces to also clip the x-axis the moment
+        // any axis is non-`visible` — an `absolute` tooltip positioned
+        // `left-full` of a link inside that container was invisible, full
+        // stop, confirmed by a real hover/focus screenshot showing nothing
+        // rendered. `fixed` positioning is computed relative to the
+        // viewport, so its on-screen coordinates are computed here, once,
+        // at the moment a trigger is entered/focused — visibility itself
+        // remains entirely CSS-driven (`group-hover`/`group-focus-within`),
+        // unchanged from the original design.
+        positionTooltip(el) {
+            const tip = el.querySelector('[role=tooltip]');
+            if (! tip) return;
+            const rect = el.getBoundingClientRect();
+            tip.style.top = (rect.top + rect.height / 2) + 'px';
+            tip.style.left = (rect.right + 8) + 'px';
+        },
         openDrawer() {
             this.open = true;
             document.body.classList.add('overflow-hidden');
@@ -146,7 +165,8 @@ new class extends Component
                            'border-accent/30 bg-accent/10 font-semibold text-neutral-900' => $isActive,
                            'border-transparent font-medium text-neutral-600 hover:border-neutral-200 hover:bg-neutral-100 hover:text-neutral-900' => ! $isActive,
                        ])
-                       :class="{ 'justify-center px-0': collapsed }">
+                       :class="{ 'justify-center px-0': collapsed }"
+                       @mouseenter="positionTooltip($el)" @focusin="positionTooltip($el)">
                         <span @class([
                             'flex size-8 shrink-0 items-center justify-center rounded-md',
                             'bg-accent-strong text-white' => $isActive,
@@ -161,7 +181,7 @@ new class extends Component
                             </span>
                         @endif
                         <span x-show="collapsed" x-cloak role="tooltip" aria-hidden="true"
-                              class="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
+                              class="pointer-events-none fixed z-50 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
                             {{ $item['label'] }}{{ ($item['preview'] ?? false) ? ' — '.__('Preview') : '' }}
                         </span>
                     </a>
@@ -186,23 +206,25 @@ new class extends Component
                                'bg-accent/10 font-semibold text-neutral-900' => $isActive,
                                'font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900' => ! $isActive,
                            ])
-                           :class="{ 'justify-center px-0': collapsed }">
+                           :class="{ 'justify-center px-0': collapsed }"
+                           @mouseenter="positionTooltip($el)" @focusin="positionTooltip($el)">
                             <x-dynamic-component :component="$item['icon']" class="size-5 shrink-0" aria-hidden="true" />
                             <span :class="{ 'sr-only': collapsed }">{{ $item['label'] }}</span>
                             <span x-show="collapsed" x-cloak role="tooltip" aria-hidden="true"
-                                  class="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
+                                  class="pointer-events-none fixed z-50 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
                                 {{ $item['label'] }}
                             </span>
                         </a>
                     @endforeach
-                    <div class="group relative flex min-h-11 items-center gap-3 px-3 py-2" :class="collapsed ? 'justify-center' : 'justify-between'">
+                    <div class="group relative flex min-h-11 items-center gap-3 px-3 py-2" :class="collapsed ? 'justify-center' : 'justify-between'"
+                         @mouseenter="positionTooltip($el)" @focusin="positionTooltip($el)">
                         <span class="flex items-center gap-3 text-sm font-medium text-neutral-600" x-show="!collapsed" x-cloak>
                             <x-heroicon-o-sun class="size-5 shrink-0" aria-hidden="true" />
                             {{ __('Theme') }}
                         </span>
                         <x-theme-toggle />
                         <span x-show="collapsed" x-cloak role="tooltip" aria-hidden="true"
-                              class="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
+                              class="pointer-events-none fixed z-50 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
                             {{ __('Theme') }}
                         </span>
                     </div>
@@ -212,7 +234,8 @@ new class extends Component
                     <a href="{{ route('profile') }}" wire:navigate
                        @if (request()->routeIs('profile')) aria-current="page" @endif
                        class="group relative flex min-h-12 items-center gap-3 rounded-lg px-3 py-2 hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                       :class="{ 'justify-center px-0': collapsed }">
+                       :class="{ 'justify-center px-0': collapsed }"
+                       @mouseenter="positionTooltip($el)" @focusin="positionTooltip($el)">
                         <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent-strong">
                             {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr(auth()->user()->name, 0, 1)) }}
                         </span>
@@ -222,17 +245,18 @@ new class extends Component
                         </span>
                         <x-heroicon-o-chevron-right class="size-4 shrink-0 text-neutral-400" aria-hidden="true" x-show="!collapsed" x-cloak />
                         <span x-show="collapsed" x-cloak role="tooltip" aria-hidden="true"
-                              class="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
+                              class="pointer-events-none fixed z-50 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
                             {{ auth()->user()->name }} — {{ __('Profile & account') }}
                         </span>
                     </a>
                     <button type="button" wire:click="logout"
                             class="group relative mt-1 flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                            :class="{ 'justify-center px-0': collapsed }">
+                            :class="{ 'justify-center px-0': collapsed }"
+                            @mouseenter="positionTooltip($el)" @focusin="positionTooltip($el)">
                         <x-heroicon-o-arrow-left-on-rectangle class="size-5" aria-hidden="true" />
                         <span :class="{ 'sr-only': collapsed }">{{ __('Log out') }}</span>
                         <span x-show="collapsed" x-cloak role="tooltip" aria-hidden="true"
-                              class="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
+                              class="pointer-events-none fixed z-50 -translate-y-1/2 whitespace-nowrap rounded-md bg-surface-inverse px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-elevation-2 transition-opacity duration-standard ease-out group-hover:opacity-100 group-focus-within:opacity-100">
                             {{ __('Log out') }}
                         </span>
                     </button>
